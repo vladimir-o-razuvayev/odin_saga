@@ -1,0 +1,327 @@
+# Saga DSL Grammar
+
+Each `.saga` file is a self-contained module. The language uses Markdown-style formatting so story files are easy to read and write.
+
+//****************************************/
+// Example: inn.saga
+//****************************************/
+
+# Main
+  `ale_count ?= 0` // Initializes ale_count only if it is nil.
+  > The inn is crowded. The innkeeper is cleaning a glass at the bar.
+  + Speak to the innkeeper -> [Innkeeper]
+  + Join the patrons and try to overhear rumors -> [Patrons]
+  + Head out -> [Main]("/town_square.saga")
+
+# Patrons
+  > You join the patrons for drinks and order an ale for yourself.
+  `ale_count++` // Assigns 1 if ale_count is nil.
+  `x = rand(100)` // x is a scene-local binding for this visit to Patrons.
+  // Automatic transitions are evaluated top-to-bottom. The first one to fire exits the scene.
+  *-> `x > 80 && !man_ran` [.Man]
+  -> `x <= 20 && !met_woman` [.WomanInRedDress]
+  -> [.NoOne]
+
+## Man
+  `man_ran := true`
+  > You pick out a man in the crowd.
+  > He notices you and runs out the front door.
+  + Give chase -> [ChaseMan]("/town_square.saga")
+  + Leave it be -> [Main]
+
+## WomanInRedDress
+  > A woman in a red dress notices you, and walks over.
+  + `!met_woman` Introduce yourself -> [.InitialConvo]
+  + Tip your cap and carry on -> [Main]
+
+### InitialConvo
+  `met_woman := true`
+  > The woman introduces herself as Clair. She tells you to go to the bank, and tell Joe that she sent you.
+  > The woman turns away, and walks upstairs.
+  -> [Main]
+
+## NoOne
+  > None of the bar patrons catch your interest.
+  -> [Main]
+
+# Innkeeper
+  > The man looks at you gruffly.
+  + `man_ran` Mention the man *-> [.AskAboutMan]
+  + Gruff back -> [Main]
+
+## AskAboutMan
+  > The innkeeper lowers his voice. "Best not chase trouble through town."
+  -> [Main]
+
+//****************************************/
+// Lexical Rules
+//****************************************/
+
+Scene labels are identifiers in the form `[A-Za-z_][A-Za-z0-9_]*`.
+
+Expressions occur inside backticks:
+
+```saga
+`expression_text`
+```
+
+Comments start with `//` when `//` appears outside a backtick expression and is either:
+
+- at the beginning of a line after indentation, or
+- after whitespace in a line.
+
+Everything from `//` to the end of the line is ignored. `//` inside a backtick expression is a compile error in v0.
+
+//****************************************/
+// Scene Headings and Scope
+//****************************************/
+
+Markdown headings declare scenes:
+
+```saga
+# Heading
+## NestedHeading
+### DeeplyNestedHeading
+```
+
+Markdown hashes indicate a nested scene scope. A heading's full scene path is the concatenation of the nearest preceding headings at lower depths plus its own label. A heading at depth `N` replaces any current headings at depth `N` or deeper.
+
+Every heading declares a scene.
+
+Example:
+
+```saga
+# Patrons
+## WomanInRedDress
+### InitialConvo
+## NoOne
+```
+
+Declares these scenes:
+
+```text
+Patrons
+Patrons.WomanInRedDress
+Patrons.WomanInRedDress.InitialConvo
+Patrons.NoOne
+```
+
+//****************************************/
+// Statements
+//****************************************/
+
+Scene statements execute top-to-bottom.
+
+## Passage
+
+A greater-than sign `>` is used for passages shown on screen:
+
+```saga
+> Passage text
+> `show_condition` Passage text
+```
+
+In a passage, an optional condition immediately after `>` controls whether the passage is displayed. If the condition is falsey, the passage is skipped and scene evaluation continues to the next statement.
+
+## Choice
+
+A plus sign `+` adds a choice the player can make:
+
+```saga
++ Choice text -> [Target]
++ `show_condition` Choice text -> [Target]
++ Choice text -> `enable_condition` [Target]
++ `show_condition` Choice text -> `enable_condition` [Target]
+```
+
+In a choice, an optional condition immediately after `+` controls whether the choice is visible.
+
+In a choice, an optional condition immediately after the arrow controls whether the choice is enabled.
+
+If the choice is not visible, it is not shown to the player. If the choice is visible but not enabled, it is shown as disabled and cannot be selected.
+
+## Automatic Transition
+
+An automatic transition starts with an arrow:
+
+```saga
+-> [Target]
+-> `take_condition` [Target]
+*-> [Target]
+*-> `take_condition` [Target]
+```
+
+When an automatic transition is reached and its optional condition is truthy, the scene transfers immediately and no later statements in the scene are evaluated.
+
+When an automatic transition has no condition, it always transfers.
+
+When an automatic transition has a condition and the condition is falsey, the transition no-ops and evaluation continues to the next line.
+
+## Effect
+
+A backtick expression on its own line is an effect statement:
+
+```saga
+`effect expression`
+```
+
+Effects execute when the scene is entered and evaluation reaches the effect line.
+
+//****************************************/
+// Transfers and Targets
+//****************************************/
+
+`->` is a normal transfer symbol for choices and automatic transitions.
+
+`*->` marks a transfer as consumable once per playthrough.
+
+For automatic transitions, `*->` is consumed only when the transition is taken. On future visits, the consumed transition no-ops and evaluation continues to the next line.
+
+For choices, `*->` is consumed only when the player selects the choice and transfers. On future visits, the consumed choice is no longer visible.
+
+Targets use square brackets:
+
+```saga
+[Scene]
+[Parent.Child]
+[.Child]
+[Scene]("/module.saga")
+```
+
+A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `[Main]` resolves to `Main`, not `Patrons.WomanInRedDress.Main`.
+
+In a scene target, `.` expands to the current scene's full path. For example, from `Patrons.WomanInRedDress`, `[.InitialConvo]` resolves to `Patrons.WomanInRedDress.InitialConvo`.
+
+If a target omits a module path, the current module is used. If a target includes a module path, the scene reference is resolved in that module.
+
+A target may include a module path after the scene reference:
+
+```saga
+[Scene]("/path/to/module.saga")
+```
+
+In v0, module paths are root-relative and must begin with `/`.
+
+//****************************************/
+// Expressions and State
+//****************************************/
+
+Expression parsing is TODO. For v0 parser work, backtick contents may be treated as opaque expression text.
+
+Identifier lookup inside expressions follows this order:
+
+1. Scene-local bindings.
+2. Persistent story state.
+3. `nil` if neither exists.
+
+Scene-local bindings shadow persistent story state with the same name.
+
+## Persistent initialize-if-nil
+
+```saga
+name ?= expr
+```
+
+Initializes persistent story state if `name` is currently nil. If `name` already exists, this statement is a no-op.
+
+## Persistent assignment
+
+```saga
+name := expr
+```
+
+Assigns persistent story state.
+
+## Scene-local binding
+
+```saga
+name = expr
+```
+
+Binds or rebinds a temporary local for the current scene visit. Locals are visible to subsequent expressions in the same scene visit. Locals are discarded when leaving the scene.
+
+## Increment and decrement
+
+```saga
+name++
+name--
+```
+
+If `name` resolves to nil, `name++` assigns `1` and `name--` assigns `-1`.
+
+If `name` resolves to a number, `name++` increments it and `name--` decrements it.
+
+If `name` resolves to a non-number value, increment and decrement are runtime errors.
+
+Mutation operators apply to the nearest resolved binding. If a local binding exists, the local is mutated. Otherwise, persistent story state is mutated.
+
+//****************************************/
+// Scene Validity
+//****************************************/
+
+Each non-terminal scene must have at least one possible outgoing transfer:
+
+- one or more choices with transfers, or
+- one or more automatic transitions.
+
+Terminal scene syntax is TODO.
+
+Any statement after an unconditional automatic transition is unreachable and should be reported as a semantic error.
+
+//****************************************/
+// Grammar Summary
+//****************************************/
+
+```text
+module             = line*
+
+line               = indentation? (blank | comment | heading | statement)
+
+heading            = heading_marker space scene_label
+heading_marker     = "#" { "#" }
+
+statement          = passage
+                   | choice
+                   | transition
+                   | effect
+
+passage            = ">" space show_condition? text
+
+choice             = "+" space show_condition? choice_text space arrow space enable_condition? target
+
+transition         = arrow space take_condition? target
+
+comment            = "//" text
+
+effect             = expression
+
+show_condition     = expression space
+enable_condition   = expression space
+take_condition     = expression space
+
+expression         = "`" expression_text "`"
+
+arrow              = "->" | "*->"
+
+target             = "[" scene_ref "]" module_ref?
+module_ref         = "(" string ")"
+
+scene_ref          = scene_path
+                   | scoped_scene_path
+scene_path         = scene_label { "." scene_label }
+scoped_scene_path  = { "." } scene_path
+
+scene_label        = /[A-Za-z_][A-Za-z0-9_]*/
+```
+
+//****************************************/
+// Tech Debt
+//****************************************/
+
+Potential issue: From `Patrons.WomanInRedDress.InitialConvo`, `[.Foo]` resolves to:
+
+```text
+Patrons.WomanInRedDress.InitialConvo.Foo
+```
+
+Authors can use an absolute scene path when they need to target a sibling or ancestor scene.

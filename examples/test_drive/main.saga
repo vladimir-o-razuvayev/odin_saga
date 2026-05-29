@@ -1,0 +1,65 @@
+# Start
+  `visited_start ?= false`
+  `map_known ?= false`
+  `lantern_lit ?= false`
+  `coin ?= 0`
+  > Rain taps against the shutters of the Hollow Bell inn.
+  > `!visited_start` A sealed letter waits on your table. Its wax bears the mark of a crescent moon.
+  + Open the letter *-> [.Letter]
+  + Step into the village -> [Village]
+
+## Letter
+  `visited_start := true`
+  `map_known := true`
+  > The letter is brief: "Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
+  > A charcoal map is sketched beneath the warning.
+  -> [Village]
+
+# Village
+  `village_visits++`
+  > The village of Brindlewick curls around a muddy square. Lanterns glow like fireflies in the rain.
+  > `map_known` The charcoal map from the letter is already soft at the creases.
+  + Visit the market square -> [Square]("/market.saga")
+  + Walk to the old watchtower road -> `map_known` [Road]
+  + `!map_known` Ask around for directions -> [.Directions]
+  + `coin >= 2` Buy a dry cloak before leaving -> `coin >= 2` [Square.CloakSeller]("/market.saga")
+  + Speak with the gate watch -> [.GateWatch]
+
+## Directions
+  `map_known := true`
+  > A fishmonger points with his pipe. "Old road is north. Mind the stones. They listen."
+  -> [Village]
+
+## GateWatch
+  > The watchman leans on his spear beneath the village arch.
+  > `old_key` His eyes flick to the blackened key in your hand, then quickly away.
+  + Ask about the watchtower -> [.WatchtowerRumor]
+  + Return to the square -> [Village]
+
+### WatchtowerRumor
+  `heard_bell_rumor := true`
+  > "No bell there now," he says. "Not above ground, anyway."
+  + Press him for more *-> [.OldKey]
+  + Thank him and leave -> [Village.GateWatch]
+
+### OldKey
+  `old_key := true`
+  > He slips a blackened key into your palm. "If the lower door still stands, this might remember it."
+  -> [Village.GateWatch]
+
+# Road
+  `road_steps++`
+  > The northern road narrows between leaning birches. Somewhere ahead, stone shifts against stone.
+  > `has_cloak` Rain beads on your borrowed cloak and rolls away instead of finding your collar.
+  *-> `road_steps == 1` [.FirstSign]
+  -> `lantern_lit` [Gate]("/ruins.saga")
+  -> [.DarkRoad]
+
+## FirstSign
+  > A milestone turns as you pass it, revealing an arrow carved into its back.
+  -> [Road]
+
+## DarkRoad
+  > Without a lit lantern, the trees knit themselves into a wall of black needles.
+  + Return to Brindlewick -> [Village]
+  + Try the road anyway -> `heard_bell_rumor` [Gate]("/ruins.saga")

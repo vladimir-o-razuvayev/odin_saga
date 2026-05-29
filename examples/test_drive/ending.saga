@@ -1,0 +1,33 @@
+# Dawn
+  `ending := "dawn"`
+  > Morning arrives all at once. Rain lifts from Brindlewick as if someone has drawn back a curtain.
+  > In the village square, every bell rope trembles though no bell is visible.
+  > `pool_offering` Somewhere nearby, a stranger laughs and flips a coin into the fountain.
+  + Visit the changed village -> [.Aftermath]
+  + Begin the test drive again -> [Start]("/main.saga")
+
+## Aftermath
+  > The woman with the blue scarf waits beside the dry fountain.
+  + Ask what happened -> [.Explanation]
+  + Leave Brindlewick by the north road -> [Epilogue]
+
+### Explanation
+  > "You woke what was buried," she says. "That is not the same as saving it. But sometimes it is enough."
+  + Continue -> [Dawn.Aftermath]
+
+# Return
+  `ending := "return"`
+  > You wake at the table in the Hollow Bell inn. Rain taps against the shutters.
+  > The letter is gone, but your palm is black with old key oil.
+  + Check what remains -> [.Inventory]
+  + Begin again -> [Start]("/main.saga")
+
+## Inventory
+  > You remember fragments: a tower, a pool, the shape of a bell inside an eye.
+  + `saw_hidden_name` Whisper the hidden name -> [Epilogue]
+  + Go back to sleep -> [Start]("/main.saga")
+
+# Epilogue
+  > Brindlewick falls behind you. Somewhere under the road, something vast and hollow rings once.
+  > `has_cloak` Your cloak snaps in the morning wind like a small, stubborn banner.
+  + Start over -> [Start]("/main.saga")
