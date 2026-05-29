@@ -161,7 +161,7 @@ for (const module of story.modules) {
 
 function proxyState() {
   return new Proxy(state, {
-    has: () => true,
+    has: (target, prop) => prop !== 'rand' && prop !== 'state',
     get: (target, prop) => prop in target ? target[prop] : 0,
     set: (target, prop, value) => { target[prop] = value; return true; }
   });
@@ -234,6 +234,7 @@ function render() {
   app.appendChild(section);
 
   let choices = [];
+  let pendingTransition = null;
   for (const stmt of current.statements) {
     if (ended) break;
     if (stmt.kind === 'Effect') runEffect(stmt.effect);
@@ -245,7 +246,10 @@ function render() {
     } else if (stmt.kind === 'Transition' && evalExpr(stmt.takeIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
-      if (stmt.transfer.kind !== 'once' || !consumed.has(key)) { go(stmt.transfer, current); return; }
+      if (stmt.transfer.kind !== 'once' || !consumed.has(key)) {
+        pendingTransition = stmt;
+        break;
+      }
     } else if (stmt.kind === 'Choice' && evalExpr(stmt.showIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
@@ -253,7 +257,15 @@ function render() {
     }
   }
 
-  if (choices.length > 0 && !ended) {
+  if (pendingTransition && !ended) {
+    const div = document.createElement('div');
+    div.className = 'choices';
+    section.appendChild(div);
+    const button = document.createElement('button');
+    button.textContent = 'Continue';
+    button.addEventListener('click', () => go(pendingTransition.transfer, current));
+    div.appendChild(button);
+  } else if (choices.length > 0 && !ended) {
     const div = document.createElement('div');
     div.className = 'choices';
     section.appendChild(div);

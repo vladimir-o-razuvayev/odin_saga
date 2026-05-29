@@ -39,7 +39,7 @@
 ### WatchtowerRumor
   `heard_bell_rumor := true`
   > "No bell there now," he says. "Not above ground, anyway."
-  + Press him for more *-> [.OldKey]
+  + Press him for more *-> [..OldKey]
   + Thank him and leave -> [..]
 
 ### OldKey

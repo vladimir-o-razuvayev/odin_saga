@@ -3,10 +3,13 @@ package main
 import "core:fmt"
 import "core:os"
 import "core:path/filepath"
+import "core:strings"
+import "core:testing"
 
 Build_Result :: struct {
-	modules: [dynamic]Module,
-	errors:  [dynamic]Diagnostic,
+	modules:      [dynamic]Module,
+	errors:       [dynamic]Diagnostic,
+	source_files: [dynamic]string,
 }
 
 main :: proc() {
@@ -38,14 +41,18 @@ main :: proc() {
 
 build_story :: proc(entry_path: string) -> Build_Result {
 	result := Build_Result {
-		modules = make([dynamic]Module),
-		errors  = make([dynamic]Diagnostic),
+		modules      = make([dynamic]Module),
+		errors       = make([dynamic]Diagnostic),
+		source_files = make([dynamic]string),
 	}
 	loaded := make([dynamic]string)
 	defer delete(loaded)
 
 	base_dir := filepath.dir(entry_path)
 	load_module(&result, &loaded, base_dir, entry_path)
+	if len(result.errors) == 0 {
+		validate_targets(&result, base_dir)
+	}
 	return result
 }
 
@@ -53,27 +60,29 @@ load_module :: proc(result: ^Build_Result, loaded: ^[dynamic]string, base_dir, p
 	if has_loaded(loaded[:], path) {
 		return
 	}
-	append(loaded, path)
+	stable_path := strings.clone(path)
+	append(loaded, stable_path)
+	append(&result.source_files, stable_path)
 
-	data, ok := os.read_entire_file(path)
+	data, ok := os.read_entire_file(stable_path)
 	if !ok {
 		append(
 			&result.errors,
 			Diagnostic {
-				message = fmt.tprintf("failed to read module %q", path),
-				pos = Source_Pos{file = path, line = 1, column = 1},
+				message = fmt.tprintf("failed to read module %q", stable_path),
+				pos = Source_Pos{file = stable_path, line = 1, column = 1},
 			},
 		)
 		return
 	}
 	defer delete(data)
 
-	lx := lexer.init(string(data), path)
+	lx := lexer.init(string(data), stable_path)
 	lexed := lexer.scan_lines(&lx)
 	defer delete(lexed.lines)
 	defer delete(lexed.errors)
 
-	p := parser.init(lexed.lines[:], path)
+	p := parser.init(lexed.lines[:], stable_path)
 	parsed := parser.parse(&p)
 	for err in lexed.errors {
 		append(&parsed.errors, err)
@@ -87,6 +96,7 @@ load_module :: proc(result: ^Build_Result, loaded: ^[dynamic]string, base_dir, p
 		return
 	}
 
+	own_module_strings(&parsed.module)
 	append(&result.modules, parsed.module)
 
 	for scene in parsed.module.scenes {
@@ -101,6 +111,111 @@ load_module :: proc(result: ^Build_Result, loaded: ^[dynamic]string, base_dir, p
 	}
 }
 
+validate_targets :: proc(result: ^Build_Result, base_dir: string) {
+	for module in result.modules {
+		for scene in module.scenes {
+			for stmt in scene.statements {
+				if stmt.kind != .Choice && stmt.kind != .Transition {
+					continue
+				}
+
+				target := stmt.transfer.target
+				if len(target.scene_ref) == 0 {
+					continue
+				}
+
+				target_module_path := module.file
+				if len(target.module_path) > 0 {
+					target_module_path = fmt.tprintf("%s%s", base_dir, target.module_path)
+				}
+
+				target_module := find_module(result.modules[:], target_module_path)
+				if target_module == nil {
+					append(
+						&result.errors,
+						Diagnostic {
+							message = fmt.tprintf(
+								"unresolved target module %q",
+								target.module_path,
+							),
+							pos = target.pos,
+						},
+					)
+					continue
+				}
+
+				target_scene_path := resolve_target_scene_path(scene.path, target.scene_ref)
+				if !has_scene(target_module.scenes[:], target_scene_path) {
+					append(
+						&result.errors,
+						Diagnostic {
+							message = fmt.tprintf(
+								"unresolved target %q; resolved to %q in %s",
+								target.scene_ref,
+								target_scene_path,
+								target_module.file,
+							),
+							pos = target.pos,
+						},
+					)
+				}
+			}
+		}
+	}
+}
+
+find_module :: proc(modules: []Module, path: string) -> ^Module {
+	for i := 0; i < len(modules); i += 1 {
+		if modules[i].file == path {
+			return &modules[i]
+		}
+	}
+	return nil
+}
+
+has_scene :: proc(scenes: []Scene, path: string) -> bool {
+	for scene in scenes {
+		if scene.path == path {
+			return true
+		}
+	}
+	return false
+}
+
+resolve_target_scene_path :: proc(current_path, ref: string) -> string {
+	if ref == "." {
+		return current_path
+	}
+	if ref == ".." {
+		return parent_scene_path(current_path)
+	}
+	if lexer.starts_with(ref, "..") {
+		parent := parent_scene_path(current_path)
+		sibling := ref[2:]
+		if len(parent) == 0 {
+			return sibling
+		}
+		return fmt.tprintf("%s.%s", parent, sibling)
+	}
+	if lexer.starts_with(ref, ".") {
+		return fmt.tprintf("%s.%s", current_path, ref[1:])
+	}
+	return ref
+}
+
+parent_scene_path :: proc(path: string) -> string {
+	last_dot := -1
+	for i := 0; i < len(path); i += 1 {
+		if path[i] == '.' {
+			last_dot = i
+		}
+	}
+	if last_dot < 0 {
+		return ""
+	}
+	return path[:last_dot]
+}
+
 has_loaded :: proc(loaded: []string, path: string) -> bool {
 	for item in loaded {
 		if item == path {
@@ -110,13 +225,116 @@ has_loaded :: proc(loaded: []string, path: string) -> bool {
 	return false
 }
 
+free_loaded_paths :: proc(loaded: [dynamic]string) {
+	for path in loaded {
+		delete(path)
+	}
+	delete(loaded)
+}
+
+clone_non_empty :: proc(s: string) -> string {
+	if len(s) == 0 {
+		return ""
+	}
+	return strings.clone(s)
+}
+
+own_module_strings :: proc(module: ^Module) {
+	module.file = clone_non_empty(module.file)
+	for &scene in module.scenes {
+		scene.name = clone_non_empty(scene.name)
+		scene.path = clone_non_empty(scene.path)
+		for &stmt in scene.statements {
+			stmt.text = clone_non_empty(stmt.text)
+			stmt.show_if = clone_non_empty(stmt.show_if)
+			stmt.enable_if = clone_non_empty(stmt.enable_if)
+			stmt.take_if = clone_non_empty(stmt.take_if)
+			stmt.effect = clone_non_empty(stmt.effect)
+			stmt.transfer.target.scene_ref = clone_non_empty(stmt.transfer.target.scene_ref)
+			stmt.transfer.target.module_path = clone_non_empty(stmt.transfer.target.module_path)
+		}
+	}
+}
+
+free_string_if_non_empty :: proc(s: string) {
+	if len(s) > 0 {
+		delete(s)
+	}
+}
+
 free_build_result :: proc(result: Build_Result) {
 	for module in result.modules {
+		free_string_if_non_empty(module.file)
 		for scene in module.scenes {
+			free_string_if_non_empty(scene.name)
+			free_string_if_non_empty(scene.path)
+			for stmt in scene.statements {
+				free_string_if_non_empty(stmt.text)
+				free_string_if_non_empty(stmt.show_if)
+				free_string_if_non_empty(stmt.enable_if)
+				free_string_if_non_empty(stmt.take_if)
+				free_string_if_non_empty(stmt.effect)
+				free_string_if_non_empty(stmt.transfer.target.scene_ref)
+				free_string_if_non_empty(stmt.transfer.target.module_path)
+			}
 			delete(scene.statements)
 		}
 		delete(module.scenes)
 	}
 	delete(result.modules)
 	delete(result.errors)
+	for file in result.source_files {
+		delete(file)
+	}
+	delete(result.source_files)
+}
+
+build_result_from_source_for_test :: proc(source: string) -> (Build_Result, Lexer_Result) {
+	lx := lexer.init(source, "test.saga")
+	lexed := lexer.scan_lines(&lx)
+	p := parser.init(lexed.lines[:], "test.saga")
+	parsed := parser.parse(&p)
+
+	build := Build_Result {
+		modules      = make([dynamic]Module),
+		errors       = make([dynamic]Diagnostic),
+		source_files = make([dynamic]string),
+	}
+	for err in parsed.errors {
+		append(&build.errors, err)
+	}
+	delete(parsed.errors)
+	own_module_strings(&parsed.module)
+	append(&build.modules, parsed.module)
+	return build, lexed
+}
+
+@(test)
+semantic_reports_unresolved_child_target_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Village\n## GateWatch\n### WatchtowerRumor\n+ Press him for more *-> [.OldKey]\n### OldKey\n> key\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 1)
+	testing.expect(
+		t,
+		lexer.index_of(build.errors[0].message, "Village.GateWatch.WatchtowerRumor.OldKey") >= 0,
+	)
+}
+
+@(test)
+semantic_accepts_sibling_target_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Village\n## GateWatch\n### WatchtowerRumor\n+ Press him for more *-> [..OldKey]\n### OldKey\n> key\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 0)
 }

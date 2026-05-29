@@ -41,7 +41,7 @@
 ### LetterTalk
   `trust_blue_scarf := true`
   > She folds the mirror shut. "Then you are already late. Find the archivist's mark beneath the tower."
-  + Ask what the mark looks like *-> [.MarkDescription]
+  + Ask what the mark looks like *-> [..MarkDescription]
   + Return to the market -> [..]
 
 ### MarkDescription

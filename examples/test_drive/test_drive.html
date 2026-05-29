@@ -55,7 +55,7 @@ const story = {
       {name:"WatchtowerRumor",path:"Village.GateWatch.WatchtowerRumor",statements:[
         {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"heard_bell_rumor := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
         {kind:"Passage",text:"\"No bell there now,\" he says. \"Not above ground, anyway.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"Press him for more",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:".OldKey",modulePath:""}}},
+        {kind:"Choice",text:"Press him for more",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"..OldKey",modulePath:""}}},
         {kind:"Choice",text:"Thank him and leave",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
       {name:"OldKey",path:"Village.GateWatch.OldKey",statements:[
@@ -82,97 +82,97 @@ const story = {
       ]}
     ]},
     {file:"examples/test_drive/market.saga", scenes:[
-      {name:"Gate\n ",path:"Gate\n ",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"    êisits++`\n ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:" watchtower gate leans open between two stones carved like sleeping dogs.\n  > `lantern_lit` You",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"warm teeth along the archway stones.\n  *-> `!lantern_lit && !heard_bell_r",showIf:"ern paint",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:" [.LoseNerve]\n  -> [.A",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ch]\n\n## Lose",modulePath:""}}},
-        {kind:"Choice",text:"  > The darkness beneath the arch pres",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"gainst you",modulePath:""}}},
-        {kind:"Choice",text:" until you step bac",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ping.\n",modulePath:""}}},
-        {kind:"Choice",text:"turn to the village -> [V",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"e](\"/ma",modulePath:"saga\")\n\n##"}}}
+      {name:"Square",path:"Square",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"market_visits++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Brindlewick's market is a ring of dripping awnings, bright apples, wet boots, and sharper eyes.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The crate from the cloak seller knocks against your knee with every step.",showIf:"has_crate",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Visit the cloak seller",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".CloakSeller",modulePath:""}}},
+        {kind:"Choice",text:"Speak to the woman with the blue scarf",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".BlueScarf",modulePath:""}}},
+        {kind:"Choice",text:"Slip into the alley",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Alley",modulePath:""}}},
+        {kind:"Choice",text:"Return to the village inn",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:"/main.saga"}}}
       ]},
-      {name:"ch\n  > Your",path:"Square.CloakSeller",statements:[
-        {kind:"Passage",text:"ern throws gold over a stair spiraling down under the tow",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"nto the courtyard -> [Courtyard]\n  + Search the gateh",showIf:"+ Descend",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"-> [.Gatehouse]",showIf:"",enableIf:"Return to",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"indlewick",modulePath:""}}},
-        {kind:"Choice",text:"illage](\"/ma",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ga\")\n\n#",modulePath:""}}},
-        {kind:"Choice",text:"ehouse\n  `found_",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" ?= fa",modulePath:""}}}
+      {name:"CloakSeller",path:"Square.CloakSeller",statements:[
+        {kind:"Passage",text:"A narrow man shakes rainwater from a row of heavy cloaks.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"He nods approvingly at the cloak you bought from him.",showIf:"has_cloak",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Buy a dry cloak",showIf:"",enableIf:"coin >= 2",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".BuyCloak",modulePath:""}}},
+        {kind:"Choice",text:"Ask for work",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".OddJob",modulePath:""}}},
+        {kind:"Choice",text:"Browse and leave",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Square",modulePath:""}}}
       ]},
-      {name:"> The ga",path:"Square.CloakSeller.BuyCloak",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"use roof has col",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"d, but a dry shel",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"ins beneath a slab of slate.\n  + Take the white chalk *-> [.TakeChalk",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"et",modulePath:""}}}
+      {name:"BuyCloak",path:"Square.CloakSeller.BuyCloak",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"coin := coin - 2",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"has_cloak := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The cloak smells of cedar and sheep oil. It is ugly, warm, and yours.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"the ga",path:"Square.CloakSeller.OddJob",statements:[
-        {kind:"Passage",text:" [..]\n\n#### TakeChalk\n  `found_chalk := true`\n  > You pocket a stick of white chalk.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"eaves a moon-p",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"ear on you",modulePath:""}}},
-        {kind:"Choice",text:"b.\n  -> [Gate.Ap",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"h]",modulePath:""}}}
+      {name:"OddJob",path:"Square.CloakSeller.OddJob",statements:[
+        {kind:"Passage",text:"\"Carry this crate to Mira in the alley,\" he says. \"She pays if she likes your face.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Take the crate",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:".TakeCrate",modulePath:""}}},
+        {kind:"Choice",text:"Decline politely",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"tyard\n  >",path:"Square.CloakSeller.OddJob.TakeCrate",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" sunken courtyard",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"open to the rain. Four doors wait under four br",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ches.\n  > `f",modulePath:""}}}
+      {name:"TakeCrate",path:"Square.CloakSeller.OddJob.TakeCrate",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"has_crate := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The crate clinks with bottles wrapped in straw.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Square.Alley",modulePath:""}}}
       ]},
-      {name:"halk` The",path:"Square.BlueScarf",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"lk in your pocket leav",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"ale crescent on your fingertips.\n  + Inspect the well -> [.Well]\n  + Enter t",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"\n  + Try the lower door -> `old_key` [.LowerDo",showIf:"hive -> [.Archiv",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:" + `!old_key` Examine the s",showIf:"",enableIf:" lower door -",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".SealedDoor",modulePath:""}}},
-        {kind:"Choice",text:"Retreat to the gate -> [Gate",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" Well\n  `well_e",modulePath:""}}},
-        {kind:"Choice",text:"rand(100)`\n  > You lean",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" the w",modulePath:""}}}
+      {name:"BlueScarf",path:"Square.BlueScarf",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"met_blue_scarf := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The woman with the blue scarf watches the crowd reflected in a brass mirror.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"She greets you with the smallest possible nod.",showIf:"trust_blue_scarf",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Mention the crescent letter",showIf:"",enableIf:"visited_start",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".LetterTalk",modulePath:""}}},
+        {kind:"Choice",text:"Ask about the old watchtower",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".WatchtowerTalk",modulePath:""}}},
+        {kind:"Choice",text:"Leave her to her mirror",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Square",modulePath:""}}}
       ]},
-      {name:"r below, w",path:"Square.BlueScarf.LetterTalk",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" repeats your breathing.",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:" `well_echo > 70` [.CoinGlimmer]\n  -> [.QuietWater]\n\n### CoinGlimmer\n  `coin := coin + 1`\n  > Someth",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"right spins up from the dark",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"s at your feet, ",modulePath:""}}},
-        {kind:"Choice",text:"comes a coin.\n  -> [",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"et",modulePath:""}}}
+      {name:"LetterTalk",path:"Square.BlueScarf.LetterTalk",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"trust_blue_scarf := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"She folds the mirror shut. \"Then you are already late. Find the archivist's mark beneath the tower.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Ask what the mark looks like",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"..MarkDescription",modulePath:""}}},
+        {kind:"Choice",text:"Return to the market",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"\n### QuietWater",path:"Square.BlueScarf.MarkDescription",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" The well gives no",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"back but the small sound of rain.\n  -> [Courtyard]\n\n## Archive\n  > Shelves of ",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ab",modulePath:""}}}
+      {name:"MarkDescription",path:"Square.BlueScarf.MarkDescription",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"knows_mark := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"\"A bell inside a closed eye,\" she says. \"If you see it, knock twice and wait.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"an against the",path:"Square.BlueScarf.WatchtowerTalk",statements:[
-        {kind:"Passage",text:"s. Most are blank with age.\n  > `knows_mark` You keep searching for a bell inside a closed eye.\n  + Look for the",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"ivist's m",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"> ",modulePath:""}}}
+      {name:"WatchtowerTalk",path:"Square.BlueScarf.WatchtowerTalk",statements:[
+        {kind:"Passage",text:"\"The tower was built over a well,\" she says. \"Everything important in Brindlewick is underneath something else.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Thank her",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"_mark",path:"Square.Alley",statements:[
-        {kind:"Passage",text:"arkedTablet]\n  + Search randomly -> [.RandomTablet]\n  + Return to t",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"Courtyard]\n\n### MarkedTablet\n  `archive_mark := tru",showIf:"rtyard ->",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"> You find the bell-in-ey",showIf:"",enableIf:"k. When y",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"knock",modulePath:""}}},
-        {kind:"Choice",text:", a hidden drawer o",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"\n  + Take ",modulePath:""}}},
-        {kind:"Choice",text:"onze tongue *-> [.BronzeTo",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"\n  + Leave th",modulePath:""}}},
-        {kind:"Choice",text:"er alone -> [..]\n\n##",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"onzeTo",modulePath:""}}}
+      {name:"Alley",path:"Square.Alley",statements:[
+        {kind:"Passage",text:"The alley behind the market smells of rain, onions, and lamp smoke.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Mira's crate grows heavier the longer you carry it.",showIf:"has_crate",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Deliver the crate to Mira",showIf:"",enableIf:"has_crate",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Mira",modulePath:""}}},
+        {kind:"Choice",text:"Visit the locksmith",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Locksmith",modulePath:""}}},
+        {kind:"Choice",text:"Return to the cloak seller",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..CloakSeller",modulePath:""}}},
+        {kind:"Choice",text:"Return to the square",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Square",modulePath:""}}}
       ]},
-      {name:"`bro",path:"Square.Alley.Mira",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"tongue := true`\n  ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" bronze tongue i",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:" and heavy, made for a bell that should not still exist.\n  -> [Courtyard.Archiv",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" R",modulePath:""}}}
+      {name:"Mira",path:"Square.Alley.Mira",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"has_crate := false",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"coin := coin + 3",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Mira counts the bottles, nods once, and presses three old coins into your hand.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"blet\n  `d",path:"Square.Alley.Locksmith",statements:[
-        {kind:"Passage",text:"ount++`\n  > Dust coats your hands. The tablets say nothing you understand.\n  + Keep searching ->",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:".]\n  + Give up -> [..]\n\n## SealedDoor\n  > The lower door has no ",showIf:"_count < 3`",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"e, only a keyhole shaped l",showIf:"",enableIf:" crooke",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ooth.\n  +",modulePath:""}}},
-        {kind:"Choice",text:"n to the cou",showIf:"",enableIf:"d -> [Cou",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ard]\n\n##",modulePath:""}}},
-        {kind:"Choice",text:"Door\n  > The bl",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ed",modulePath:""}}}
+      {name:"Locksmith",path:"Square.Alley.Locksmith",statements:[
+        {kind:"Passage",text:"The locksmith's stall is hardly wider than its door. Keys hang from the ceiling like iron fruit.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The blue flame in your lantern makes every key cast two shadows.",showIf:"lantern_lit",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Show him the blackened key",showIf:"",enableIf:"old_key",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".BlackKey",modulePath:""}}},
+        {kind:"Choice",text:"Buy lamp oil",showIf:"",enableIf:"coin >= 1",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".LampOil",modulePath:""}}},
+        {kind:"Choice",text:"Leave the stall",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"ns with ",path:"Square.Alley.Locksmith.BlackKey",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"und like a cough.\n  > `",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"door_hint` You remember the locksmith's warning and work slowly.\n  *-> `lower_do",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" &",modulePath:""}}}
+      {name:"BlackKey",path:"Square.Alley.Locksmith.BlackKey",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"lower_door_hint := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"He whistles. \"That opens a lock that hates daylight. Oil it before you turn it.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"n_lit` ",path:"Square.Alley.Locksmith.LampOil",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ledLock]\n  -> [.",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ornLock]\n\n### Stubb",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"k\n  > The lock resists you. Rust flakes fall like old scabs.\n  + Return t",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ou",modulePath:""}}}
+      {name:"LampOil",path:"Square.Alley.Locksmith.LampOil",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"coin := coin - 1",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"lantern_lit := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"He fills your lantern and lights it with a blue spark from his thumbnail.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]}
     ]},
     {file:"examples/test_drive/ruins.saga", scenes:[
       {name:"Gate",path:"Gate",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"      êisits++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ruins_visits++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
         {kind:"Passage",text:"The watchtower gate leans open between two stones carved like sleeping dogs.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
         {kind:"Passage",text:"Your lantern paints warm teeth along the archway stones.",showIf:"lantern_lit",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
         {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"!lantern_lit && !heard_bell_rumor",effect:"",transfer:{kind:"once",target:{sceneRef:".LoseNerve",modulePath:""}}},
@@ -267,105 +267,105 @@ const story = {
       ]}
     ]},
     {file:"examples/test_drive/bell.saga", scenes:[
-      {name:"doctyp ",path:"doctyp ",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"   Žhtml lang=\"en\">\n<he",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"eta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initi",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"ale=1\">\n<title>Odin Saga</title>\n<style>\n:root{color-scheme:dark",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"l:#1b1f2a;--text:#eceff4;--muted:#aab1c2;--acc",showIf:"#111318;--pa",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"8fbcbb;--disable",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"6070}",modulePath:""}}},
-        {kind:"Choice",text:"argin:0;backgr",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"var(-",modulePath:""}}},
-        {kind:"Choice",text:"olor:var(--text);font:18px/",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"system-ui",modulePath:"pple-system"}}}
+      {name:"Chamber",path:"Chamber",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"entered_chamber := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The bell chamber is round, dry, and impossibly deep beneath the ruined tower.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"A cracked silver bell hangs from three chains over a black pool.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"A chalk ring glows faintly at the pool's edge.",showIf:"chalk_circle",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Inspect the bell",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Bell",modulePath:""}}},
+        {kind:"Choice",text:"Study the pool",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Pool",modulePath:""}}},
+        {kind:"Choice",text:"Climb back to the courtyard",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard",modulePath:"/ruins.saga"}}}
       ]},
-      {name:"acSy",path:"Chamber.Bell",statements:[
-        {kind:"Passage",text:"ont,'Segoe UI',sans-serif}main{max-width:760px;margin:0 auto;padding:48px 20px}.scene",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"und:var(--panel);border:1px solid #2b3140;b",showIf:"ay:none;backg",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"-radius:18px;padding:28px;box-sh",showIf:"",enableIf:"0 20px 60px #",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"6}.scene",modulePath:""}}},
-        {kind:"Choice",text:"e{display:block}h1{margin",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"20px;f",modulePath:""}}},
-        {kind:"Choice",text:"ze:2rem}.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ge{marg",modulePath:""}}}
+      {name:"Bell",path:"Chamber.Bell",statements:[
+        {kind:"Passage",text:"The bell has no tongue. Its inner curve is scratched with names you almost recognize.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The bronze tongue hums softly in your pack.",showIf:"bronze_tongue",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Fit the bronze tongue into place",showIf:"",enableIf:"bronze_tongue",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Restore",modulePath:""}}},
+        {kind:"Choice",text:"Touch the scratched names",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Names",modulePath:""}}},
+        {kind:"Choice",text:"Step away",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Chamber",modulePath:""}}}
       ]},
-      {name:"1rem}.c",path:"Chamber.Bell.Restore",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"es{display:grid;gap:.",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"margin-top:1.5rem}button{appearance:none;text-align:left;border:1px soli",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"4254;border-r",showIf:"",enableIf:"12px;background:",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"2a36;colo",modulePath:""}}},
-        {kind:"Choice",text:"--text);padding:.8re",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"m;font:inh",modulePath:""}}},
-        {kind:"Choice",text:"ursor:pointer}b",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:":hover:",modulePath:""}}}
+      {name:"Restore",path:"Chamber.Bell.Restore",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"bell_restored := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The bronze tongue rises from your hand and locks itself inside the bell.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Ring the bell",showIf:"",enableIf:"trust_blue_scarf",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"..TrueRing",modulePath:""}}},
+        {kind:"Choice",text:"Ring the bell anyway",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..FalseRing",modulePath:""}}},
+        {kind:"Choice",text:"Wait and listen",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..Names",modulePath:""}}}
       ]},
-      {name:"sabled){",path:"Chamber.Bell.TrueRing",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"er-color:var(--accent)",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:":var(--accent)}button:disabled{color:var(--disabled);cursor:not-allowed}",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"rgin",modulePath:"p:1.5rem;col"}}}
+      {name:"TrueRing",path:"Chamber.Bell.TrueRing",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"bell_rang_true := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The bell rings without sound. The black pool becomes a sky full of dawn.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Dawn",modulePath:"/ending.saga"}}}
       ]},
-      {name:"-accent);",path:"Chamber.Bell.FalseRing",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"-weight:700}.missing{co",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"fb4ab}.meta{color:var(--muted);font-size:.9rem;margin-top:1.5rem}\n</styl",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ad>\n<b",modulePath:">\n<main id=\""}}}
+      {name:"FalseRing",path:"Chamber.Bell.FalseRing",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"bell_rang_false := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The bell screams. Every chain in the chamber snaps tight, then slackens.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Return",modulePath:"/ending.saga"}}}
       ]},
-      {name:"ain>\n",path:"Chamber.Bell.Names",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ipt>\nconst story = {\n ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"es: [\n    {file:\"examples/test_drive/main.saga\", scenes:",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"{name:\"Start\",pat",effect:"",transfer:{kind:"once",target:{sceneRef:"Start\",stat",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"\n ",modulePath:""}}}
+      {name:"Names",path:"Chamber.Bell.Names",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"name_glimpse = rand(3)",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Your name is there, but the letters keep changing order.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"name_glimpse == 0",effect:"",transfer:{kind:"once",target:{sceneRef:".HiddenName",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"kind:\"Effe",path:"Chamber.Bell.Names.HiddenName",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"text:\"\",showIf:\"\",enabl",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:",takeIf:\"\",effect:\"visited_start ?= false\",transfer:{kind:\"normal\",target:{sceneRef:\"\",mod",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:":\"",modulePath:""}}}
+      {name:"HiddenName",path:"Chamber.Bell.Names.HiddenName",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"saw_hidden_name := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"For one breath, the letters spell a name that is not yours, but answers when you think it.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"    ",path:"Chamber.Pool",statements:[
-        {kind:"Passage",text:"kind:\"Effect\",text:\"\",showIf:\"\",enableIf:\"\",takeIf:\"\",effect:\"map_known ?= false\",transfer:{kind:\"n",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"ef:\"\",modulePath:\"\"}}},\n        {kind:\"Effect\",text:\"\",showIf:\"\",en",showIf:",target:{scen",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"f:\"\",takeIf:\"\",effect:\"la",showIf:"",enableIf:"_lit ?= f",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"e\",transf",modulePath:""}}},
-        {kind:"Choice",text:"nd:\"normal\",target:{sceneRef:\"\",module",showIf:"",enableIf:"\"\"}}},\n    ",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" {kind:",modulePath:""}}},
-        {kind:"Choice",text:"t\",text:\"\",showIf:",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ableIf",modulePath:""}}}
+      {name:"Pool",path:"Chamber.Pool",statements:[
+        {kind:"Passage",text:"The pool reflects the chamber as it was: whole, full of candlelight, crowded with silent villagers.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"A stranger in the reflection turns your coin over in their fingers.",showIf:"pool_offering",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Drop a coin into the pool",showIf:"",enableIf:"coin >= 1",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Offering",modulePath:""}}},
+        {kind:"Choice",text:"Draw a chalk circle at the pool's edge",showIf:"",enableIf:"found_chalk",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Circle",modulePath:""}}},
+        {kind:"Choice",text:"Return to the bell",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..Bell",modulePath:""}}}
       ]},
-      {name:"eIf:\"\",e",path:"Chamber.Pool.Offering",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"t:\"coin ?= 0\",tr",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"r:{kind:\"normal\",targ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"eneRef:\"\",modulePath:\"\"}}},\n        {kind:\"Passage\",text:\"Rain taps against th",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"er",modulePath:""}}}
+      {name:"Offering",path:"Chamber.Pool.Offering",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"coin := coin - 1",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"pool_offering := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The coin falls upward through the reflection and lands in someone else's palm.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"e Holl",path:"Chamber.Pool.Circle",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ell inn.\",showIf:\"\",",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"If:\"\",takeIf:\"\",effect:\"\",transfer:{kind:\"normal\",target:{sceneRef:\"\",m",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"th",modulePath:""}}}
+      {name:"Circle",path:"Chamber.Pool.Circle",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"chalk_circle := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The chalk line closes itself into a perfect ring. The pool grows still.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]}
     ]},
     {file:"examples/test_drive/ending.saga", scenes:[
-      {name:"doct",path:"doct",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"      êhtml lang",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"title>Odin Saga</title>\n<style>\n:root{color-scheme:dark;--bg:#111318;--pan",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"eff4;--muted:#aab1c2;--accent:#8fbcbb;--disabled:#596070}body{margin:0;",showIf:"1f2a;--text:#",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"round:var(--bg);color:var",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"xt);font:1",modulePath:""}}}
+      {name:"Dawn",path:"Dawn",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ending := \"dawn\"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Morning arrives all at once. Rain lifts from Brindlewick as if someone has drawn back a curtain.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"In the village square, every bell rope trembles though no bell is visible.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Somewhere nearby, a stranger laughs and flips a coin into the fountain.",showIf:"pool_offering",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Visit the changed village",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Aftermath",modulePath:""}}}
       ]},
-      {name:"55 system",path:"Dawn.Aftermath",statements:[
-        {kind:"Passage",text:"apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{m",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"dth:760px;margin:",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"o;padding:48",modulePath:""}}},
-        {kind:"Choice",text:"x}.scene{display:none;background:va",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"anel);bo",modulePath:""}}}
+      {name:"Aftermath",path:"Dawn.Aftermath",statements:[
+        {kind:"Passage",text:"The woman with the blue scarf waits beside the dry fountain.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Ask what happened",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Explanation",modulePath:""}}},
+        {kind:"Choice",text:"Leave Brindlewick by the north road",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Epilogue",modulePath:""}}}
       ]},
-      {name:"x solid #2b",path:"Dawn.Aftermath.Explanation",statements:[
-        {kind:"Passage",text:"border-radius:18px;padding:28px;box-shadow:0 20px 60px #0006}.scene.active{display:block}h1{margin:0 0",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:";font-si",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"em",modulePath:""}}}
+      {name:"Explanation",path:"Dawn.Aftermath.Explanation",statements:[
+        {kind:"Passage",text:"\"You woke what was buried,\" she says. \"That is not the same as saving it. But sometimes it is enough.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Continue",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
       ]},
-      {name:"sage{m",path:"sage{m",statements:[
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"n:0 0 1rem}.choice",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"lay:grid;gap:.75rem;margin-top:1.5rem}button{appearance:none;text-align:left;",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:"r:1px solid #3a4254;border-radius:12px;background:#242a36;co",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"ar(--text);padding",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"m 1rem;fon",modulePath:""}}}
+      {name:"Return",path:"Return",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ending := \"return\"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"You wake at the table in the Hollow Bell inn. Rain taps against the shutters.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The letter is gone, but your palm is black with old key oil.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Check what remains",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Inventory",modulePath:""}}}
       ]},
-      {name:"rit;curso",path:"Return.Inventory",statements:[
-        {kind:"Passage",text:"nter}button:hover:not(:disabled){border-color:var(--accent);color:var(--acc",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Choice",text:"lor:var(--disabled);cur",showIf:"utton:disabled{",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ot-allow",modulePath:""}}},
-        {kind:"Choice",text:"d{margin-top:1.5",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"olor:v",modulePath:""}}}
+      {name:"Inventory",path:"Return.Inventory",statements:[
+        {kind:"Passage",text:"You remember fragments: a tower, a pool, the shape of a bell inside an eye.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Whisper the hidden name",showIf:"saw_hidden_name",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Epilogue",modulePath:""}}},
+        {kind:"Choice",text:"Go back to sleep",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Sleep",modulePath:""}}}
       ]},
-      {name:"cent)",path:"Return.Inventory.Sleep",statements:[
-        {kind:"Passage",text:"-weight:700}.missing{color:#ffb4ab}.meta{color:var(--mu",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:";font-size:.9rem;margin-top:1.5rem}\n</style>\n</head>\n<bo",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}}
+      {name:"Sleep",path:"Return.Inventory.Sleep",statements:[
+        {kind:"Passage",text:"You close your eyes and let the rain count the seconds.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"end(\"By morning, the rain has washed every road clean.\")",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}}
       ]},
-      {name:"main id=",path:"main id=",statements:[
-        {kind:"Passage",text:"></main>\n<script>\nconst story = {\n  modules: [\n    {file:\"examples/test_drive/main.saga\", sce",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Passage",text:":\"Start\",path:\"Start\",statements:[\n        {kind:\"Effect\",text:\"\",s",showIf:"      {na",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
-        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"f:\"\",enableIf:\"\",takeIf:\"\",effect:\"visited_start ?= false\",transfer:{kind:\"normal\",target:{sceneRef",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}}
+      {name:"Epilogue",path:"Epilogue",statements:[
+        {kind:"Passage",text:"Brindlewick falls behind you. Somewhere under the road, something vast and hollow rings once.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Your cloak snaps in the morning wind like a small, stubborn banner.",showIf:"has_cloak",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"end(\"The road carries you past Brindlewick, and the bell's final note follows you into the hills.\")",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}}
       ]}
     ]}
   ]
@@ -394,7 +394,7 @@ for (const module of story.modules) {
 
 function proxyState() {
   return new Proxy(state, {
-    has: () => true,
+    has: (target, prop) => prop !== 'rand' && prop !== 'state',
     get: (target, prop) => prop in target ? target[prop] : 0,
     set: (target, prop, value) => { target[prop] = value; return true; }
   });
@@ -467,6 +467,7 @@ function render() {
   app.appendChild(section);
 
   let choices = [];
+  let pendingTransition = null;
   for (const stmt of current.statements) {
     if (ended) break;
     if (stmt.kind === 'Effect') runEffect(stmt.effect);
@@ -478,7 +479,10 @@ function render() {
     } else if (stmt.kind === 'Transition' && evalExpr(stmt.takeIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
-      if (stmt.transfer.kind !== 'once' || !consumed.has(key)) { go(stmt.transfer, current); return; }
+      if (stmt.transfer.kind !== 'once' || !consumed.has(key)) {
+        pendingTransition = stmt;
+        break;
+      }
     } else if (stmt.kind === 'Choice' && evalExpr(stmt.showIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
@@ -486,7 +490,15 @@ function render() {
     }
   }
 
-  if (choices.length > 0 && !ended) {
+  if (pendingTransition && !ended) {
+    const div = document.createElement('div');
+    div.className = 'choices';
+    section.appendChild(div);
+    const button = document.createElement('button');
+    button.textContent = 'Continue';
+    button.addEventListener('click', () => go(pendingTransition.transfer, current));
+    div.appendChild(button);
+  } else if (choices.length > 0 && !ended) {
     const div = document.createElement('div');
     div.className = 'choices';
     section.appendChild(div);

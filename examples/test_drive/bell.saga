@@ -17,8 +17,8 @@
 ### Restore
   `bell_restored := true`
   > The bronze tongue rises from your hand and locks itself inside the bell.
-  + Ring the bell *-> `trust_blue_scarf` [.TrueRing]
-  + Ring the bell anyway -> [.FalseRing]
+  + Ring the bell *-> `trust_blue_scarf` [..TrueRing]
+  + Ring the bell anyway -> [..FalseRing]
   + Wait and listen -> [..Names]
 
 ### TrueRing
