@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odin Saga</title>
+<style>
+:root{color-scheme:dark;--bg:#111318;--panel:#1b1f2a;--text:#eceff4;--muted:#aab1c2;--accent:#8fbcbb;--disabled:#596070}body{margin:0;background:var(--bg);color:var(--text);font:18px/1.55 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:760px;margin:0 auto;padding:48px 20px}.scene{display:none;background:var(--panel);border:1px solid #2b3140;border-radius:18px;padding:28px;box-shadow:0 20px 60px #0006}.scene.active{display:block}h1{margin:0 0 20px;font-size:2rem}.passage{margin:0 0 1rem}.choices{display:grid;gap:.75rem;margin-top:1.5rem}button{appearance:none;text-align:left;border:1px solid #3a4254;border-radius:12px;background:#242a36;color:var(--text);padding:.8rem 1rem;font:inherit;cursor:pointer}button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}button:disabled{color:var(--disabled);cursor:not-allowed}.end{margin-top:1.5rem;color:var(--accent);font-weight:700}.missing{color:#ffb4ab}.meta{color:var(--muted);font-size:.9rem;margin-top:1.5rem}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const story = {
+  modules: [
+    {file:"examples/test_drive/main.saga", scenes:[
+      {name:"Start",path:"Start",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"visited_start ?= false",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"map_known ?= false",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"lantern_lit ?= false",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"coin ?= 0",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Rain taps against the shutters of the Hollow Bell inn.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"A sealed letter waits on your table. Its wax bears the mark of a crescent moon.",showIf:"!visited_start",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Open the letter",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:".Letter",modulePath:""}}},
+        {kind:"Choice",text:"Step into the village",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:""}}}
+      ]},
+      {name:"Letter",path:"Start.Letter",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"visited_start := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"map_known := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The letter is brief: \"Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"A charcoal map is sketched beneath the warning.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:""}}}
+      ]},
+      {name:"Village",path:"Village",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"village_visits++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The village of Brindlewick curls around a muddy square. Lanterns glow like fireflies in the rain.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The charcoal map from the letter is already soft at the creases.",showIf:"map_known",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Visit the market square",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Square",modulePath:"/market.saga"}}},
+        {kind:"Choice",text:"Walk to the old watchtower road",showIf:"",enableIf:"map_known",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Road",modulePath:""}}},
+        {kind:"Choice",text:"Ask around for directions",showIf:"!map_known",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Directions",modulePath:""}}},
+        {kind:"Choice",text:"Buy a dry cloak before leaving",showIf:"coin >= 2",enableIf:"coin >= 2",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Square.CloakSeller",modulePath:"/market.saga"}}},
+        {kind:"Choice",text:"Speak with the gate watch",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".GateWatch",modulePath:""}}}
+      ]},
+      {name:"Directions",path:"Village.Directions",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"map_known := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"A fishmonger points with his pipe. \"Old road is north. Mind the stones. They listen.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:""}}}
+      ]},
+      {name:"GateWatch",path:"Village.GateWatch",statements:[
+        {kind:"Passage",text:"The watchman leans on his spear beneath the village arch.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"His eyes flick to the blackened key in your hand, then quickly away.",showIf:"old_key",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Ask about the watchtower",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".WatchtowerRumor",modulePath:""}}},
+        {kind:"Choice",text:"Return to the square",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:""}}}
+      ]},
+      {name:"WatchtowerRumor",path:"Village.GateWatch.WatchtowerRumor",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"heard_bell_rumor := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"\"No bell there now,\" he says. \"Not above ground, anyway.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Press him for more",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:".OldKey",modulePath:""}}},
+        {kind:"Choice",text:"Thank him and leave",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
+      ]},
+      {name:"OldKey",path:"Village.GateWatch.OldKey",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"old_key := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"He slips a blackened key into your palm. \"If the lower door still stands, this might remember it.\"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
+      ]},
+      {name:"Road",path:"Road",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"road_steps++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The northern road narrows between leaning birches. Somewhere ahead, stone shifts against stone.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Rain beads on your borrowed cloak and rolls away instead of finding your collar.",showIf:"has_cloak",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"road_steps == 1",effect:"",transfer:{kind:"once",target:{sceneRef:".FirstSign",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"lantern_lit",effect:"",transfer:{kind:"normal",target:{sceneRef:"Gate",modulePath:"/ruins.saga"}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".DarkRoad",modulePath:""}}}
+      ]},
+      {name:"FirstSign",path:"Road.FirstSign",statements:[
+        {kind:"Passage",text:"A milestone turns as you pass it, revealing an arrow carved into its back.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Road",modulePath:""}}}
+      ]},
+      {name:"DarkRoad",path:"Road.DarkRoad",statements:[
+        {kind:"Passage",text:"Without a lit lantern, the trees knit themselves into a wall of black needles.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Return to Brindlewick",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:""}}},
+        {kind:"Choice",text:"Try the road anyway",showIf:"",enableIf:"heard_bell_rumor",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Gate",modulePath:"/ruins.saga"}}}
+      ]}
+    ]},
+    {file:"examples/test_drive/market.saga", scenes:[
+      {name:"Gate\n ",path:"Gate\n ",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"    êisits++`\n ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:" watchtower gate leans open between two stones carved like sleeping dogs.\n  > `lantern_lit` You",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"warm teeth along the archway stones.\n  *-> `!lantern_lit && !heard_bell_r",showIf:"ern paint",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:" [.LoseNerve]\n  -> [.A",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ch]\n\n## Lose",modulePath:""}}},
+        {kind:"Choice",text:"  > The darkness beneath the arch pres",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"gainst you",modulePath:""}}},
+        {kind:"Choice",text:" until you step bac",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ping.\n",modulePath:""}}},
+        {kind:"Choice",text:"turn to the village -> [V",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"e](\"/ma",modulePath:"saga\")\n\n##"}}}
+      ]},
+      {name:"ch\n  > Your",path:"Square.CloakSeller",statements:[
+        {kind:"Passage",text:"ern throws gold over a stair spiraling down under the tow",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"nto the courtyard -> [Courtyard]\n  + Search the gateh",showIf:"+ Descend",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"-> [.Gatehouse]",showIf:"",enableIf:"Return to",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"indlewick",modulePath:""}}},
+        {kind:"Choice",text:"illage](\"/ma",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ga\")\n\n#",modulePath:""}}},
+        {kind:"Choice",text:"ehouse\n  `found_",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" ?= fa",modulePath:""}}}
+      ]},
+      {name:"> The ga",path:"Square.CloakSeller.BuyCloak",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"use roof has col",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"d, but a dry shel",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"ins beneath a slab of slate.\n  + Take the white chalk *-> [.TakeChalk",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"et",modulePath:""}}}
+      ]},
+      {name:"the ga",path:"Square.CloakSeller.OddJob",statements:[
+        {kind:"Passage",text:" [..]\n\n#### TakeChalk\n  `found_chalk := true`\n  > You pocket a stick of white chalk.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"eaves a moon-p",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"ear on you",modulePath:""}}},
+        {kind:"Choice",text:"b.\n  -> [Gate.Ap",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"h]",modulePath:""}}}
+      ]},
+      {name:"tyard\n  >",path:"Square.CloakSeller.OddJob.TakeCrate",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" sunken courtyard",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"open to the rain. Four doors wait under four br",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ches.\n  > `f",modulePath:""}}}
+      ]},
+      {name:"halk` The",path:"Square.BlueScarf",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"lk in your pocket leav",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"ale crescent on your fingertips.\n  + Inspect the well -> [.Well]\n  + Enter t",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"\n  + Try the lower door -> `old_key` [.LowerDo",showIf:"hive -> [.Archiv",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:" + `!old_key` Examine the s",showIf:"",enableIf:" lower door -",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".SealedDoor",modulePath:""}}},
+        {kind:"Choice",text:"Retreat to the gate -> [Gate",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" Well\n  `well_e",modulePath:""}}},
+        {kind:"Choice",text:"rand(100)`\n  > You lean",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" the w",modulePath:""}}}
+      ]},
+      {name:"r below, w",path:"Square.BlueScarf.LetterTalk",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" repeats your breathing.",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:" `well_echo > 70` [.CoinGlimmer]\n  -> [.QuietWater]\n\n### CoinGlimmer\n  `coin := coin + 1`\n  > Someth",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"right spins up from the dark",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"s at your feet, ",modulePath:""}}},
+        {kind:"Choice",text:"comes a coin.\n  -> [",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"et",modulePath:""}}}
+      ]},
+      {name:"\n### QuietWater",path:"Square.BlueScarf.MarkDescription",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" The well gives no",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"back but the small sound of rain.\n  -> [Courtyard]\n\n## Archive\n  > Shelves of ",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ab",modulePath:""}}}
+      ]},
+      {name:"an against the",path:"Square.BlueScarf.WatchtowerTalk",statements:[
+        {kind:"Passage",text:"s. Most are blank with age.\n  > `knows_mark` You keep searching for a bell inside a closed eye.\n  + Look for the",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"ivist's m",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"> ",modulePath:""}}}
+      ]},
+      {name:"_mark",path:"Square.Alley",statements:[
+        {kind:"Passage",text:"arkedTablet]\n  + Search randomly -> [.RandomTablet]\n  + Return to t",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Courtyard]\n\n### MarkedTablet\n  `archive_mark := tru",showIf:"rtyard ->",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"> You find the bell-in-ey",showIf:"",enableIf:"k. When y",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"knock",modulePath:""}}},
+        {kind:"Choice",text:", a hidden drawer o",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"\n  + Take ",modulePath:""}}},
+        {kind:"Choice",text:"onze tongue *-> [.BronzeTo",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"\n  + Leave th",modulePath:""}}},
+        {kind:"Choice",text:"er alone -> [..]\n\n##",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"onzeTo",modulePath:""}}}
+      ]},
+      {name:"`bro",path:"Square.Alley.Mira",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"tongue := true`\n  ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:" bronze tongue i",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:" and heavy, made for a bell that should not still exist.\n  -> [Courtyard.Archiv",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" R",modulePath:""}}}
+      ]},
+      {name:"blet\n  `d",path:"Square.Alley.Locksmith",statements:[
+        {kind:"Passage",text:"ount++`\n  > Dust coats your hands. The tablets say nothing you understand.\n  + Keep searching ->",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:".]\n  + Give up -> [..]\n\n## SealedDoor\n  > The lower door has no ",showIf:"_count < 3`",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"e, only a keyhole shaped l",showIf:"",enableIf:" crooke",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ooth.\n  +",modulePath:""}}},
+        {kind:"Choice",text:"n to the cou",showIf:"",enableIf:"d -> [Cou",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ard]\n\n##",modulePath:""}}},
+        {kind:"Choice",text:"Door\n  > The bl",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ed",modulePath:""}}}
+      ]},
+      {name:"ns with ",path:"Square.Alley.Locksmith.BlackKey",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"und like a cough.\n  > `",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"door_hint` You remember the locksmith's warning and work slowly.\n  *-> `lower_do",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" &",modulePath:""}}}
+      ]},
+      {name:"n_lit` ",path:"Square.Alley.Locksmith.LampOil",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ledLock]\n  -> [.",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ornLock]\n\n### Stubb",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"k\n  > The lock resists you. Rust flakes fall like old scabs.\n  + Return t",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ou",modulePath:""}}}
+      ]}
+    ]},
+    {file:"examples/test_drive/ruins.saga", scenes:[
+      {name:"Gate",path:"Gate",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"      êisits++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The watchtower gate leans open between two stones carved like sleeping dogs.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Your lantern paints warm teeth along the archway stones.",showIf:"lantern_lit",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"!lantern_lit && !heard_bell_rumor",effect:"",transfer:{kind:"once",target:{sceneRef:".LoseNerve",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Approach",modulePath:""}}}
+      ]},
+      {name:"LoseNerve",path:"Gate.LoseNerve",statements:[
+        {kind:"Passage",text:"The darkness beneath the arch presses against your face until you step back gasping.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Return to the village",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:"/main.saga"}}}
+      ]},
+      {name:"Approach",path:"Gate.Approach",statements:[
+        {kind:"Passage",text:"Your lantern throws gold over a stair spiraling down under the tower.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Descend into the courtyard",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard",modulePath:""}}},
+        {kind:"Choice",text:"Search the gatehouse",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Gatehouse",modulePath:""}}},
+        {kind:"Choice",text:"Return to Brindlewick",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Village",modulePath:"/main.saga"}}}
+      ]},
+      {name:"Gatehouse",path:"Gate.Approach.Gatehouse",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"found_chalk ?= false",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The gatehouse roof has collapsed, but a dry shelf remains beneath a slab of slate.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Take the white chalk",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:".TakeChalk",modulePath:""}}},
+        {kind:"Choice",text:"Return to the gate",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
+      ]},
+      {name:"TakeChalk",path:"Gate.Approach.Gatehouse.TakeChalk",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"found_chalk := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"You pocket a stick of white chalk. It leaves a moon-pale smear on your thumb.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Gate.Approach",modulePath:""}}}
+      ]},
+      {name:"Courtyard",path:"Courtyard",statements:[
+        {kind:"Passage",text:"The sunken courtyard lies open to the rain. Four doors wait under four broken arches.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The chalk in your pocket leaves a pale crescent on your fingertips.",showIf:"found_chalk",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Inspect the well",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Well",modulePath:""}}},
+        {kind:"Choice",text:"Enter the archive",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".Archive",modulePath:""}}},
+        {kind:"Choice",text:"Try the lower door",showIf:"",enableIf:"old_key",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".LowerDoor",modulePath:""}}},
+        {kind:"Choice",text:"Examine the sealed lower door",showIf:"!old_key",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".SealedDoor",modulePath:""}}},
+        {kind:"Choice",text:"Retreat to the gate",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Gate",modulePath:""}}}
+      ]},
+      {name:"Well",path:"Courtyard.Well",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"well_echo = rand(100)",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"You lean over the well. Far below, water repeats your breathing.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"well_echo > 70",effect:"",transfer:{kind:"once",target:{sceneRef:".CoinGlimmer",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".QuietWater",modulePath:""}}}
+      ]},
+      {name:"CoinGlimmer",path:"Courtyard.Well.CoinGlimmer",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"coin := coin + 1",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Something bright spins up from the dark, lands at your feet, and becomes a coin.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..QuietWater",modulePath:""}}}
+      ]},
+      {name:"QuietWater",path:"Courtyard.Well.QuietWater",statements:[
+        {kind:"Passage",text:"The well gives nothing back but the small sound of rain.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard",modulePath:""}}}
+      ]},
+      {name:"Archive",path:"Courtyard.Archive",statements:[
+        {kind:"Passage",text:"Shelves of stone tablets lean against the walls. Most are blank with age.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"You keep searching for a bell inside a closed eye.",showIf:"knows_mark",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Look for the archivist's mark",showIf:"",enableIf:"knows_mark",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".MarkedTablet",modulePath:""}}},
+        {kind:"Choice",text:"Search randomly",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".RandomTablet",modulePath:""}}},
+        {kind:"Choice",text:"Return to the courtyard",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard",modulePath:""}}}
+      ]},
+      {name:"MarkedTablet",path:"Courtyard.Archive.MarkedTablet",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"archive_mark := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"You find the bell-in-eye mark. When you knock twice, a hidden drawer opens.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Take the bronze tongue",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:".BronzeTongue",modulePath:""}}},
+        {kind:"Choice",text:"Leave the drawer alone",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
+      ]},
+      {name:"BronzeTongue",path:"Courtyard.Archive.MarkedTablet.BronzeTongue",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"bronze_tongue := true",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"The bronze tongue is cold and heavy, made for a bell that should not still exist.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard.Archive",modulePath:""}}}
+      ]},
+      {name:"RandomTablet",path:"Courtyard.Archive.RandomTablet",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"dust_count++",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"Dust coats your hands. The tablets say nothing you understand.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Keep searching",showIf:"",enableIf:"dust_count < 3",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".",modulePath:""}}},
+        {kind:"Choice",text:"Give up",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"..",modulePath:""}}}
+      ]},
+      {name:"SealedDoor",path:"Courtyard.SealedDoor",statements:[
+        {kind:"Passage",text:"The lower door has no handle, only a keyhole shaped like a crooked tooth.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Return to the courtyard",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard",modulePath:""}}}
+      ]},
+      {name:"LowerDoor",path:"Courtyard.LowerDoor",statements:[
+        {kind:"Passage",text:"The blackened key turns with a sound like a cough.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"You remember the locksmith's warning and work slowly.",showIf:"lower_door_hint",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"lower_door_hint && lantern_lit",effect:"",transfer:{kind:"once",target:{sceneRef:".OiledLock",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:".StubbornLock",modulePath:""}}}
+      ]},
+      {name:"StubbornLock",path:"Courtyard.LowerDoor.StubbornLock",statements:[
+        {kind:"Passage",text:"The lock resists you. Rust flakes fall like old scabs.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Return to the courtyard",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Courtyard",modulePath:""}}}
+      ]},
+      {name:"OiledLock",path:"Courtyard.LowerDoor.OiledLock",statements:[
+        {kind:"Passage",text:"The lock remembers the key. The lower door opens inward.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"Enter the bell chamber",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"Chamber",modulePath:"/bell.saga"}}}
+      ]}
+    ]},
+    {file:"examples/test_drive/bell.saga", scenes:[
+      {name:"doctyp ",path:"doctyp ",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"   Žhtml lang=\"en\">\n<he",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"eta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initi",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"ale=1\">\n<title>Odin Saga</title>\n<style>\n:root{color-scheme:dark",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"l:#1b1f2a;--text:#eceff4;--muted:#aab1c2;--acc",showIf:"#111318;--pa",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"8fbcbb;--disable",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"6070}",modulePath:""}}},
+        {kind:"Choice",text:"argin:0;backgr",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"var(-",modulePath:""}}},
+        {kind:"Choice",text:"olor:var(--text);font:18px/",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"system-ui",modulePath:"pple-system"}}}
+      ]},
+      {name:"acSy",path:"Chamber.Bell",statements:[
+        {kind:"Passage",text:"ont,'Segoe UI',sans-serif}main{max-width:760px;margin:0 auto;padding:48px 20px}.scene",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"und:var(--panel);border:1px solid #2b3140;b",showIf:"ay:none;backg",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"-radius:18px;padding:28px;box-sh",showIf:"",enableIf:"0 20px 60px #",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"6}.scene",modulePath:""}}},
+        {kind:"Choice",text:"e{display:block}h1{margin",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"20px;f",modulePath:""}}},
+        {kind:"Choice",text:"ze:2rem}.",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ge{marg",modulePath:""}}}
+      ]},
+      {name:"1rem}.c",path:"Chamber.Bell.Restore",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"es{display:grid;gap:.",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"margin-top:1.5rem}button{appearance:none;text-align:left;border:1px soli",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"4254;border-r",showIf:"",enableIf:"12px;background:",takeIf:"",effect:"",transfer:{kind:"once",target:{sceneRef:"2a36;colo",modulePath:""}}},
+        {kind:"Choice",text:"--text);padding:.8re",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"m;font:inh",modulePath:""}}},
+        {kind:"Choice",text:"ursor:pointer}b",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:":hover:",modulePath:""}}}
+      ]},
+      {name:"sabled){",path:"Chamber.Bell.TrueRing",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"er-color:var(--accent)",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:":var(--accent)}button:disabled{color:var(--disabled);cursor:not-allowed}",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"rgin",modulePath:"p:1.5rem;col"}}}
+      ]},
+      {name:"-accent);",path:"Chamber.Bell.FalseRing",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"-weight:700}.missing{co",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"fb4ab}.meta{color:var(--muted);font-size:.9rem;margin-top:1.5rem}\n</styl",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ad>\n<b",modulePath:">\n<main id=\""}}}
+      ]},
+      {name:"ain>\n",path:"Chamber.Bell.Names",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ipt>\nconst story = {\n ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"es: [\n    {file:\"examples/test_drive/main.saga\", scenes:",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"{name:\"Start\",pat",effect:"",transfer:{kind:"once",target:{sceneRef:"Start\",stat",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"\n ",modulePath:""}}}
+      ]},
+      {name:"kind:\"Effe",path:"Chamber.Bell.Names.HiddenName",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"text:\"\",showIf:\"\",enabl",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:",takeIf:\"\",effect:\"visited_start ?= false\",transfer:{kind:\"normal\",target:{sceneRef:\"\",mod",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:":\"",modulePath:""}}}
+      ]},
+      {name:"    ",path:"Chamber.Pool",statements:[
+        {kind:"Passage",text:"kind:\"Effect\",text:\"\",showIf:\"\",enableIf:\"\",takeIf:\"\",effect:\"map_known ?= false\",transfer:{kind:\"n",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"ef:\"\",modulePath:\"\"}}},\n        {kind:\"Effect\",text:\"\",showIf:\"\",en",showIf:",target:{scen",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"f:\"\",takeIf:\"\",effect:\"la",showIf:"",enableIf:"_lit ?= f",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"e\",transf",modulePath:""}}},
+        {kind:"Choice",text:"nd:\"normal\",target:{sceneRef:\"\",module",showIf:"",enableIf:"\"\"}}},\n    ",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:" {kind:",modulePath:""}}},
+        {kind:"Choice",text:"t\",text:\"\",showIf:",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ableIf",modulePath:""}}}
+      ]},
+      {name:"eIf:\"\",e",path:"Chamber.Pool.Offering",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"t:\"coin ?= 0\",tr",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"r:{kind:\"normal\",targ",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"eneRef:\"\",modulePath:\"\"}}},\n        {kind:\"Passage\",text:\"Rain taps against th",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"er",modulePath:""}}}
+      ]},
+      {name:"e Holl",path:"Chamber.Pool.Circle",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"ell inn.\",showIf:\"\",",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"If:\"\",takeIf:\"\",effect:\"\",transfer:{kind:\"normal\",target:{sceneRef:\"\",m",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Transition",text:"",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"th",modulePath:""}}}
+      ]}
+    ]},
+    {file:"examples/test_drive/ending.saga", scenes:[
+      {name:"doct",path:"doct",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"      êhtml lang",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"title>Odin Saga</title>\n<style>\n:root{color-scheme:dark;--bg:#111318;--pan",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"eff4;--muted:#aab1c2;--accent:#8fbcbb;--disabled:#596070}body{margin:0;",showIf:"1f2a;--text:#",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"round:var(--bg);color:var",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"xt);font:1",modulePath:""}}}
+      ]},
+      {name:"55 system",path:"Dawn.Aftermath",statements:[
+        {kind:"Passage",text:"apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{m",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"dth:760px;margin:",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"o;padding:48",modulePath:""}}},
+        {kind:"Choice",text:"x}.scene{display:none;background:va",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"anel);bo",modulePath:""}}}
+      ]},
+      {name:"x solid #2b",path:"Dawn.Aftermath.Explanation",statements:[
+        {kind:"Passage",text:"border-radius:18px;padding:28px;box-shadow:0 20px 60px #0006}.scene.active{display:block}h1{margin:0 0",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:";font-si",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"em",modulePath:""}}}
+      ]},
+      {name:"sage{m",path:"sage{m",statements:[
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"n:0 0 1rem}.choice",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"lay:grid;gap:.75rem;margin-top:1.5rem}button{appearance:none;text-align:left;",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:"r:1px solid #3a4254;border-radius:12px;background:#242a36;co",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"ar(--text);padding",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"m 1rem;fon",modulePath:""}}}
+      ]},
+      {name:"rit;curso",path:"Return.Inventory",statements:[
+        {kind:"Passage",text:"nter}button:hover:not(:disabled){border-color:var(--accent);color:var(--acc",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Choice",text:"lor:var(--disabled);cur",showIf:"utton:disabled{",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"ot-allow",modulePath:""}}},
+        {kind:"Choice",text:"d{margin-top:1.5",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"olor:v",modulePath:""}}}
+      ]},
+      {name:"cent)",path:"Return.Inventory.Sleep",statements:[
+        {kind:"Passage",text:"-weight:700}.missing{color:#ffb4ab}.meta{color:var(--mu",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:";font-size:.9rem;margin-top:1.5rem}\n</style>\n</head>\n<bo",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}}
+      ]},
+      {name:"main id=",path:"main id=",statements:[
+        {kind:"Passage",text:"></main>\n<script>\nconst story = {\n  modules: [\n    {file:\"examples/test_drive/main.saga\", sce",showIf:"",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Passage",text:":\"Start\",path:\"Start\",statements:[\n        {kind:\"Effect\",text:\"\",s",showIf:"      {na",enableIf:"",takeIf:"",effect:"",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}},
+        {kind:"Effect",text:"",showIf:"",enableIf:"",takeIf:"",effect:"f:\"\",enableIf:\"\",takeIf:\"\",effect:\"visited_start ?= false\",transfer:{kind:\"normal\",target:{sceneRef",transfer:{kind:"normal",target:{sceneRef:"",modulePath:""}}}
+      ]}
+    ]}
+  ]
+};
+
+const app = document.getElementById('app');
+const state = Object.create(null);
+const consumed = new Set();
+const scenes = Object.create(null);
+let current = null;
+let ended = false;
+
+function moduleId(file) {
+  const slash = Math.max(file.lastIndexOf('/'), file.lastIndexOf('\\\\'));
+  return '/' + file.slice(slash + 1);
+}
+
+for (const module of story.modules) {
+  module.id = moduleId(module.file);
+  for (const scene of module.scenes) {
+    scene.module = module;
+    scene.key = module.id + '#' + scene.path;
+    scenes[scene.key] = scene;
+  }
+}
+
+function proxyState() {
+  return new Proxy(state, {
+    has: () => true,
+    get: (target, prop) => prop in target ? target[prop] : 0,
+    set: (target, prop, value) => { target[prop] = value; return true; }
+  });
+}
+
+function rand(max) { return Math.floor(Math.random() * max); }
+function normalize(code) { return code.replace(/:=/g, '='); }
+
+function evalExpr(code) {
+  if (!code) return true;
+  try { return !!Function('state', 'rand', 'with (state) { return (' + normalize(code) + '); }')(proxyState(), rand); }
+  catch (err) { console.warn('condition failed:', code, err); return false; }
+}
+
+function runEffect(code) {
+  if (!code) return;
+  const defaultMatch = code.match(/^\s*([A-Za-z_]\w*)\s*\?=\s*(.+)$/);
+  if (defaultMatch) {
+    if (!(defaultMatch[1] in state)) {
+      state[defaultMatch[1]] = Function('state', 'rand', 'with (state) { return (' + normalize(defaultMatch[2]) + '); }')(proxyState(), rand);
+    }
+    return;
+  }
+  const endMatch = code.match(/^\s*end\((.*)\)\s*$/);
+  if (endMatch) {
+    ended = true;
+    const message = Function('state', 'rand', 'with (state) { return (' + endMatch[1] + '); }')(proxyState(), rand);
+    const div = document.createElement('div');
+    div.className = 'end';
+    div.textContent = message;
+    app.appendChild(div);
+    return;
+  }
+  Function('state', 'rand', 'with (state) { ' + normalize(code) + '; }')(proxyState(), rand);
+}
+
+function resolveTarget(transfer, fromScene) {
+  const ref = transfer.target.sceneRef;
+  const module = transfer.target.modulePath || fromScene.module.id;
+  const parts = fromScene.path.split('.');
+  let path = ref;
+  if (ref === '.') path = fromScene.path;
+  else if (ref === '..') path = parts.slice(0, -1).join('.');
+  else if (ref.startsWith('..')) path = parts.slice(0, -1).concat(ref.slice(2).split('.')).join('.');
+  else if (ref.startsWith('.')) path = parts.concat(ref.slice(1).split('.')).join('.');
+  return scenes[module + '#' + path];
+}
+
+function go(transfer, fromScene) {
+  const target = resolveTarget(transfer, fromScene);
+  if (!target) {
+    app.innerHTML = '<p class="missing">Missing target: ' + escapeHtml(transfer.target.sceneRef) + '</p>';
+    return;
+  }
+  if (transfer.kind === 'once') consumed.add(fromScene.key + '->' + target.key + ':' + transfer.target.sceneRef);
+  current = target;
+  render();
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+
+function render() {
+  ended = false;
+  app.innerHTML = '';
+  const section = document.createElement('section');
+  section.className = 'scene active';
+  section.innerHTML = '<h1>' + escapeHtml(current.name) + '</h1>';
+  app.appendChild(section);
+
+  let choices = [];
+  for (const stmt of current.statements) {
+    if (ended) break;
+    if (stmt.kind === 'Effect') runEffect(stmt.effect);
+    else if (stmt.kind === 'Passage' && evalExpr(stmt.showIf)) {
+      const p = document.createElement('p');
+      p.className = 'passage';
+      p.textContent = stmt.text;
+      section.appendChild(p);
+    } else if (stmt.kind === 'Transition' && evalExpr(stmt.takeIf)) {
+      const target = resolveTarget(stmt.transfer, current);
+      const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
+      if (stmt.transfer.kind !== 'once' || !consumed.has(key)) { go(stmt.transfer, current); return; }
+    } else if (stmt.kind === 'Choice' && evalExpr(stmt.showIf)) {
+      const target = resolveTarget(stmt.transfer, current);
+      const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
+      if (stmt.transfer.kind !== 'once' || !consumed.has(key)) choices.push(stmt);
+    }
+  }
+
+  if (choices.length > 0 && !ended) {
+    const div = document.createElement('div');
+    div.className = 'choices';
+    section.appendChild(div);
+    for (const choice of choices) {
+      const button = document.createElement('button');
+      button.textContent = choice.text;
+      button.disabled = !evalExpr(choice.enableIf);
+      button.addEventListener('click', () => go(choice.transfer, current));
+      div.appendChild(button);
+    }
+  }
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.textContent = current.module.id + ' Â· ' + current.path;
+  section.appendChild(meta);
+}
+
+current = story.modules[0]?.scenes[0];
+if (current) render();
+else app.textContent = 'No scenes found.';
+</script>
+</body>
+</html>
