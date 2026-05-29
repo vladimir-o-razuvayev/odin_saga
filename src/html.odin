@@ -225,6 +225,21 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 }
 
+function armButton(button, enabled, onClick) {
+  button.disabled = true;
+  if (!enabled) return;
+  let armed = false;
+  setTimeout(() => {
+    armed = true;
+    button.disabled = false;
+  }, 100);
+  button.addEventListener('click', () => {
+    if (!armed) return;
+    button.disabled = true;
+    onClick();
+  });
+}
+
 function render() {
   ended = false;
   app.innerHTML = '';
@@ -263,7 +278,7 @@ function render() {
     section.appendChild(div);
     const button = document.createElement('button');
     button.textContent = 'Continue';
-    button.addEventListener('click', () => go(pendingTransition.transfer, current));
+    armButton(button, true, () => go(pendingTransition.transfer, current));
     div.appendChild(button);
   } else if (choices.length > 0 && !ended) {
     const div = document.createElement('div');
@@ -272,8 +287,7 @@ function render() {
     for (const choice of choices) {
       const button = document.createElement('button');
       button.textContent = choice.text;
-      button.disabled = !evalExpr(choice.enableIf);
-      button.addEventListener('click', () => go(choice.transfer, current));
+      armButton(button, evalExpr(choice.enableIf), () => go(choice.transfer, current));
       div.appendChild(button);
     }
   }
