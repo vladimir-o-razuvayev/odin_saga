@@ -13,7 +13,7 @@
 
 ### Explanation
   > "You woke what was buried," she says. "That is not the same as saving it. But sometimes it is enough."
-  + Continue -> [Dawn.Aftermath]
+  + Continue -> [..]
 
 # Return
   `ending := "return"`

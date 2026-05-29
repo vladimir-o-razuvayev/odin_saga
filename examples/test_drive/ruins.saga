@@ -19,7 +19,7 @@
   `found_chalk ?= false`
   > The gatehouse roof has collapsed, but a dry shelf remains beneath a slab of slate.
   + Take the white chalk *-> [.TakeChalk]
-  + Return to the gate -> [Gate.Approach]
+  + Return to the gate -> [..]
 
 #### TakeChalk
   `found_chalk := true`
@@ -61,7 +61,7 @@
   `archive_mark := true`
   > You find the bell-in-eye mark. When you knock twice, a hidden drawer opens.
   + Take the bronze tongue *-> [.BronzeTongue]
-  + Leave the drawer alone -> [Courtyard.Archive]
+  + Leave the drawer alone -> [..]
 
 #### BronzeTongue
   `bronze_tongue := true`
@@ -71,8 +71,8 @@
 ### RandomTablet
   `dust_count++`
   > Dust coats your hands. The tablets say nothing you understand.
-  + Keep searching -> `dust_count < 3` [.RandomTablet]
-  + Give up -> [Courtyard.Archive]
+  + Keep searching -> `dust_count < 3` [.]
+  + Give up -> [..]
 
 ## SealedDoor
   > The lower door has no handle, only a keyhole shaped like a crooked tooth.

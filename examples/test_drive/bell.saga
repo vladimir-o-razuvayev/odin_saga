@@ -35,12 +35,12 @@
   `name_glimpse = rand(3)`
   > Your name is there, but the letters keep changing order.
   *-> `name_glimpse == 0` [.HiddenName]
-  -> [Chamber.Bell]
+  -> [..]
 
 #### HiddenName
   `saw_hidden_name := true`
   > For one breath, the letters spell a name that is not yours, but answers when you think it.
-  -> [Chamber.Bell.Names]
+  -> [..]
 
 ## Pool
   > The pool reflects the chamber as it was: whole, full of candlelight, crowded with silent villagers.
@@ -53,9 +53,9 @@
   `coin := coin - 1`
   `pool_offering := true`
   > The coin falls upward through the reflection and lands in someone else's palm.
-  -> [Chamber.Pool]
+  -> [..]
 
 ### Circle
   `chalk_circle := true`
   > The chalk line closes itself into a perfect ring. The pool grows still.
-  -> [Chamber.Pool]
+  -> [..]

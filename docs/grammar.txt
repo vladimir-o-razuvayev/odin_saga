@@ -184,13 +184,22 @@ Targets use square brackets:
 ```saga
 [Scene]
 [Parent.Child]
+[.]
 [.Child]
+[..]
+[..Sibling]
 [Scene]("/module.saga")
 ```
 
 A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `[Main]` resolves to `Main`, not `Patrons.WomanInRedDress.Main`.
 
-In a scene target, `.` expands to the current scene's full path. For example, from `Patrons.WomanInRedDress`, `[.InitialConvo]` resolves to `Patrons.WomanInRedDress.InitialConvo`.
+In a scene target, `[.]` resolves to the current scene.
+
+In a scene target, `.Child` expands to a child of the current scene. For example, from `Patrons.WomanInRedDress`, `[.InitialConvo]` resolves to `Patrons.WomanInRedDress.InitialConvo`.
+
+In a scene target, `[..]` resolves to the parent scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..]` resolves to `Patrons.WomanInRedDress`.
+
+In a scene target, `..Sibling` resolves to a sibling of the current scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..FollowUp]` resolves to `Patrons.WomanInRedDress.FollowUp`.
 
 If a target omits a module path, the current module is used. If a target includes a module path, the scene reference is resolved in that module.
 
@@ -307,9 +316,15 @@ target             = "[" scene_ref "]" module_ref?
 module_ref         = "(" string ")"
 
 scene_ref          = scene_path
-                   | scoped_scene_path
+                   | self_scene_path
+                   | child_scene_path
+                   | parent_scene_path
+                   | sibling_scene_path
 scene_path         = scene_label { "." scene_label }
-scoped_scene_path  = { "." } scene_path
+self_scene_path    = "."
+child_scene_path   = "." scene_path
+parent_scene_path  = ".."
+sibling_scene_path = ".." scene_path
 
 scene_label        = /[A-Za-z_][A-Za-z0-9_]*/
 ```
@@ -324,4 +339,4 @@ Potential issue: From `Patrons.WomanInRedDress.InitialConvo`, `[.Foo]` resolves 
 Patrons.WomanInRedDress.InitialConvo.Foo
 ```
 
-Authors can use an absolute scene path when they need to target a sibling or ancestor scene.
+Authors can use `[.]` to target the current scene, `[..]` to target the parent scene, `[..Sibling]` to target a sibling scene, or an absolute scene path when they need to target another ancestor scene.

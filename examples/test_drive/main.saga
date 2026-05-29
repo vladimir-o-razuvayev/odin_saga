@@ -40,12 +40,12 @@
   `heard_bell_rumor := true`
   > "No bell there now," he says. "Not above ground, anyway."
   + Press him for more *-> [.OldKey]
-  + Thank him and leave -> [Village.GateWatch]
+  + Thank him and leave -> [..]
 
 ### OldKey
   `old_key := true`
   > He slips a blackened key into your palm. "If the lower door still stands, this might remember it."
-  -> [Village.GateWatch]
+  -> [..]
 
 # Road
   `road_steps++`

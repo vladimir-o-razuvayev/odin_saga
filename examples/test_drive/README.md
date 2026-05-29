@@ -30,6 +30,7 @@ The story root is this directory. Root-relative module targets such as `("/marke
 - Automatic transitions with `->`.
 - One-shot transfers with `*->` for both choices and transitions.
 - Child targets with `[.Child]`.
+- Parent targets with `[..]`.
 - Sibling targets with `[..Sibling]`.
 - Absolute in-module targets like `[Village.GateWatch]`.
 - Cross-module targets like `[Square]("/market.saga")`.
