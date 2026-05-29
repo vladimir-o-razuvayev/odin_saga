@@ -21,6 +21,7 @@ Diagnostic :: struct {
 Transfer_Kind :: enum {
 	Normal,
 	Once,
+	Widget,
 }
 
 Target :: struct {
@@ -56,6 +57,7 @@ Scene :: struct {
 	name:       string,
 	path:       string,
 	depth:      int,
+	widget:     string,
 	statements: [dynamic]Statement,
 	pos:        Source_Pos,
 }

@@ -1,0 +1,5 @@
+Use markdown style nested back qoutes. for example"
+  > The letter is brief: "Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
+becomes
+  > The letter is brief:
+  >> Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf.

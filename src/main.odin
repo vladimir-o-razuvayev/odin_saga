@@ -12,6 +12,12 @@ Build_Result :: struct {
 	source_files: [dynamic]string,
 }
 
+Load_Context :: struct {
+	result:   ^Build_Result,
+	loaded:   ^[dynamic]string,
+	base_dir: string,
+}
+
 main :: proc() {
 	args := os.args
 	if len(args) != 3 {
@@ -48,12 +54,65 @@ build_story :: proc(entry_path: string) -> Build_Result {
 	loaded := make([dynamic]string)
 	defer delete(loaded)
 
-	base_dir := filepath.dir(entry_path)
-	load_module(&result, &loaded, base_dir, entry_path)
+	entry_abs, abs_ok := filepath.abs(entry_path, context.temp_allocator)
+	if !abs_ok {
+		append(
+			&result.errors,
+			Diagnostic {
+				message = fmt.tprintf("failed to resolve %q", entry_path),
+				pos = Source_Pos{file = entry_path, line = 1, column = 1},
+			},
+		)
+		return result
+	}
+	base_dir := filepath.dir(entry_abs)
+	load_module(&result, &loaded, base_dir, entry_abs)
+	load_all_saga_files(&result, &loaded, base_dir, base_dir)
 	if len(result.errors) == 0 {
 		validate_targets(&result, base_dir)
 	}
 	return result
+}
+
+load_all_saga_files :: proc(
+	result: ^Build_Result,
+	loaded: ^[dynamic]string,
+	base_dir, dir: string,
+) {
+	ctx := Load_Context {
+		result   = result,
+		loaded   = loaded,
+		base_dir = base_dir,
+	}
+	err := filepath.walk(dir, load_saga_walk_proc, &ctx)
+	if err != nil {
+		append(
+			&result.errors,
+			Diagnostic {
+				message = fmt.tprintf("failed to read directory %q", dir),
+				pos = Source_Pos{file = dir, line = 1, column = 1},
+			},
+		)
+	}
+}
+
+load_saga_walk_proc :: proc(
+	info: os.File_Info,
+	in_err: os.Error,
+	user_data: rawptr,
+) -> (
+	err: os.Error,
+	skip_dir: bool,
+) {
+	if in_err != nil {
+		return in_err, false
+	}
+	if info.is_dir || !has_suffix(info.fullpath, ".saga") {
+		return nil, false
+	}
+	ctx := (^Load_Context)(user_data)
+	load_module(ctx.result, ctx.loaded, ctx.base_dir, info.fullpath)
+	return nil, false
 }
 
 load_module :: proc(result: ^Build_Result, loaded: ^[dynamic]string, base_dir, path: string) {
@@ -99,21 +158,21 @@ load_module :: proc(result: ^Build_Result, loaded: ^[dynamic]string, base_dir, p
 	own_module_strings(&parsed.module)
 	append(&result.modules, parsed.module)
 
-	for scene in parsed.module.scenes {
-		for stmt in scene.statements {
-			module_path := stmt.transfer.target.module_path
-			if len(module_path) == 0 {
-				continue
-			}
-			resolved_path := fmt.tprintf("%s%s", base_dir, module_path)
-			load_module(result, loaded, base_dir, resolved_path)
-		}
-	}
 }
 
 validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 	for module in result.modules {
 		for scene in module.scenes {
+			if len(scene.widget) > 0 && !is_builtin_widget(scene.widget) {
+				append(
+					&result.errors,
+					Diagnostic {
+						message = fmt.tprintf("unknown widget renderer %q", scene.widget),
+						pos = scene.pos,
+					},
+				)
+			}
+
 			for stmt in scene.statements {
 				if stmt.kind != .Choice && stmt.kind != .Transition {
 					continue
@@ -145,7 +204,8 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 				}
 
 				target_scene_path := resolve_target_scene_path(scene.path, target.scene_ref)
-				if !has_scene(target_module.scenes[:], target_scene_path) {
+				target_scene := find_scene(target_module.scenes[:], target_scene_path)
+				if target_scene == nil {
 					append(
 						&result.errors,
 						Diagnostic {
@@ -154,6 +214,20 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 								target.scene_ref,
 								target_scene_path,
 								target_module.file,
+							),
+							pos = target.pos,
+						},
+					)
+					continue
+				}
+
+				if stmt.transfer.kind == .Widget && len(target_scene.widget) == 0 {
+					append(
+						&result.errors,
+						Diagnostic {
+							message = fmt.tprintf(
+								"widget transfer target %q is not a widget scene",
+								target_scene_path,
 							),
 							pos = target.pos,
 						},
@@ -173,13 +247,21 @@ find_module :: proc(modules: []Module, path: string) -> ^Module {
 	return nil
 }
 
-has_scene :: proc(scenes: []Scene, path: string) -> bool {
-	for scene in scenes {
-		if scene.path == path {
-			return true
+find_scene :: proc(scenes: []Scene, path: string) -> ^Scene {
+	for i := 0; i < len(scenes); i += 1 {
+		if scenes[i].path == path {
+			return &scenes[i]
 		}
 	}
-	return false
+	return nil
+}
+
+has_scene :: proc(scenes: []Scene, path: string) -> bool {
+	return find_scene(scenes, path) != nil
+}
+
+is_builtin_widget :: proc(widget: string) -> bool {
+	return widget == "std:inventory" || widget == "std:item" || widget == "std:status"
 }
 
 resolve_target_scene_path :: proc(current_path, ref: string) -> string {
@@ -216,6 +298,13 @@ parent_scene_path :: proc(path: string) -> string {
 	return path[:last_dot]
 }
 
+has_suffix :: proc(s, suffix: string) -> bool {
+	if len(suffix) > len(s) {
+		return false
+	}
+	return s[len(s) - len(suffix):] == suffix
+}
+
 has_loaded :: proc(loaded: []string, path: string) -> bool {
 	for item in loaded {
 		if item == path {
@@ -244,6 +333,7 @@ own_module_strings :: proc(module: ^Module) {
 	for &scene in module.scenes {
 		scene.name = clone_non_empty(scene.name)
 		scene.path = clone_non_empty(scene.path)
+		scene.widget = clone_non_empty(scene.widget)
 		for &stmt in scene.statements {
 			stmt.text = clone_non_empty(stmt.text)
 			stmt.show_if = clone_non_empty(stmt.show_if)
@@ -268,6 +358,7 @@ free_build_result :: proc(result: Build_Result) {
 		for scene in module.scenes {
 			free_string_if_non_empty(scene.name)
 			free_string_if_non_empty(scene.path)
+			free_string_if_non_empty(scene.widget)
 			for stmt in scene.statements {
 				free_string_if_non_empty(stmt.text)
 				free_string_if_non_empty(stmt.show_if)
@@ -324,6 +415,20 @@ semantic_reports_unresolved_child_target_test :: proc(t: ^testing.T) {
 		t,
 		lexer.index_of(build.errors[0].message, "Village.GateWatch.WatchtowerRumor.OldKey") >= 0,
 	)
+}
+
+@(test)
+semantic_reports_widget_transfer_to_non_widget_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Main\nw-> [.Panel]\n## Panel\n> Not a widget\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 1)
+	testing.expect(t, lexer.index_of(build.errors[0].message, "not a widget scene") >= 0)
 }
 
 @(test)

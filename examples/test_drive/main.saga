@@ -11,6 +11,7 @@
 ## Letter
   `visited_start := true`
   `map_known := true`
+  w-> [Inventory]("/widgets/inventory.saga")
   > The letter is brief: "Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
   > A charcoal map is sketched beneath the warning.
   -> [Village]

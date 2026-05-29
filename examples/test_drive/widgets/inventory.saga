@@ -1,0 +1,23 @@
+@widget std:inventory
+# Inventory
+  > Your personal belongings
+  + `has_cloak` Dry cloak w-> [.DryCloak]
+  + `old_key` Blackened key w-> [.OldKey]
+  + `found_chalk` White chalk w-> [.Chalk]
+  + `bronze_tongue` Bronze tongue w-> [.BronzeTongue]
+
+@widget std:item
+## DryCloak
+  > The dry cloak smells of cedar and sheep oil. It keeps the rain off your back.
+
+@widget std:item
+## OldKey
+  > The blackened key is cold no matter how long you hold it.
+
+@widget std:item
+## Chalk
+  > The chalk leaves a moon-pale smear on your fingertips.
+
+@widget std:item
+## BronzeTongue
+  > The bronze tongue is cold and heavy, made for a bell that should not still exist.

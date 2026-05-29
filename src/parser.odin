@@ -19,24 +19,24 @@ Parsed_Expression :: struct {
 
 Parsed_Arrow :: struct {
 	index: int,
-	once:  bool,
+	kind:  Transfer_Kind,
 }
 
 parser :: struct {
-	init:               proc(lines: []Source_Line, file := "<input>") -> Parser,
-	parse:              proc(p: ^Parser) -> Parse_Result,
-	parse_heading:      proc(
+	init:                   proc(lines: []Source_Line, file := "<input>") -> Parser,
+	parse:                  proc(p: ^Parser) -> Parse_Result,
+	parse_heading:          proc(
 		p: ^Parser,
 		line: Source_Line,
 		stack: ^[32]string,
 		current_depth: ^int,
 	) -> bool,
-	parse_statement:    proc(p: ^Parser, line: Source_Line, scene: ^Scene),
-	parse_passage:      proc(p: ^Parser, line: Source_Line) -> Statement,
-	parse_choice:       proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
-	parse_transition:   proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
-	parse_effect:       proc(p: ^Parser, line: Source_Line) -> Statement,
-	parse_target:       proc(
+	parse_statement:        proc(p: ^Parser, line: Source_Line, scene: ^Scene),
+	parse_passage:          proc(p: ^Parser, line: Source_Line) -> Statement,
+	parse_choice:           proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
+	parse_transition:       proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
+	parse_effect:           proc(p: ^Parser, line: Source_Line) -> Statement,
+	parse_target:           proc(
 		p: ^Parser,
 		text: string,
 		pos: Source_Pos,
@@ -45,13 +45,14 @@ parser :: struct {
 		Target,
 		bool,
 	),
-	parse_leading_expr: proc(text: string) -> Parsed_Expression,
-	find_choice_arrow:  proc(text: string) -> Parsed_Arrow,
-	parse_path_labels:  proc(p: ^Parser, path: string, pos: Source_Pos) -> bool,
-	build_scene_path:   proc(stack: ^[32]string, depth: int) -> string,
-	current_scene:      proc(p: ^Parser, module: ^Module) -> ^Scene,
-	append_error:       proc(p: ^Parser, pos: Source_Pos, message: string),
-	starts_with_arrow:  proc(text: string) -> (Transfer_Kind, string, bool),
+	parse_widget_decorator: proc(p: ^Parser, line: Source_Line) -> (string, bool),
+	parse_leading_expr:     proc(text: string) -> Parsed_Expression,
+	find_choice_arrow:      proc(text: string) -> Parsed_Arrow,
+	parse_path_labels:      proc(p: ^Parser, path: string, pos: Source_Pos) -> bool,
+	build_scene_path:       proc(stack: ^[32]string, depth: int) -> string,
+	current_scene:          proc(p: ^Parser, module: ^Module) -> ^Scene,
+	append_error:           proc(p: ^Parser, pos: Source_Pos, message: string),
+	starts_with_arrow:      proc(text: string) -> (Transfer_Kind, string, bool),
 } {
 	init = proc(lines: []Source_Line, file := "<input>") -> Parser {
 		return Parser{lines = lines, errors = make([dynamic]Diagnostic), file = file}
@@ -63,9 +64,20 @@ parser :: struct {
 		}
 		stack: [32]string
 		current_depth := 0
+		pending_widget := ""
+		pending_widget_pos := Source_Pos{}
 
 		for line in p.lines {
 			if len(line.text) == 0 {
+				continue
+			}
+
+			if lexer.starts_with(line.text, "@") {
+				widget, ok := parser.parse_widget_decorator(p, line)
+				if ok {
+					pending_widget = widget
+					pending_widget_pos = line.pos
+				}
 				continue
 			}
 
@@ -78,12 +90,25 @@ parser :: struct {
 							name = name,
 							path = parser.build_scene_path(&stack, current_depth),
 							depth = current_depth,
+							widget = pending_widget,
 							statements = make([dynamic]Statement),
 							pos = line.pos,
 						},
 					)
+					pending_widget = ""
+					pending_widget_pos = Source_Pos{}
 				}
 				continue
+			}
+
+			if len(pending_widget) > 0 {
+				parser.append_error(
+					p,
+					pending_widget_pos,
+					"decorator must be followed by a scene heading",
+				)
+				pending_widget = ""
+				pending_widget_pos = Source_Pos{}
 			}
 
 			if len(module.scenes) == 0 {
@@ -93,6 +118,14 @@ parser :: struct {
 
 			scene := parser.current_scene(p, &module)
 			parser.parse_statement(p, line, scene)
+		}
+
+		if len(pending_widget) > 0 {
+			parser.append_error(
+				p,
+				pending_widget_pos,
+				"decorator must be followed by a scene heading",
+			)
 		}
 
 		return Parse_Result{module = module, errors = p.errors}
@@ -136,7 +169,9 @@ parser :: struct {
 			stmt = parser.parse_passage(p, line)
 		} else if lexer.starts_with(text, "+") {
 			stmt = parser.parse_choice(p, line, scene.depth)
-		} else if lexer.starts_with(text, "*->") || lexer.starts_with(text, "->") {
+		} else if lexer.starts_with(text, "*->") ||
+		   lexer.starts_with(text, "w->") ||
+		   lexer.starts_with(text, "->") {
 			stmt = parser.parse_transition(p, line, scene.depth)
 		} else if lexer.starts_with(text, "`") {
 			stmt = parser.parse_effect(p, line)
@@ -198,10 +233,7 @@ parser :: struct {
 			parser.append_error(p, line.pos, "expected choice target")
 		}
 
-		kind: Transfer_Kind = .Normal
-		if arrow.once {
-			kind = .Once
-		}
+		kind := arrow.kind
 		return Statement {
 			kind = .Choice,
 			text = choice_text,
@@ -312,6 +344,20 @@ parser :: struct {
 
 		return Target{scene_ref = ref, module_path = module_path, pos = pos}, true
 	},
+	parse_widget_decorator = proc(p: ^Parser, line: Source_Line) -> (string, bool) {
+		rest := lexer.trim(line.text[1:])
+		if !lexer.starts_with(rest, "widget") {
+			parser.append_error(p, line.pos, "unknown decorator")
+			return "", false
+		}
+
+		value := lexer.trim(rest[len("widget"):])
+		if len(value) == 0 {
+			parser.append_error(p, line.pos, "expected widget renderer")
+			return "", false
+		}
+		return value, true
+	},
 	parse_leading_expr = proc(text: string) -> Parsed_Expression {
 		trimmed_text := lexer.trim(text)
 		if len(trimmed_text) == 0 || trimmed_text[0] != '`' {
@@ -342,10 +388,13 @@ parser :: struct {
 				continue
 			}
 			if i + 3 < len(text) && text[i:i + 3] == "*->" && token.is_space(text[i + 3]) {
-				return Parsed_Arrow{index = i, once = true}
+				return Parsed_Arrow{index = i, kind = .Once}
+			}
+			if i + 3 < len(text) && text[i:i + 3] == "w->" && token.is_space(text[i + 3]) {
+				return Parsed_Arrow{index = i, kind = .Widget}
 			}
 			if i + 2 < len(text) && text[i:i + 2] == "->" && token.is_space(text[i + 2]) {
-				return Parsed_Arrow{index = i, once = false}
+				return Parsed_Arrow{index = i, kind = .Normal}
 			}
 		}
 		return Parsed_Arrow{index = -1}
@@ -390,6 +439,12 @@ parser :: struct {
 				return .Once, "", false
 			}
 			return .Once, lexer.trim(trimmed_text[3:]), true
+		}
+		if lexer.starts_with(trimmed_text, "w->") {
+			if len(trimmed_text) == 3 || !token.is_space(trimmed_text[3]) {
+				return .Widget, "", false
+			}
+			return .Widget, lexer.trim(trimmed_text[3:]), true
 		}
 		if lexer.starts_with(trimmed_text, "->") {
 			if len(trimmed_text) == 2 || !token.is_space(trimmed_text[2]) {
@@ -458,6 +513,21 @@ parser_parse_v0_story_test :: proc(t: ^testing.T) {
 }
 
 @(test)
+parser_widget_syntax_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test(
+		"@widget std:inventory\n# Inventory\n+ Dry cloak w-> [.DryCloak]\n@widget std:item\n## DryCloak\n> A cloak.\n",
+	)
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	testing.expect(t, len(result.errors) == 0)
+	testing.expect(t, result.module.scenes[0].widget == "std:inventory")
+	testing.expect(t, result.module.scenes[1].widget == "std:item")
+	testing.expect(t, result.module.scenes[0].statements[0].transfer.kind == .Widget)
+}
+
+@(test)
 parser_target_test :: proc(t: ^testing.T) {
 	p := parser.init(nil)
 	defer delete(p.errors)
@@ -487,6 +557,7 @@ parser_parses_test_drive_examples_test :: proc(t: ^testing.T) {
 		"examples/test_drive/ruins.saga",
 		"examples/test_drive/bell.saga",
 		"examples/test_drive/ending.saga",
+		"examples/test_drive/widgets/inventory.saga",
 	}
 
 	for path in paths {
