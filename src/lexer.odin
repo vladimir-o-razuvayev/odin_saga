@@ -5,208 +5,137 @@ import "core:testing"
 Lexer :: struct {
 	source: string,
 	file:   string,
-	start:  int,
-	pos:    int,
-	line:   int,
-	column: int,
 }
 
 lexer :: struct {
-	init:              proc(source: string, file := "<input>") -> Lexer,
-	scan_all:          proc(l: ^Lexer) -> [dynamic]Token,
-	scan_token:        proc(l: ^Lexer) -> Token,
-	identifier:        proc(l: ^Lexer, line: int, column: int) -> Token,
-	number:            proc(l: ^Lexer, line: int, column: int) -> Token,
-	string:            proc(l: ^Lexer, line: int, column: int) -> Token,
-	make_token:        proc(l: ^Lexer, kind: Token_Kind, line: int, column: int) -> Token,
-	skip_line_comment: proc(l: ^Lexer),
-	match:             proc(l: ^Lexer, expected: u8) -> bool,
-	advance:           proc(l: ^Lexer) -> u8,
-	peek:              proc(l: ^Lexer) -> u8,
-	peek_next:         proc(l: ^Lexer) -> u8,
-	at_end:            proc(l: ^Lexer) -> bool,
-	is_alpha:          proc(ch: u8) -> bool,
-	is_digit:          proc(ch: u8) -> bool,
+	init:          proc(source: string, file := "<input>") -> Lexer,
+	scan_lines:    proc(l: ^Lexer) -> Lexer_Result,
+	strip_comment: proc(line: string, pos: Source_Pos) -> (string, bool, Diagnostic),
+	trim:          proc(s: string) -> string,
+	trim_left:     proc(s: string) -> string,
+	trim_right:    proc(s: string) -> string,
+	count_indent:  proc(s: string) -> int,
+	starts_with:   proc(s: string, prefix: string) -> bool,
+	index_of:      proc(s: string, needle: string) -> int,
 } {
 	init = proc(source: string, file := "<input>") -> Lexer {
-		return Lexer{source = source, file = file, line = 1, column = 1}
+		return Lexer{source = source, file = file}
 	},
-	scan_all = proc(l: ^Lexer) -> [dynamic]Token {
-		tokens := make([dynamic]Token)
+	scan_lines = proc(l: ^Lexer) -> Lexer_Result {
+		result := Lexer_Result {
+			lines  = make([dynamic]Source_Line),
+			errors = make([dynamic]Diagnostic),
+		}
 
-		for !lexer.at_end(l) {
-			l.start = l.pos
-			tok := lexer.scan_token(l)
-			if tok.kind != .Illegal || len(tok.lexeme) > 0 {
-				append(&tokens, tok)
+		line_start := 0
+		line_no := 1
+		for i := 0; i <= len(l.source); i += 1 {
+			if i != len(l.source) && l.source[i] != '\n' {
+				continue
+			}
+
+			raw := l.source[line_start:i]
+			if len(raw) > 0 && raw[len(raw) - 1] == '\r' {
+				raw = raw[:len(raw) - 1]
+			}
+
+			pos := Source_Pos {
+				file   = l.file,
+				line   = line_no,
+				column = 1,
+			}
+			without_comment, ok, err := lexer.strip_comment(raw, pos)
+			if !ok {
+				append(&result.errors, err)
+			}
+
+			trimmed_right := lexer.trim_right(without_comment)
+			trimmed := lexer.trim_left(trimmed_right)
+			append(
+				&result.lines,
+				Source_Line {
+					raw = raw,
+					text = trimmed,
+					indent = lexer.count_indent(without_comment),
+					pos = pos,
+				},
+			)
+
+			line_start = i + 1
+			line_no += 1
+		}
+
+		return result
+	},
+	strip_comment = proc(line: string, pos: Source_Pos) -> (string, bool, Diagnostic) {
+		in_expr := false
+		for i := 0; i < len(line); i += 1 {
+			ch := line[i]
+			if ch == '`' {
+				in_expr = !in_expr
+				continue
+			}
+
+			if ch == '/' && i + 1 < len(line) && line[i + 1] == '/' {
+				if in_expr {
+					return line, false, Diagnostic {
+						message = "comments are not allowed inside backtick expressions",
+						pos = Source_Pos{file = pos.file, line = pos.line, column = i + 1},
+					}
+				}
+
+				if i == 0 || token.is_space(line[i - 1]) {
+					return line[:i], true, Diagnostic{}
+				}
 			}
 		}
 
-		append(&tokens, Token{kind = .Eof, line = l.line, column = l.column})
-		return tokens
+		if in_expr {
+			return line, false, Diagnostic{message = "unterminated backtick expression", pos = pos}
+		}
+
+		return line, true, Diagnostic{}
 	},
-	scan_token = proc(l: ^Lexer) -> Token {
-		start_line := l.line
-		start_column := l.column
-		ch := lexer.advance(l)
-
-		switch ch {
-		case ' ', '\t', '\r':
-			return Token{kind = .Illegal}
-		case '\n':
-			return Token{kind = .Newline, lexeme = "\n", line = start_line, column = start_column}
-		case ':':
-			return lexer.make_token(l, .Colon, start_line, start_column)
-		case ',':
-			return lexer.make_token(l, .Comma, start_line, start_column)
-		case '.':
-			return lexer.make_token(l, .Dot, start_line, start_column)
-		case '(':
-			return lexer.make_token(l, .Left_Paren, start_line, start_column)
-		case ')':
-			return lexer.make_token(l, .Right_Paren, start_line, start_column)
-		case '{':
-			return lexer.make_token(l, .Left_Brace, start_line, start_column)
-		case '}':
-			return lexer.make_token(l, .Right_Brace, start_line, start_column)
-		case '-':
-			if lexer.match(l, '>') {
-				return lexer.make_token(l, .Arrow, start_line, start_column)
-			}
-			return lexer.make_token(l, .Illegal, start_line, start_column)
-		case '#':
-			lexer.skip_line_comment(l)
-			return Token{kind = .Illegal}
-		case '/':
-			if lexer.match(l, '/') {
-				lexer.skip_line_comment(l)
-				return Token{kind = .Illegal}
-			}
-			return lexer.make_token(l, .Illegal, start_line, start_column)
-		case '"':
-			return lexer.string(l, start_line, start_column)
-		}
-
-		if lexer.is_alpha(ch) || ch == '_' {
-			return lexer.identifier(l, start_line, start_column)
-		}
-
-		if lexer.is_digit(ch) {
-			return lexer.number(l, start_line, start_column)
-		}
-
-		return lexer.make_token(l, .Illegal, start_line, start_column)
+	trim = proc(s: string) -> string {
+		return lexer.trim_left(lexer.trim_right(s))
 	},
-	identifier = proc(l: ^Lexer, line: int, column: int) -> Token {
-		for !lexer.at_end(l) {
-			ch := lexer.peek(l)
-			if !(lexer.is_alpha(ch) || lexer.is_digit(ch) || ch == '_' || ch == '-') {
-				break
-			}
-			lexer.advance(l)
+	trim_left = proc(s: string) -> string {
+		start := 0
+		for start < len(s) && token.is_space(s[start]) {
+			start += 1
 		}
-
-		lexeme := l.source[l.start:l.pos]
-		kind, ok := token.keyword_kind(lexeme)
-		if !ok {
-			kind = .Identifier
-		}
-
-		return Token{kind = kind, lexeme = lexeme, line = line, column = column}
+		return s[start:]
 	},
-	number = proc(l: ^Lexer, line: int, column: int) -> Token {
-		for lexer.is_digit(lexer.peek(l)) {
-			lexer.advance(l)
+	trim_right = proc(s: string) -> string {
+		end := len(s)
+		for end > 0 && token.is_space(s[end - 1]) {
+			end -= 1
 		}
-
-		if lexer.peek(l) == '.' && lexer.is_digit(lexer.peek_next(l)) {
-			lexer.advance(l)
-			for lexer.is_digit(lexer.peek(l)) {
-				lexer.advance(l)
-			}
-		}
-
-		return Token {
-			kind = .Number,
-			lexeme = l.source[l.start:l.pos],
-			line = line,
-			column = column,
-		}
+		return s[:end]
 	},
-	string = proc(l: ^Lexer, line: int, column: int) -> Token {
-		value_start := l.pos
-
-		for !lexer.at_end(l) && lexer.peek(l) != '"' {
-			lexer.advance(l)
+	count_indent = proc(s: string) -> int {
+		count := 0
+		for count < len(s) && (s[count] == ' ' || s[count] == '\t') {
+			count += 1
 		}
-
-		if lexer.at_end(l) {
-			return Token {
-				kind = .Illegal,
-				lexeme = l.source[value_start:l.pos],
-				line = line,
-				column = column,
-			}
-		}
-
-		value_end := l.pos
-		lexer.advance(l)
-		return Token {
-			kind = .String,
-			lexeme = l.source[value_start:value_end],
-			line = line,
-			column = column,
-		}
+		return count
 	},
-	make_token = proc(l: ^Lexer, kind: Token_Kind, line: int, column: int) -> Token {
-		return Token{kind = kind, lexeme = l.source[l.start:l.pos], line = line, column = column}
-	},
-	skip_line_comment = proc(l: ^Lexer) {
-		for !lexer.at_end(l) && lexer.peek(l) != '\n' {
-			lexer.advance(l)
-		}
-	},
-	match = proc(l: ^Lexer, expected: u8) -> bool {
-		if lexer.at_end(l) || l.source[l.pos] != expected {
+	starts_with = proc(s: string, prefix: string) -> bool {
+		if len(prefix) > len(s) {
 			return false
 		}
-
-		lexer.advance(l)
-		return true
+		return s[:len(prefix)] == prefix
 	},
-	advance = proc(l: ^Lexer) -> u8 {
-		ch := l.source[l.pos]
-		l.pos += 1
-
-		if ch == '\n' {
-			l.line += 1
-			l.column = 1
-		} else {
-			l.column += 1
+	index_of = proc(s: string, needle: string) -> int {
+		if len(needle) == 0 || len(needle) > len(s) {
+			return -1
 		}
-
-		return ch
-	},
-	peek = proc(l: ^Lexer) -> u8 {
-		if lexer.at_end(l) {
-			return 0
+		for i := 0; i <= len(s) - len(needle); i += 1 {
+			if s[i:i + len(needle)] == needle {
+				return i
+			}
 		}
-		return l.source[l.pos]
-	},
-	peek_next = proc(l: ^Lexer) -> u8 {
-		if l.pos + 1 >= len(l.source) {
-			return 0
-		}
-		return l.source[l.pos + 1]
-	},
-	at_end = proc(l: ^Lexer) -> bool {
-		return l.pos >= len(l.source)
-	},
-	is_alpha = proc(ch: u8) -> bool {
-		return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
-	},
-	is_digit = proc(ch: u8) -> bool {
-		return ch >= '0' && ch <= '9'
+		return -1
 	},
 }
 
@@ -215,227 +144,42 @@ lexer :: struct {
 //****************************************/
 
 @(test)
-lexer_init_test :: proc(t: ^testing.T) {
-	lx := lexer.init("story", "story.saga")
-	testing.expect(t, lx.source == "story")
-	testing.expect(t, lx.file == "story.saga")
-	testing.expect(t, lx.start == 0)
-	testing.expect(t, lx.pos == 0)
-	testing.expect(t, lx.line == 1)
-	testing.expect(t, lx.column == 1)
+lexer_scan_lines_test :: proc(t: ^testing.T) {
+	lx := lexer.init("# Main\n  > Text // comment\n  `x = 1`\n", "main.saga")
+	result := lexer.scan_lines(&lx)
+	defer delete(result.lines)
+	defer delete(result.errors)
+
+	testing.expect(t, len(result.errors) == 0)
+	testing.expect(t, len(result.lines) == 4)
+	testing.expect(t, result.lines[0].text == "# Main")
+	testing.expect(t, result.lines[1].text == "> Text")
+	testing.expect(t, result.lines[1].indent == 2)
+	testing.expect(t, result.lines[2].text == "`x = 1`")
+	testing.expect(t, result.lines[2].pos.line == 3)
 }
 
 @(test)
-lexer_scan_all_test :: proc(t: ^testing.T) {
-	lx := lexer.init(
-		"story \"Saga\"\nscene intro:\n# ignored\nsay Odin: \"Hi\"\nchoice:\n\"Go\" -> next\n",
-	)
-	tokens := lexer.scan_all(&lx)
-	defer delete(tokens)
+lexer_comment_rules_test :: proc(t: ^testing.T) {
+	line, ok, _ := lexer.strip_comment("> Text // ok", Source_Pos{})
+	testing.expect(t, ok)
+	testing.expect(t, lexer.trim(line) == "> Text")
 
-	expected := [?]Token_Kind {
-		.Keyword_Story,
-		.String,
-		.Newline,
-		.Keyword_Scene,
-		.Identifier,
-		.Colon,
-		.Newline,
-		.Newline,
-		.Keyword_Say,
-		.Identifier,
-		.Colon,
-		.String,
-		.Newline,
-		.Keyword_Choice,
-		.Colon,
-		.Newline,
-		.String,
-		.Arrow,
-		.Identifier,
-		.Newline,
-		.Eof,
-	}
+	line, ok, _ = lexer.strip_comment("> https://example.com", Source_Pos{})
+	testing.expect(t, ok)
+	testing.expect(t, lexer.trim(line) == "> https://example.com")
 
-	testing.expect(t, len(tokens) == len(expected))
-	for kind, index in expected {
-		testing.expect(t, tokens[index].kind == kind)
-	}
+	_, bad_ok, err := lexer.strip_comment("`x // bad`", Source_Pos{line = 7})
+	testing.expect(t, !bad_ok)
+	testing.expect(t, err.pos.line == 7)
 }
 
 @(test)
-lexer_scan_token_test :: proc(t: ^testing.T) {
-	sources := [?]string {
-		"\n",
-		":",
-		",",
-		".",
-		"(",
-		")",
-		"{",
-		"}",
-		"->",
-		"-",
-		"/",
-		"@",
-		"story",
-		"scene-name",
-		"123.45",
-		"\"hello\"",
-	}
-	kinds := [?]Token_Kind {
-		.Newline,
-		.Colon,
-		.Comma,
-		.Dot,
-		.Left_Paren,
-		.Right_Paren,
-		.Left_Brace,
-		.Right_Brace,
-		.Arrow,
-		.Illegal,
-		.Illegal,
-		.Illegal,
-		.Keyword_Story,
-		.Identifier,
-		.Number,
-		.String,
-	}
-
-	for source, index in sources {
-		lx := lexer.init(source)
-		tok := lexer.scan_token(&lx)
-		testing.expect(t, tok.kind == kinds[index])
-	}
-}
-
-@(test)
-lexer_identifier_test :: proc(t: ^testing.T) {
-	lx := lexer.init("scene-name_1 ")
-	lexer.advance(&lx)
-	tok := lexer.identifier(&lx, 1, 1)
-	testing.expect(t, tok.kind == .Identifier)
-	testing.expect(t, tok.lexeme == "scene-name_1")
-	testing.expect(t, tok.line == 1)
-	testing.expect(t, tok.column == 1)
-
-	lx = lexer.init("goto ")
-	lexer.advance(&lx)
-	tok = lexer.identifier(&lx, 1, 1)
-	testing.expect(t, tok.kind == .Keyword_Goto)
-	testing.expect(t, tok.lexeme == "goto")
-}
-
-@(test)
-lexer_number_test :: proc(t: ^testing.T) {
-	lx := lexer.init("123.45 ")
-	lexer.advance(&lx)
-	tok := lexer.number(&lx, 1, 1)
-	testing.expect(t, tok.kind == .Number)
-	testing.expect(t, tok.lexeme == "123.45")
-
-	lx = lexer.init("123.story")
-	lexer.advance(&lx)
-	tok = lexer.number(&lx, 1, 1)
-	testing.expect(t, tok.lexeme == "123")
-	testing.expect(t, lexer.peek(&lx) == '.')
-}
-
-@(test)
-lexer_string_test :: proc(t: ^testing.T) {
-	lx := lexer.init("\"hello world\"")
-	lexer.advance(&lx)
-	tok := lexer.string(&lx, 1, 1)
-	testing.expect(t, tok.kind == .String)
-	testing.expect(t, tok.lexeme == "hello world")
-	testing.expect(t, lexer.at_end(&lx))
-
-	lx = lexer.init("\"unterminated")
-	lexer.advance(&lx)
-	tok = lexer.string(&lx, 1, 1)
-	testing.expect(t, tok.kind == .Illegal)
-	testing.expect(t, tok.lexeme == "unterminated")
-}
-
-@(test)
-lexer_make_token_test :: proc(t: ^testing.T) {
-	lx := lexer.init(":")
-	lexer.advance(&lx)
-	tok := lexer.make_token(&lx, .Colon, 1, 1)
-	testing.expect(t, tok.kind == .Colon)
-	testing.expect(t, tok.lexeme == ":")
-	testing.expect(t, tok.line == 1)
-	testing.expect(t, tok.column == 1)
-}
-
-@(test)
-lexer_skip_line_comment_test :: proc(t: ^testing.T) {
-	lx := lexer.init("comment\nnext")
-	lexer.skip_line_comment(&lx)
-	testing.expect(t, lexer.peek(&lx) == '\n')
-	testing.expect(t, lx.line == 1)
-}
-
-@(test)
-lexer_match_test :: proc(t: ^testing.T) {
-	lx := lexer.init(">")
-	testing.expect(t, lexer.match(&lx, '>'))
-	testing.expect(t, lx.pos == 1)
-	testing.expect(t, lexer.at_end(&lx))
-
-	lx = lexer.init("x")
-	testing.expect(t, !lexer.match(&lx, '>'))
-	testing.expect(t, lx.pos == 0)
-}
-
-@(test)
-lexer_advance_test :: proc(t: ^testing.T) {
-	lx := lexer.init("a\nb")
-	testing.expect(t, lexer.advance(&lx) == 'a')
-	testing.expect(t, lx.line == 1)
-	testing.expect(t, lx.column == 2)
-	testing.expect(t, lexer.advance(&lx) == '\n')
-	testing.expect(t, lx.line == 2)
-	testing.expect(t, lx.column == 1)
-}
-
-@(test)
-lexer_peek_test :: proc(t: ^testing.T) {
-	lx := lexer.init("ab")
-	testing.expect(t, lexer.peek(&lx) == 'a')
-	lexer.advance(&lx)
-	testing.expect(t, lexer.peek(&lx) == 'b')
-	lexer.advance(&lx)
-	testing.expect(t, lexer.peek(&lx) == 0)
-}
-
-@(test)
-lexer_peek_next_test :: proc(t: ^testing.T) {
-	lx := lexer.init("ab")
-	testing.expect(t, lexer.peek_next(&lx) == 'b')
-	lexer.advance(&lx)
-	testing.expect(t, lexer.peek_next(&lx) == 0)
-}
-
-@(test)
-lexer_at_end_test :: proc(t: ^testing.T) {
-	lx := lexer.init("a")
-	testing.expect(t, !lexer.at_end(&lx))
-	lexer.advance(&lx)
-	testing.expect(t, lexer.at_end(&lx))
-}
-
-@(test)
-is_alpha_test :: proc(t: ^testing.T) {
-	testing.expect(t, lexer.is_alpha('a'))
-	testing.expect(t, lexer.is_alpha('Z'))
-	testing.expect(t, !lexer.is_alpha('9'))
-	testing.expect(t, !lexer.is_alpha('_'))
-}
-
-@(test)
-is_digit_test :: proc(t: ^testing.T) {
-	testing.expect(t, lexer.is_digit('9'))
-	testing.expect(t, lexer.is_digit('0'))
-	testing.expect(t, !lexer.is_digit('a'))
+lexer_string_helpers_test :: proc(t: ^testing.T) {
+	testing.expect(t, lexer.trim("  hello \t") == "hello")
+	testing.expect(t, lexer.count_indent("  hello") == 2)
+	testing.expect(t, lexer.starts_with("abcdef", "abc"))
+	testing.expect(t, !lexer.starts_with("ab", "abc"))
+	testing.expect(t, lexer.index_of("one -> two", "->") == 4)
+	testing.expect(t, lexer.index_of("one", "->") == -1)
 }

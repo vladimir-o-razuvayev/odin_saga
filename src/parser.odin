@@ -1,477 +1,524 @@
 package main
 
+import "core:fmt"
+import "core:os"
 import "core:testing"
 
 Parser :: struct {
-	tokens:  []Token,
+	lines:   []Source_Line,
 	current: int,
-	errors:  [dynamic]Parse_Error,
+	errors:  [dynamic]Diagnostic,
+	file:    string,
+}
+
+Parsed_Expression :: struct {
+	expr: string,
+	rest: string,
+	ok:   bool,
+}
+
+Parsed_Arrow :: struct {
+	index: int,
+	once:  bool,
 }
 
 parser :: struct {
-	init:               proc(tokens: []Token) -> Parser,
+	init:               proc(lines: []Source_Line, file := "<input>") -> Parser,
 	parse:              proc(p: ^Parser) -> Parse_Result,
-	statement:          proc(p: ^Parser) -> (Statement, bool),
-	scene_statement:    proc(p: ^Parser) -> Statement,
-	dialogue_statement: proc(p: ^Parser) -> Statement,
-	goto_statement:     proc(p: ^Parser) -> Statement,
-	choice_statement:   proc(p: ^Parser) -> Statement,
-	consume_identifier: proc(p: ^Parser, message: string) -> string,
-	consume_string:     proc(p: ^Parser, message: string) -> string,
-	consume:            proc(p: ^Parser, kind: Token_Kind, message: string) -> Token,
-	match:              proc(p: ^Parser, kind: Token_Kind) -> bool,
-	check:              proc(p: ^Parser, kind: Token_Kind) -> bool,
-	advance:            proc(p: ^Parser) -> Token,
-	at_end:             proc(p: ^Parser) -> bool,
-	peek:               proc(p: ^Parser) -> Token,
-	previous:           proc(p: ^Parser) -> Token,
-	skip_newlines:      proc(p: ^Parser),
-	synchronize:        proc(p: ^Parser),
-	previous_safe:      proc(p: ^Parser) -> Token,
-	error_at_current:   proc(p: ^Parser, message: string),
-	error:              proc(p: ^Parser, tok: Token, message: string),
+	parse_heading:      proc(
+		p: ^Parser,
+		line: Source_Line,
+		stack: ^[32]string,
+		current_depth: ^int,
+	) -> bool,
+	parse_statement:    proc(p: ^Parser, line: Source_Line, scene: ^Scene),
+	parse_passage:      proc(p: ^Parser, line: Source_Line) -> Statement,
+	parse_choice:       proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
+	parse_transition:   proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
+	parse_effect:       proc(p: ^Parser, line: Source_Line) -> Statement,
+	parse_target:       proc(
+		p: ^Parser,
+		text: string,
+		pos: Source_Pos,
+		current_depth: int,
+	) -> (
+		Target,
+		bool,
+	),
+	parse_leading_expr: proc(text: string) -> Parsed_Expression,
+	find_choice_arrow:  proc(text: string) -> Parsed_Arrow,
+	parse_path_labels:  proc(p: ^Parser, path: string, pos: Source_Pos) -> bool,
+	build_scene_path:   proc(stack: ^[32]string, depth: int) -> string,
+	current_scene:      proc(p: ^Parser, module: ^Module) -> ^Scene,
+	append_error:       proc(p: ^Parser, pos: Source_Pos, message: string),
+	starts_with_arrow:  proc(text: string) -> (Transfer_Kind, string, bool),
 } {
-	init = proc(tokens: []Token) -> Parser {
-		return Parser{tokens = tokens, errors = make([dynamic]Parse_Error)}
+	init = proc(lines: []Source_Line, file := "<input>") -> Parser {
+		return Parser{lines = lines, errors = make([dynamic]Diagnostic), file = file}
 	},
 	parse = proc(p: ^Parser) -> Parse_Result {
-		story := Story {
-			statements = make([dynamic]Statement),
+		module := Module {
+			file   = p.file,
+			scenes = make([dynamic]Scene),
 		}
-		parser.skip_newlines(p)
+		stack: [32]string
+		current_depth := 0
 
-		if parser.match(p, .Keyword_Story) {
-			if parser.check(p, .String) || parser.check(p, .Identifier) {
-				story.title = parser.advance(p).lexeme
-			} else {
-				parser.error_at_current(p, "expected story title after 'story'")
-			}
-		} else {
-			parser.error_at_current(p, "expected story declaration")
-		}
-
-		for !parser.at_end(p) {
-			parser.skip_newlines(p)
-			if parser.at_end(p) {
-				break
+		for line in p.lines {
+			if len(line.text) == 0 {
+				continue
 			}
 
-			stmt, ok := parser.statement(p)
-			if ok {
-				append(&story.statements, stmt)
-			} else {
-				parser.synchronize(p)
+			if lexer.starts_with(line.text, "#") {
+				if parser.parse_heading(p, line, &stack, &current_depth) {
+					name := stack[current_depth - 1]
+					append(
+						&module.scenes,
+						Scene {
+							name = name,
+							path = parser.build_scene_path(&stack, current_depth),
+							depth = current_depth,
+							statements = make([dynamic]Statement),
+							pos = line.pos,
+						},
+					)
+				}
+				continue
 			}
+
+			if len(module.scenes) == 0 {
+				parser.append_error(p, line.pos, "statement appears before first scene heading")
+				continue
+			}
+
+			scene := parser.current_scene(p, &module)
+			parser.parse_statement(p, line, scene)
 		}
 
-		return Parse_Result{story = story, errors = p.errors}
+		return Parse_Result{module = module, errors = p.errors}
 	},
-	statement = proc(p: ^Parser) -> (Statement, bool) {
-		if parser.match(p, .Keyword_Scene) {
-			return parser.scene_statement(p), true
-		}
-		if parser.match(p, .String) {
-			prev := parser.previous(p)
-			return Statement{kind = .Narration, text = prev.lexeme, token = prev}, true
-		}
-		if parser.match(p, .Keyword_Say) {
-			return parser.dialogue_statement(p), true
-		}
-		if parser.match(p, .Keyword_Choice) {
-			return parser.choice_statement(p), true
-		}
-		if parser.match(p, .Keyword_Goto) {
-			return parser.goto_statement(p), true
-		}
-		if parser.match(p, .Keyword_End) {
-			return Statement{}, false
+	parse_heading = proc(
+		p: ^Parser,
+		line: Source_Line,
+		stack: ^[32]string,
+		current_depth: ^int,
+	) -> bool {
+		depth := 0
+		for depth < len(line.text) && line.text[depth] == '#' {
+			depth += 1
 		}
 
-		parser.error_at_current(
-			p,
-			"expected scene, narration, dialogue, choice, or goto statement",
-		)
-		return Statement{}, false
-	},
-	scene_statement = proc(p: ^Parser) -> Statement {
-		tok := parser.previous(p)
-		name := parser.consume_identifier(p, "expected scene name after 'scene'")
-		parser.match(p, .Colon)
-		return Statement{kind = .Scene, name = name, token = tok}
-	},
-	dialogue_statement = proc(p: ^Parser) -> Statement {
-		tok := parser.previous(p)
-		speaker := parser.consume_identifier(p, "expected speaker name after 'say'")
-		parser.consume(p, .Colon, "expected ':' after speaker name")
-		line := parser.consume_string(p, "expected dialogue text after ':'")
-		return Statement{kind = .Dialogue, name = speaker, text = line, token = tok}
-	},
-	goto_statement = proc(p: ^Parser) -> Statement {
-		tok := parser.previous(p)
-		target := parser.consume_identifier(p, "expected scene target after 'goto'")
-		return Statement{kind = .Goto, target = target, token = tok}
-	},
-	choice_statement = proc(p: ^Parser) -> Statement {
-		tok := parser.previous(p)
-		stmt := Statement {
-			kind    = .Choice_Block,
-			choices = make([dynamic]Choice_Option),
-			token   = tok,
-		}
-		parser.match(p, .Colon)
-		parser.skip_newlines(p)
-
-		for !parser.at_end(p) && parser.check(p, .String) {
-			option_token := parser.advance(p)
-			parser.consume(p, .Arrow, "expected '->' after choice text")
-			target := parser.consume_identifier(p, "expected scene target after '->'")
-			append(
-				&stmt.choices,
-				Choice_Option{text = option_token.lexeme, target = target, token = option_token},
-			)
-			parser.skip_newlines(p)
-		}
-
-		if len(stmt.choices) == 0 {
-			parser.error(p, tok, "expected at least one choice option")
-		}
-
-		return stmt
-	},
-	consume_identifier = proc(p: ^Parser, message: string) -> string {
-		if parser.check(p, .Identifier) {
-			return parser.advance(p).lexeme
-		}
-		parser.error_at_current(p, message)
-		return ""
-	},
-	consume_string = proc(p: ^Parser, message: string) -> string {
-		if parser.check(p, .String) {
-			return parser.advance(p).lexeme
-		}
-		parser.error_at_current(p, message)
-		return ""
-	},
-	consume = proc(p: ^Parser, kind: Token_Kind, message: string) -> Token {
-		if parser.check(p, kind) {
-			return parser.advance(p)
-		}
-		parser.error_at_current(p, message)
-		return parser.peek(p)
-	},
-	match = proc(p: ^Parser, kind: Token_Kind) -> bool {
-		if !parser.check(p, kind) {
+		if depth == 0 || depth > len(stack) {
+			parser.append_error(p, line.pos, "invalid heading depth")
 			return false
 		}
-		parser.advance(p)
+
+		if depth >= len(line.text) || !token.is_space(line.text[depth]) {
+			parser.append_error(p, line.pos, "expected space after heading marker")
+			return false
+		}
+
+		label := lexer.trim(line.text[depth:])
+		if !token.is_scene_label(label) {
+			parser.append_error(p, line.pos, "invalid scene label")
+			return false
+		}
+
+		stack[depth - 1] = label
+		current_depth^ = depth
 		return true
 	},
-	check = proc(p: ^Parser, kind: Token_Kind) -> bool {
-		if parser.at_end(p) {
-			return kind == .Eof
-		}
-		return parser.peek(p).kind == kind
-	},
-	advance = proc(p: ^Parser) -> Token {
-		if !parser.at_end(p) {
-			p.current += 1
-		}
-		return parser.previous(p)
-	},
-	at_end = proc(p: ^Parser) -> bool {
-		return parser.peek(p).kind == .Eof
-	},
-	peek = proc(p: ^Parser) -> Token {
-		return p.tokens[p.current]
-	},
-	previous = proc(p: ^Parser) -> Token {
-		return p.tokens[p.current - 1]
-	},
-	skip_newlines = proc(p: ^Parser) {
-		for parser.match(p, .Newline) {}
-	},
-	synchronize = proc(p: ^Parser) {
-		if !parser.at_end(p) {
-			parser.advance(p)
+	parse_statement = proc(p: ^Parser, line: Source_Line, scene: ^Scene) {
+		text := line.text
+		stmt: Statement
+
+		if lexer.starts_with(text, ">") {
+			stmt = parser.parse_passage(p, line)
+		} else if lexer.starts_with(text, "+") {
+			stmt = parser.parse_choice(p, line, scene.depth)
+		} else if lexer.starts_with(text, "*->") || lexer.starts_with(text, "->") {
+			stmt = parser.parse_transition(p, line, scene.depth)
+		} else if lexer.starts_with(text, "`") {
+			stmt = parser.parse_effect(p, line)
+		} else {
+			parser.append_error(p, line.pos, "unknown statement")
+			return
 		}
 
-		for !parser.at_end(p) {
-			if parser.previous(p).kind == .Newline {
-				return
+		append(&scene.statements, stmt)
+	},
+	parse_passage = proc(p: ^Parser, line: Source_Line) -> Statement {
+		rest := lexer.trim(line.text[1:])
+		show_if := ""
+		parsed := parser.parse_leading_expr(rest)
+		if parsed.ok {
+			show_if = parsed.expr
+			rest = lexer.trim(parsed.rest)
+		}
+		if len(rest) == 0 {
+			parser.append_error(p, line.pos, "expected passage text")
+		}
+		return Statement{kind = .Passage, text = rest, show_if = show_if, pos = line.pos}
+	},
+	parse_choice = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
+		rest := lexer.trim(line.text[1:])
+		show_if := ""
+		parsed := parser.parse_leading_expr(rest)
+		if parsed.ok {
+			show_if = parsed.expr
+			rest = lexer.trim(parsed.rest)
+		}
+
+		arrow := parser.find_choice_arrow(rest)
+		if arrow.index < 0 {
+			parser.append_error(p, line.pos, "expected choice arrow surrounded by whitespace")
+			return Statement{kind = .Choice, show_if = show_if, pos = line.pos}
+		}
+
+		choice_text := lexer.trim(rest[:arrow.index])
+		after_arrow := lexer.trim(rest[arrow.index:])
+		_, after_target, arrow_ok := parser.starts_with_arrow(after_arrow)
+		if !arrow_ok {
+			parser.append_error(p, line.pos, "invalid choice arrow")
+			return Statement{kind = .Choice, show_if = show_if, text = choice_text, pos = line.pos}
+		}
+
+		enable_if := ""
+		parsed = parser.parse_leading_expr(after_target)
+		if parsed.ok {
+			enable_if = parsed.expr
+			after_target = lexer.trim(parsed.rest)
+		}
+
+		target, ok := parser.parse_target(p, after_target, line.pos, current_depth)
+		if len(choice_text) == 0 {
+			parser.append_error(p, line.pos, "expected choice text")
+		}
+		if !ok {
+			parser.append_error(p, line.pos, "expected choice target")
+		}
+
+		kind: Transfer_Kind = .Normal
+		if arrow.once {
+			kind = .Once
+		}
+		return Statement {
+			kind = .Choice,
+			text = choice_text,
+			show_if = show_if,
+			enable_if = enable_if,
+			transfer = Transfer{kind = kind, target = target},
+			pos = line.pos,
+		}
+	},
+	parse_transition = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
+		kind, rest, ok := parser.starts_with_arrow(line.text)
+		if !ok {
+			parser.append_error(p, line.pos, "expected transition arrow")
+			return Statement{kind = .Transition, pos = line.pos}
+		}
+
+		take_if := ""
+		parsed := parser.parse_leading_expr(rest)
+		if parsed.ok {
+			take_if = parsed.expr
+			rest = lexer.trim(parsed.rest)
+		}
+
+		target, target_ok := parser.parse_target(p, rest, line.pos, current_depth)
+		if !target_ok {
+			parser.append_error(p, line.pos, "expected transition target")
+		}
+
+		return Statement {
+			kind = .Transition,
+			take_if = take_if,
+			transfer = Transfer{kind = kind, target = target},
+			pos = line.pos,
+		}
+	},
+	parse_effect = proc(p: ^Parser, line: Source_Line) -> Statement {
+		parsed := parser.parse_leading_expr(line.text)
+		if !parsed.ok {
+			parser.append_error(p, line.pos, "expected effect expression")
+			return Statement{kind = .Effect, pos = line.pos}
+		}
+		if len(lexer.trim(parsed.rest)) > 0 {
+			parser.append_error(p, line.pos, "unexpected text after effect expression")
+		}
+		return Statement{kind = .Effect, effect = parsed.expr, pos = line.pos}
+	},
+	parse_target = proc(
+		p: ^Parser,
+		text: string,
+		pos: Source_Pos,
+		current_depth: int,
+	) -> (
+		Target,
+		bool,
+	) {
+		trimmed_text := lexer.trim(text)
+		if len(trimmed_text) < 3 || trimmed_text[0] != '[' {
+			return Target{}, false
+		}
+
+		close := lexer.index_of(trimmed_text, "]")
+		if close < 0 {
+			return Target{}, false
+		}
+
+		ref := trimmed_text[1:close]
+		if len(ref) == 0 {
+			return Target{}, false
+		}
+
+		if ref == "." {
+			// self target
+		} else if ref == ".." {
+			if current_depth <= 1 {
+				parser.append_error(p, pos, "[..] cannot be used from a top-level scene")
 			}
-
-			#partial switch parser.peek(p).kind {
-			case .Keyword_Scene, .Keyword_Say, .Keyword_Choice, .Keyword_Goto, .String:
-				return
+		} else if lexer.starts_with(ref, "..") {
+			if current_depth <= 1 {
+				parser.append_error(
+					p,
+					pos,
+					"sibling targets cannot be used from a top-level scene",
+				)
 			}
+			parser.parse_path_labels(p, ref[2:], pos)
+		} else if lexer.starts_with(ref, ".") {
+			parser.parse_path_labels(p, ref[1:], pos)
+		} else {
+			parser.parse_path_labels(p, ref, pos)
+		}
 
-			parser.advance(p)
+		rest := lexer.trim(trimmed_text[close + 1:])
+		module_path := ""
+		if len(rest) > 0 {
+			if len(rest) < 4 ||
+			   rest[0] != '(' ||
+			   rest[1] != '"' ||
+			   rest[len(rest) - 2] != '"' ||
+			   rest[len(rest) - 1] != ')' {
+				parser.append_error(p, pos, "invalid module path syntax")
+				return Target{scene_ref = ref, pos = pos}, true
+			}
+			module_path = rest[2:len(rest) - 2]
+			if len(module_path) == 0 || module_path[0] != '/' {
+				parser.append_error(p, pos, "module paths must be root-relative in v0")
+			}
 		}
+
+		return Target{scene_ref = ref, module_path = module_path, pos = pos}, true
 	},
-	previous_safe = proc(p: ^Parser) -> Token {
-		if p.current == 0 {
-			return parser.peek(p)
+	parse_leading_expr = proc(text: string) -> Parsed_Expression {
+		trimmed_text := lexer.trim(text)
+		if len(trimmed_text) == 0 || trimmed_text[0] != '`' {
+			return Parsed_Expression{}
 		}
-		return parser.previous(p)
+		for i := 1; i < len(trimmed_text); i += 1 {
+			if trimmed_text[i] == '`' {
+				return Parsed_Expression {
+					expr = trimmed_text[1:i],
+					rest = trimmed_text[i + 1:],
+					ok = true,
+				}
+			}
+		}
+		return Parsed_Expression{}
 	},
-	error_at_current = proc(p: ^Parser, message: string) {
-		parser.error(p, parser.peek(p), message)
+	find_choice_arrow = proc(text: string) -> Parsed_Arrow {
+		in_expr := false
+		for i := 0; i < len(text); i += 1 {
+			if text[i] == '`' {
+				in_expr = !in_expr
+				continue
+			}
+			if in_expr || i == 0 {
+				continue
+			}
+			if text[i - 1] != ' ' && text[i - 1] != '\t' {
+				continue
+			}
+			if i + 3 < len(text) && text[i:i + 3] == "*->" && token.is_space(text[i + 3]) {
+				return Parsed_Arrow{index = i, once = true}
+			}
+			if i + 2 < len(text) && text[i:i + 2] == "->" && token.is_space(text[i + 2]) {
+				return Parsed_Arrow{index = i, once = false}
+			}
+		}
+		return Parsed_Arrow{index = -1}
 	},
-	error = proc(p: ^Parser, tok: Token, message: string) {
-		append(&p.errors, Parse_Error{message = message, token = tok})
+	parse_path_labels = proc(p: ^Parser, path: string, pos: Source_Pos) -> bool {
+		if len(path) == 0 {
+			parser.append_error(p, pos, "expected scene path")
+			return false
+		}
+
+		start := 0
+		for i := 0; i <= len(path); i += 1 {
+			if i != len(path) && path[i] != '.' {
+				continue
+			}
+			label := path[start:i]
+			if !token.is_scene_label(label) {
+				parser.append_error(p, pos, "invalid scene path label")
+				return false
+			}
+			start = i + 1
+		}
+		return true
 	},
+	build_scene_path = proc(stack: ^[32]string, depth: int) -> string {
+		path := stack[0]
+		for i := 1; i < depth; i += 1 {
+			path = fmt.tprintf("%s.%s", path, stack[i])
+		}
+		return path
+	},
+	current_scene = proc(p: ^Parser, module: ^Module) -> ^Scene {
+		return &module.scenes[len(module.scenes) - 1]
+	},
+	append_error = proc(p: ^Parser, pos: Source_Pos, message: string) {
+		append(&p.errors, Diagnostic{message = message, pos = pos})
+	},
+	starts_with_arrow = proc(text: string) -> (Transfer_Kind, string, bool) {
+		trimmed_text := lexer.trim(text)
+		if lexer.starts_with(trimmed_text, "*->") {
+			if len(trimmed_text) == 3 || !token.is_space(trimmed_text[3]) {
+				return .Once, "", false
+			}
+			return .Once, lexer.trim(trimmed_text[3:]), true
+		}
+		if lexer.starts_with(trimmed_text, "->") {
+			if len(trimmed_text) == 2 || !token.is_space(trimmed_text[2]) {
+				return .Normal, "", false
+			}
+			return .Normal, lexer.trim(trimmed_text[2:]), true
+		}
+		return .Normal, "", false
+	},
+}
+
+free_parse_result :: proc(result: Parse_Result) {
+	for scene in result.module.scenes {
+		delete(scene.statements)
+	}
+	delete(result.module.scenes)
+	delete(result.errors)
 }
 
 //****************************************/
 // Tests
 //****************************************/
 
-test_token :: proc(kind: Token_Kind, lexeme := "") -> Token {
-	return Token{kind = kind, lexeme = lexeme, line = 1, column = 1}
-}
-
-@(test)
-parser_init_test :: proc(t: ^testing.T) {
-	tokens := [?]Token{test_token(.Eof)}
-	p := parser.init(tokens[:])
-	defer delete(p.errors)
-
-	testing.expect(t, len(p.tokens) == 1)
-	testing.expect(t, p.current == 0)
-	testing.expect(t, len(p.errors) == 0)
-}
-
-@(test)
-parser_cursor_helpers_test :: proc(t: ^testing.T) {
-	tokens := [?]Token {
-		test_token(.Newline, "\n"),
-		test_token(.Identifier, "intro"),
-		test_token(.Eof),
-	}
-	p := parser.init(tokens[:])
-	defer delete(p.errors)
-
-	testing.expect(t, parser.peek(&p).kind == .Newline)
-	testing.expect(t, parser.check(&p, .Newline))
-	testing.expect(t, parser.match(&p, .Newline))
-	testing.expect(t, parser.previous(&p).kind == .Newline)
-	testing.expect(t, parser.previous_safe(&p).kind == .Newline)
-	testing.expect(t, p.current == 1)
-
-	parser.skip_newlines(&p)
-	testing.expect(t, p.current == 1)
-	testing.expect(t, parser.advance(&p).lexeme == "intro")
-	testing.expect(t, parser.at_end(&p))
-	testing.expect(t, parser.check(&p, .Eof))
-	testing.expect(t, parser.previous_safe(&p).kind == .Identifier)
-}
-
-@(test)
-parser_consume_helpers_test :: proc(t: ^testing.T) {
-	tokens := [?]Token {
-		test_token(.Identifier, "Odin"),
-		test_token(.Colon, ":"),
-		test_token(.String, "Hello"),
-		test_token(.Eof),
-	}
-	p := parser.init(tokens[:])
-	defer delete(p.errors)
-
-	testing.expect(t, parser.consume_identifier(&p, "identifier expected") == "Odin")
-	testing.expect(t, parser.consume(&p, .Colon, "colon expected").kind == .Colon)
-	testing.expect(t, parser.consume_string(&p, "string expected") == "Hello")
-	testing.expect(t, len(p.errors) == 0)
-
-	parser.consume(&p, .Colon, "missing colon")
-	testing.expect(t, len(p.errors) == 1)
-	testing.expect(t, p.errors[0].message == "missing colon")
-}
-
-@(test)
-parser_statement_test :: proc(t: ^testing.T) {
-	scene_tokens := [?]Token {
-		test_token(.Keyword_Scene, "scene"),
-		test_token(.Identifier, "intro"),
-		test_token(.Colon, ":"),
-		test_token(.Eof),
-	}
-	p := parser.init(scene_tokens[:])
-	stmt, ok := parser.statement(&p)
-	testing.expect(t, ok)
-	testing.expect(t, stmt.kind == .Scene)
-	testing.expect(t, stmt.name == "intro")
-	delete(p.errors)
-
-	narration_tokens := [?]Token{test_token(.String, "Opening"), test_token(.Eof)}
-	p = parser.init(narration_tokens[:])
-	stmt, ok = parser.statement(&p)
-	testing.expect(t, ok)
-	testing.expect(t, stmt.kind == .Narration)
-	testing.expect(t, stmt.text == "Opening")
-	delete(p.errors)
-
-	dialogue_tokens := [?]Token {
-		test_token(.Keyword_Say, "say"),
-		test_token(.Identifier, "Odin"),
-		test_token(.Colon, ":"),
-		test_token(.String, "Hi"),
-		test_token(.Eof),
-	}
-	p = parser.init(dialogue_tokens[:])
-	stmt, ok = parser.statement(&p)
-	testing.expect(t, ok)
-	testing.expect(t, stmt.kind == .Dialogue)
-	testing.expect(t, stmt.name == "Odin")
-	testing.expect(t, stmt.text == "Hi")
-	delete(p.errors)
-
-	choice_tokens := [?]Token {
-		test_token(.Keyword_Choice, "choice"),
-		test_token(.Colon, ":"),
-		test_token(.Newline, "\n"),
-		test_token(.String, "Go"),
-		test_token(.Arrow, "->"),
-		test_token(.Identifier, "next"),
-		test_token(.Eof),
-	}
-	p = parser.init(choice_tokens[:])
-	stmt, ok = parser.statement(&p)
-	testing.expect(t, ok)
-	testing.expect(t, stmt.kind == .Choice_Block)
-	testing.expect(t, len(stmt.choices) == 1)
-	testing.expect(t, stmt.choices[0].text == "Go")
-	testing.expect(t, stmt.choices[0].target == "next")
-	delete(stmt.choices)
-	delete(p.errors)
-
-	goto_tokens := [?]Token {
-		test_token(.Keyword_Goto, "goto"),
-		test_token(.Identifier, "next"),
-		test_token(.Eof),
-	}
-	p = parser.init(goto_tokens[:])
-	stmt, ok = parser.statement(&p)
-	testing.expect(t, ok)
-	testing.expect(t, stmt.kind == .Goto)
-	testing.expect(t, stmt.target == "next")
-	delete(p.errors)
-
-	end_tokens := [?]Token{test_token(.Keyword_End, "end"), test_token(.Eof)}
-	p = parser.init(end_tokens[:])
-	stmt, ok = parser.statement(&p)
-	testing.expect(t, !ok)
-	delete(p.errors)
-
-	bad_tokens := [?]Token{test_token(.Illegal, "?"), test_token(.Eof)}
-	p = parser.init(bad_tokens[:])
-	stmt, ok = parser.statement(&p)
-	testing.expect(t, !ok)
-	testing.expect(t, len(p.errors) == 1)
-	delete(p.errors)
-}
-
-@(test)
-parser_synchronize_test :: proc(t: ^testing.T) {
-	tokens := [?]Token {
-		test_token(.Illegal, "?"),
-		test_token(.Illegal, "?"),
-		test_token(.Newline, "\n"),
-		test_token(.Keyword_Goto, "goto"),
-		test_token(.Identifier, "next"),
-		test_token(.Eof),
-	}
-	p := parser.init(tokens[:])
-	defer delete(p.errors)
-
-	parser.synchronize(&p)
-	testing.expect(t, p.current == 3)
-	testing.expect(t, parser.peek(&p).kind == .Keyword_Goto)
-
-	tokens_2 := [?]Token {
-		test_token(.Illegal, "?"),
-		test_token(.Keyword_Scene, "scene"),
-		test_token(.Identifier, "intro"),
-		test_token(.Eof),
-	}
-	p_2 := parser.init(tokens_2[:])
-	defer delete(p_2.errors)
-
-	parser.synchronize(&p_2)
-	testing.expect(t, p_2.current == 1)
-	testing.expect(t, parser.peek(&p_2).kind == .Keyword_Scene)
-}
-
-@(test)
-parser_error_test :: proc(t: ^testing.T) {
-	tokens := [?]Token{test_token(.Identifier, "bad"), test_token(.Eof)}
-	p := parser.init(tokens[:])
-	defer delete(p.errors)
-
-	parser.error_at_current(&p, "current error")
-	parser.error(&p, tokens[1], "explicit error")
-
-	testing.expect(t, len(p.errors) == 2)
-	testing.expect(t, p.errors[0].message == "current error")
-	testing.expect(t, p.errors[0].token.lexeme == "bad")
-	testing.expect(t, p.errors[1].message == "explicit error")
-	testing.expect(t, p.errors[1].token.kind == .Eof)
-}
-
-@(test)
-parser_parse_test :: proc(t: ^testing.T) {
-	lx := lexer.init(
-		"story \"Saga\"\nscene intro:\n\"Opening\"\nsay Odin: \"Hi\"\nchoice:\n\"Go\" -> next\n\"Stay\" -> intro\ngoto next\n",
-	)
-	tokens := lexer.scan_all(&lx)
-	defer delete(tokens)
-
-	p := parser.init(tokens[:])
+parse_source_for_test :: proc(source: string) -> (Parse_Result, Lexer_Result) {
+	lx := lexer.init(source, "test.saga")
+	lexed := lexer.scan_lines(&lx)
+	p := parser.init(lexed.lines[:], "test.saga")
 	result := parser.parse(&p)
-	defer delete(result.errors)
-	defer delete(result.story.statements)
-	defer delete(result.story.statements[3].choices)
+	for err in lexed.errors {
+		append(&result.errors, err)
+	}
+	return result, lexed
+}
+
+@(test)
+parser_parse_v0_story_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test(
+		"# Main\n  `seen ?= false`\n  > `!seen` Hello there.\n  + `seen` Continue -> `ready` [.Next]\n  *-> `auto` [.]\n## Next\n  `end(\"Done\")`\n",
+	)
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
 
 	testing.expect(t, len(result.errors) == 0)
-	testing.expect(t, result.story.title == "Saga")
-	testing.expect(t, len(result.story.statements) == 5)
+	testing.expect(t, len(result.module.scenes) == 2)
+	testing.expect(t, result.module.scenes[0].path == "Main")
+	testing.expect(t, result.module.scenes[1].path == "Main.Next")
+	testing.expect(t, len(result.module.scenes[0].statements) == 4)
 
-	testing.expect(t, result.story.statements[0].kind == .Scene)
-	testing.expect(t, result.story.statements[0].name == "intro")
+	passage := result.module.scenes[0].statements[1]
+	testing.expect(t, passage.kind == .Passage)
+	testing.expect(t, passage.show_if == "!seen")
+	testing.expect(t, passage.text == "Hello there.")
 
-	testing.expect(t, result.story.statements[1].kind == .Narration)
-	testing.expect(t, result.story.statements[1].text == "Opening")
+	choice := result.module.scenes[0].statements[2]
+	testing.expect(t, choice.kind == .Choice)
+	testing.expect(t, choice.show_if == "seen")
+	testing.expect(t, choice.enable_if == "ready")
+	testing.expect(t, choice.transfer.target.scene_ref == ".Next")
 
-	testing.expect(t, result.story.statements[2].kind == .Dialogue)
-	testing.expect(t, result.story.statements[2].name == "Odin")
-	testing.expect(t, result.story.statements[2].text == "Hi")
-
-	testing.expect(t, result.story.statements[3].kind == .Choice_Block)
-	testing.expect(t, len(result.story.statements[3].choices) == 2)
-	testing.expect(t, result.story.statements[3].choices[0].text == "Go")
-	testing.expect(t, result.story.statements[3].choices[0].target == "next")
-	testing.expect(t, result.story.statements[3].choices[1].text == "Stay")
-	testing.expect(t, result.story.statements[3].choices[1].target == "intro")
-
-	testing.expect(t, result.story.statements[4].kind == .Goto)
-	testing.expect(t, result.story.statements[4].target == "next")
+	transition := result.module.scenes[0].statements[3]
+	testing.expect(t, transition.kind == .Transition)
+	testing.expect(t, transition.take_if == "auto")
+	testing.expect(t, transition.transfer.kind == .Once)
+	testing.expect(t, transition.transfer.target.scene_ref == ".")
 }
 
 @(test)
-parser_reports_errors_and_synchronizes_test :: proc(t: ^testing.T) {
-	lx := lexer.init("story\n???\nscene recovered:\nchoice:\n")
-	tokens := lexer.scan_all(&lx)
-	defer delete(tokens)
+parser_target_test :: proc(t: ^testing.T) {
+	p := parser.init(nil)
+	defer delete(p.errors)
 
-	p := parser.init(tokens[:])
-	result := parser.parse(&p)
-	defer delete(result.errors)
-	defer delete(result.story.statements)
-	defer delete(result.story.statements[1].choices)
+	target, ok := parser.parse_target(&p, "[Scene.Child](\"/other.saga\")", Source_Pos{}, 2)
+	testing.expect(t, ok)
+	testing.expect(t, target.scene_ref == "Scene.Child")
+	testing.expect(t, target.module_path == "/other.saga")
 
-	testing.expect(t, len(result.errors) >= 3)
-	testing.expect(t, len(result.story.statements) == 2)
-	testing.expect(t, result.story.statements[0].kind == .Scene)
-	testing.expect(t, result.story.statements[0].name == "recovered")
-	testing.expect(t, result.story.statements[1].kind == .Choice_Block)
-	testing.expect(t, len(result.story.statements[1].choices) == 0)
+	target, ok = parser.parse_target(&p, "[..]", Source_Pos{}, 3)
+	testing.expect(t, ok)
+	testing.expect(t, target.scene_ref == "..")
+
+	target, ok = parser.parse_target(&p, "[..Sibling]", Source_Pos{}, 3)
+	testing.expect(t, ok)
+	testing.expect(t, target.scene_ref == "..Sibling")
+
+	parser.parse_target(&p, "[..]", Source_Pos{}, 1)
+	testing.expect(t, len(p.errors) == 1)
+}
+
+@(test)
+parser_parses_test_drive_examples_test :: proc(t: ^testing.T) {
+	paths := [?]string {
+		"examples/test_drive/main.saga",
+		"examples/test_drive/market.saga",
+		"examples/test_drive/ruins.saga",
+		"examples/test_drive/bell.saga",
+		"examples/test_drive/ending.saga",
+	}
+
+	for path in paths {
+		data, ok := os.read_entire_file(path)
+		testing.expect(t, ok)
+		defer delete(data)
+
+		lx := lexer.init(string(data), path)
+		lexed := lexer.scan_lines(&lx)
+		p := parser.init(lexed.lines[:], path)
+		result := parser.parse(&p)
+		for err in lexed.errors {
+			append(&result.errors, err)
+		}
+
+		testing.expect(t, len(result.errors) == 0)
+		testing.expect(t, len(result.module.scenes) > 0)
+
+		free_parse_result(result)
+		delete(lexed.lines)
+		delete(lexed.errors)
+	}
+}
+
+@(test)
+parser_reports_errors_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test(
+		"> orphan\n# 1Bad\n# Main\n+ Missing arrow\n-> [Bad-Path]\n",
+	)
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	testing.expect(t, len(result.errors) >= 4)
 }

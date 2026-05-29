@@ -65,6 +65,18 @@ Expressions occur inside backticks:
 `expression_text`
 ```
 
+Blank lines are ignored.
+
+Leading indentation before statements is ignored by the compiler. Authors may use indentation for readability, but indentation has no semantic meaning in v0.
+
+Statements are single-line in v0. Multiline passages, choices, transitions, and effects are not supported.
+
+For readability and simpler parsing, choice arrows must be surrounded by whitespace, and automatic transition arrows must be followed by whitespace.
+
+Passage and choice text are trimmed of leading and trailing whitespace.
+
+Choice text cannot contain `->` or `*->` literally in v0.
+
 Comments start with `//` when `//` appears outside a backtick expression and is either:
 
 - at the beginning of a line after indentation, or
@@ -207,9 +219,9 @@ In a scene target, `[.]` resolves to the current scene.
 
 In a scene target, `.Child` expands to a child of the current scene. For example, from `Patrons.WomanInRedDress`, `[.InitialConvo]` resolves to `Patrons.WomanInRedDress.InitialConvo`.
 
-In a scene target, `[..]` resolves to the parent scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..]` resolves to `Patrons.WomanInRedDress`.
+In a scene target, `[..]` resolves to the parent scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..]` resolves to `Patrons.WomanInRedDress`. Using `[..]` from a top-level scene is a compile error.
 
-In a scene target, `..Sibling` resolves to a sibling of the current scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..FollowUp]` resolves to `Patrons.WomanInRedDress.FollowUp`.
+In a scene target, `..Sibling` resolves to a sibling of the current scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..FollowUp]` resolves to `Patrons.WomanInRedDress.FollowUp`. Using `[..Sibling]` from a top-level scene is a compile error; use `[Sibling]` instead.
 
 If a target omits a module path, the current module is used. If a target includes a module path, the scene reference is resolved in that module.
 
