@@ -112,6 +112,8 @@ Patrons.NoOne
 
 Scene statements execute top-to-bottom.
 
+Conditions are evaluated when their statement is reached, after previous effects in the same scene have executed.
+
 ## Passage
 
 A greater-than sign `>` is used for passages shown on screen:
@@ -166,6 +168,14 @@ A backtick expression on its own line is an effect statement:
 ```
 
 Effects execute when the scene is entered and evaluation reaches the effect line.
+
+The built-in `end(message)` effect ends the story and displays the provided message:
+
+```saga
+`end("You were eaten by a grue")`
+```
+
+When `end(...)` is reached, no later statements in the scene are evaluated.
 
 //****************************************/
 // Transfers and Targets
@@ -268,14 +278,15 @@ Mutation operators apply to the nearest resolved binding. If a local binding exi
 // Scene Validity
 //****************************************/
 
-Each non-terminal scene must have at least one possible outgoing transfer:
+Each scene must have at least one possible completion path:
 
-- one or more choices with transfers, or
-- one or more automatic transitions.
-
-Terminal scene syntax is TODO.
+- one or more choices with transfers,
+- one or more automatic transitions, or
+- a reachable `end(...)` effect.
 
 Any statement after an unconditional automatic transition is unreachable and should be reported as a semantic error.
+
+Any statement after an unconditional `end(...)` effect is unreachable and should be reported as a semantic error.
 
 //****************************************/
 // Grammar Summary
