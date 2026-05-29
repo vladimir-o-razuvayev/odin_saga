@@ -24,11 +24,11 @@ html :: struct {
 		strings.write_string(&sb, "</title>\n<style>\n")
 		strings.write_string(
 			&sb,
-			":root{color-scheme:dark;--bg:#111318;--panel:#1b1f2a;--text:#eceff4;--muted:#aab1c2;--accent:#8fbcbb;--disabled:#596070}body{margin:0;background:var(--bg);color:var(--text);font:18px/1.55 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:760px;margin:0 auto;padding:48px 20px}.scene{display:none;background:var(--panel);border:1px solid #2b3140;border-radius:18px;padding:28px;box-shadow:0 20px 60px #0006}.scene.active{display:block}h1{margin:0 0 20px;font-size:2rem}.passage{margin:0 0 1rem}.choices{display:grid;gap:.75rem;margin-top:1.5rem}button{appearance:none;text-align:left;border:1px solid #3a4254;border-radius:12px;background:#242a36;color:var(--text);padding:.8rem 1rem;font:inherit;cursor:pointer}button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}button:disabled{color:var(--disabled);cursor:not-allowed}.end{margin-top:1.5rem;color:var(--accent);font-weight:700}.missing{color:#ffb4ab}.meta{color:var(--muted);font-size:.9rem;margin-top:1.5rem}\n",
+			":root{color-scheme:dark;--bg:#111318;--panel:#1b1f2a;--dock:#151923;--text:#eceff4;--muted:#aab1c2;--accent:#8fbcbb;--disabled:#596070}body{margin:0;background:var(--bg);color:var(--text);font:18px/1.55 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.dock{position:fixed;inset:0 auto 0 0;width:280px;box-sizing:border-box;padding:24px 18px;background:var(--dock);border-right:1px solid #2b3140;overflow:auto}.dock h2{margin:0 0 1rem;font-size:1rem;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}.dock h3{margin:1.25rem 0 .75rem;font-size:.85rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.dock-view[hidden]{display:none}.dock-menu{display:grid;gap:.65rem}.dock-button{width:100%;display:block}.dock-back{margin-bottom:1rem;color:var(--muted)}.debug-panel[hidden]{display:none}.state-list{display:grid;gap:.55rem}.state-empty{color:var(--muted);font-size:.9rem}.state-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:baseline;border-bottom:1px solid #252b38;padding-bottom:.45rem}.state-key{min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem}.state-value{max-width:130px;overflow:hidden;text-overflow:ellipsis;color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;text-align:right}main{max-width:760px;margin:0 auto;padding:48px 20px 48px 320px}.scene{display:none;background:var(--panel);border:1px solid #2b3140;border-radius:18px;padding:28px;box-shadow:0 20px 60px #0006}.scene.active{display:block}h1{margin:0 0 20px;font-size:2rem}.passage{margin:0 0 1rem}.choices{display:grid;gap:.75rem;margin-top:1.5rem}button{appearance:none;text-align:left;border:1px solid #3a4254;border-radius:12px;background:#242a36;color:var(--text);padding:.8rem 1rem;font:inherit;cursor:pointer}button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}button:disabled{color:var(--disabled);cursor:not-allowed}.end{margin-top:1.5rem;color:var(--accent);font-weight:700}.missing{color:#ffb4ab}.meta{color:var(--muted);font-size:.9rem;margin-top:1.5rem}@media(max-width:900px){.dock{position:static;width:auto;border-right:0;border-bottom:1px solid #2b3140}main{padding:24px 16px;margin:0 auto}}\n",
 		)
 		strings.write_string(
 			&sb,
-			"</style>\n</head>\n<body>\n<main id=\"app\"></main>\n<script>\n",
+			"</style>\n</head>\n<body>\n<aside class=\"dock\"><section id=\"dock-menu\" class=\"dock-view\"><h2>Menu</h2><div class=\"dock-menu\"><button id=\"open-settings\" class=\"dock-button\">Settings</button></div></section><section id=\"settings-panel\" class=\"dock-view\" hidden><button id=\"back-menu\" class=\"dock-back\">← Menu</button><h2>Settings</h2><div class=\"dock-menu\"><button id=\"open-debug\" class=\"dock-button\">Debug</button></div></section><section id=\"debug-panel\" class=\"dock-view\" hidden><button id=\"back-settings\" class=\"dock-back\">← Settings</button><h2>Debug</h2><h3>Assigned Variables</h3><div id=\"state-dock\" class=\"state-list\"><div class=\"state-empty\">No variables assigned yet.</div></div></section></aside>\n<main id=\"app\"></main>\n<script>\n",
 		)
 		strings.write_string(&sb, "const story = {\n  modules: [\n")
 
@@ -139,11 +139,43 @@ html :: struct {
 
 SCRIPT :: `
 const app = document.getElementById('app');
+const stateDock = document.getElementById('state-dock');
+const dockMenu = document.getElementById('dock-menu');
+const settingsPanel = document.getElementById('settings-panel');
+const debugPanel = document.getElementById('debug-panel');
+const openSettingsButton = document.getElementById('open-settings');
+const backMenuButton = document.getElementById('back-menu');
+const openDebugButton = document.getElementById('open-debug');
+const backSettingsButton = document.getElementById('back-settings');
 const state = Object.create(null);
 const consumed = new Set();
 const scenes = Object.create(null);
 let current = null;
 let ended = false;
+
+function showDockMenu() {
+  dockMenu.hidden = false;
+  settingsPanel.hidden = true;
+  debugPanel.hidden = true;
+}
+
+function showSettings() {
+  dockMenu.hidden = true;
+  settingsPanel.hidden = false;
+  debugPanel.hidden = true;
+}
+
+function showDebug() {
+  dockMenu.hidden = true;
+  settingsPanel.hidden = true;
+  debugPanel.hidden = false;
+  updateStateDock();
+}
+
+openSettingsButton.addEventListener('click', showSettings);
+backMenuButton.addEventListener('click', showDockMenu);
+openDebugButton.addEventListener('click', showDebug);
+backSettingsButton.addEventListener('click', showSettings);
 
 function moduleId(file) {
   const slash = Math.max(file.lastIndexOf('/'), file.lastIndexOf('\\\\'));
@@ -225,6 +257,38 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 }
 
+function formatStateValue(value) {
+  if (typeof value === 'string') return JSON.stringify(value);
+  return String(value);
+}
+
+function updateStateDock() {
+  const keys = Object.keys(state).sort();
+  stateDock.innerHTML = '';
+  if (keys.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'state-empty';
+    empty.textContent = 'No variables assigned yet.';
+    stateDock.appendChild(empty);
+    return;
+  }
+  for (const key of keys) {
+    const row = document.createElement('div');
+    row.className = 'state-row';
+    const name = document.createElement('div');
+    name.className = 'state-key';
+    name.title = key;
+    name.textContent = key;
+    const value = document.createElement('div');
+    value.className = 'state-value';
+    value.title = formatStateValue(state[key]);
+    value.textContent = formatStateValue(state[key]);
+    row.appendChild(name);
+    row.appendChild(value);
+    stateDock.appendChild(row);
+  }
+}
+
 function armButton(button, enabled, onClick) {
   button.disabled = true;
   if (!enabled) return;
@@ -296,11 +360,15 @@ function render() {
   meta.className = 'meta';
   meta.textContent = current.module.id + ' · ' + current.path;
   section.appendChild(meta);
+  updateStateDock();
 }
 
 current = story.modules[0]?.scenes[0];
 if (current) render();
-else app.textContent = 'No scenes found.';
+else {
+  app.textContent = 'No scenes found.';
+  updateStateDock();
+}
 `
 
 
