@@ -19,7 +19,7 @@
   `visited_start := true`
   `map_known := true`
   -> [Inventory]("/widgets/inventory.saga")
-  ![Letter with crescent seal]("/assets/images/letter.png")
+  ![Letter with crescent seal](/assets/images/letter.png)
   > The letter is brief: "#{player_name}, find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
   > The ink looks fresh until you tilt the page, when it browns like something written years ago and only now remembered.
   > A charcoal map is sketched beneath the warning: village square, northern road, ruined tower, and one black circle where no road is drawn.
@@ -39,7 +39,7 @@
 ## Directions
   `map_known := true`
   `met_fishmonger := true`
-  ![Fishmonger]("/assets/images/fishmonger.png")
+  ![Fishmonger](/assets/images/fishmonger.png)
   > A fishmonger points with his pipe, drawing a wavering line through the rain as if sketching the road in smoke.
   > His stall smells of river mud, salt, and sharp green herbs packed around silver fish.
   >> [Fishmonger](/characters.saga#Fishmonger) Old road is north. Mind the stones. They listen.
@@ -48,7 +48,7 @@
 
 ## GateWatch
   `met_watchman := true`
-  ![Watchman]("/assets/images/watchman.png")
+  ![Watchman](/assets/images/watchman.png)
   > The watchman leans on his spear beneath the village arch, rain ticking from the brim of his iron cap.
   > His eyes move over you, the square, the road, and back again, measuring which of you is most likely to cause trouble.
   > `old_key` His eyes flick to the blackened key in your hand, then quickly away, as if the key has noticed him first.
