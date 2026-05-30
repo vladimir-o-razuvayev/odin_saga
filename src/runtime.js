@@ -45,9 +45,26 @@ function initializeDockWidgets() {
   }
 }
 
+function isRuntimeGlobal(prop) {
+  return [
+    "Array",
+    "Boolean",
+    "Date",
+    "JSON",
+    "Math",
+    "Number",
+    "Object",
+    "String",
+    "console",
+    "prompt",
+    "rand",
+    "state",
+  ].includes(prop);
+}
+
 function proxyState() {
   return new Proxy(state, {
-    has: (target, prop) => prop !== "rand" && prop !== "state",
+    has: (_target, prop) => !isRuntimeGlobal(prop),
     get: (target, prop) => (prop in target ? target[prop] : 0),
     set: (target, prop, value) => {
       target[prop] = value;
@@ -75,6 +92,26 @@ function evalExpr(code) {
     console.warn("condition failed:", code, err);
     return false;
   }
+}
+
+function evalValue(code) {
+  return Function(
+    "state",
+    "rand",
+    "with (state) { return (" + normalize(code) + "); }",
+  )(proxyState(), rand);
+}
+
+function interpolateText(text) {
+  return String(text).replace(/#\{([^}]*)\}/g, (_match, code) => {
+    try {
+      const value = evalValue(code);
+      return value == null ? "" : String(value);
+    } catch (err) {
+      console.warn("interpolation failed:", code, err);
+      return "";
+    }
+  });
 }
 
 function runEffect(code) {
@@ -299,7 +336,7 @@ function renderImage(container, stmt) {
   figure.className = "image-block";
   const img = document.createElement("img");
   img.src = resolveAssetPath(stmt.imageSrc);
-  img.alt = stmt.text;
+  img.alt = interpolateText(stmt.text);
   img.style.display = "block";
   img.style.maxWidth = "100%";
   img.style.maxHeight = "360px";
@@ -405,7 +442,9 @@ function renderDialogueBlock(statements, start, container, fromScene) {
         } else {
           paragraph.appendChild(document.createTextNode(" "));
         }
-        paragraph.appendChild(document.createTextNode(stmt.text));
+        paragraph.appendChild(
+          document.createTextNode(interpolateText(stmt.text)),
+        );
       }
     }
     i += 1;
@@ -433,7 +472,7 @@ function renderWidgetScene(scene, container, surface) {
     else if (stmt.kind === "Passage" && evalExpr(stmt.showIf)) {
       const p = document.createElement("p");
       p.className = "passage";
-      p.textContent = stmt.text;
+      p.textContent = interpolateText(stmt.text);
       container.appendChild(p);
     } else if (stmt.kind === "Image") {
       renderImage(container, stmt);
@@ -450,7 +489,7 @@ function renderWidgetScene(scene, container, surface) {
     container.appendChild(div);
     for (const choice of choices) {
       const button = document.createElement("button");
-      button.textContent = choice.text;
+      button.textContent = interpolateText(choice.text);
       if (surface === "dock") {
         button.className = "state-row";
         button.style.width = "100%";
@@ -490,7 +529,7 @@ function render() {
     else if (stmt.kind === "Passage" && evalExpr(stmt.showIf)) {
       const p = document.createElement("p");
       p.className = "passage";
-      p.textContent = stmt.text;
+      p.textContent = interpolateText(stmt.text);
       section.appendChild(p);
     } else if (stmt.kind === "Image") {
       renderImage(section, stmt);
@@ -536,7 +575,7 @@ function render() {
     section.appendChild(div);
     for (const choice of choices) {
       const button = document.createElement("button");
-      button.textContent = choice.text;
+      button.textContent = interpolateText(choice.text);
       armButton(button, evalExpr(choice.enableIf), () =>
         go(choice.transfer, current),
       );

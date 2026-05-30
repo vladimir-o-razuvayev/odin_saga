@@ -181,6 +181,7 @@ html_generates_document_test :: proc(t: ^testing.T) {
 	testing.expect(t, lexer.index_of(doc, "<!doctype html>") == 0)
 	testing.expect(t, lexer.index_of(doc, "Hello <world>") >= 0)
 	testing.expect(t, lexer.index_of(doc, "function render()") >= 0)
+	testing.expect(t, lexer.index_of(doc, "function interpolateText") >= 0)
 	testing.expect(t, lexer.index_of(doc, ".dock-card") >= 0)
 	testing.expect(t, lexer.index_of(doc, "%!(MISSING") < 0)
 }

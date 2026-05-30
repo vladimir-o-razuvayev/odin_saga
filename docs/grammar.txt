@@ -137,6 +137,21 @@ A greater-than sign `>` is used for passages shown on screen:
 
 In a passage, an optional condition immediately after `>` controls whether the passage is displayed. If the condition is falsey, the passage is skipped and scene evaluation continues to the next statement.
 
+## Text Interpolation
+
+Displayed text can include JavaScript expressions inside `#{...}`:
+
+```saga
+`player_name ?= prompt("What is your name?") || "traveler"`
+> Welcome, #{player_name}.
+>> [Guide]("/characters.saga") As I was telling #{player_name}, the princess is in another castle.
++ Ask #{player_name}'s question -> [.Question]
+```
+
+Interpolation is evaluated at render time in passages, dialogue text, choice text, and image alt text. Values are inserted as text, not HTML.
+
+Backticks remain the syntax for Saga conditions and effects. `#{...}` is only interpreted inside displayed text. In v0, interpolation expressions are simple JavaScript snippets and should not contain `}`.
+
 ## Dialogue
 
 A double greater-than sign `>>` adds character dialogue. The first line in a dialogue bubble names a speaker target. Consecutive `>>` lines without a speaker continue the same bubble. Any non-dialogue statement ends the bubble.

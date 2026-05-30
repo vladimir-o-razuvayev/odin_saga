@@ -125,6 +125,30 @@ Targets are scene references in square brackets:
 
 When in doubt, prefer explicit module-root paths for cross-file links.
 
+## Text interpolation and prompts
+
+Displayed story text can interpolate runtime values with `#{...}`:
+
+```saga
+> Welcome, #{player_name}.
+>> [Guide]("/characters.saga") As I was telling #{player_name}, the princess is in another castle.
++ Ask #{player_name}'s question -> [.Question]
+```
+
+Interpolation works in passages, dialogue text, choice text, and image alt text. Values are inserted as text, not HTML.
+
+For player prompts, use a normal effect with browser JavaScript:
+
+```saga
+# Start
+  `player_name ?= prompt("What is your name?") || "traveler"`
+  > Welcome, #{player_name}.
+```
+
+The `?=` operator makes the prompt run only if `player_name` has not already been assigned.
+
+Backticks are still used for Saga conditions/effects. `#{...}` is only interpreted inside displayed text. In v0, interpolation expressions should be simple JavaScript expressions and should not contain `}`.
+
 ## State and effects
 
 Effects are backtick expressions on their own line:
