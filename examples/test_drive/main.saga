@@ -31,12 +31,14 @@
 ## Directions
   `map_known := true`
   `met_fishmonger := true`
+  ![Fishmonger]("/assets/images/fishmonger.png")
   > A fishmonger points with his pipe.
   >> [Fishmonger]("/characters.saga") Old road is north. Mind the stones. They listen.
   -> [Village]
 
 ## GateWatch
   `met_watchman := true`
+  ![Watchman]("/assets/images/watchman.png")
   > The watchman leans on his spear beneath the village arch.
   > `old_key` His eyes flick to the blackened key in your hand, then quickly away.
   + Ask about the watchtower -> [.WatchtowerRumor]

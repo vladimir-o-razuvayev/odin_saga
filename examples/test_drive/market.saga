@@ -9,6 +9,7 @@
 
 ## CloakSeller
   `met_cloak_seller := true`
+  ![Cloak Seller]("/assets/images/cloak_seller.png")
   > A narrow man shakes rainwater from a row of heavy cloaks.
   > `has_cloak` He nods approvingly at the cloak you bought from him.
   + `coin >= 2` Buy a dry cloak -> [.BuyCloak]
@@ -33,6 +34,7 @@
 
 ## BlueScarf
   `met_blue_scarf := true`
+  ![Blue Scarf]("/assets/images/blue_scarf.png")
   > The woman with the blue scarf watches the crowd reflected in a brass mirror.
   >> `trust_blue_scarf` [BlueScarf]("/characters.saga") You came back. Good.
   + `visited_start` Mention the crescent letter -> [.LetterTalk]
@@ -67,6 +69,7 @@
 
 ### Mira
   `met_mira := true`
+  ![Mira]("/assets/images/mira.png")
   `has_crate := false`
   `coin := coin + 3`
   > Mira counts the bottles and presses three old coins into your hand.
@@ -75,6 +78,7 @@
 
 ### Locksmith
   `met_locksmith := true`
+  ![Locksmith]("/assets/images/locksmith.png")
   > The locksmith's stall is hardly wider than its door. Keys hang from the ceiling like iron fruit.
   > `lantern_lit` The blue flame in your lantern makes every key cast two shadows.
   + `old_key` Show him the blackened key -> [.BlackKey]
