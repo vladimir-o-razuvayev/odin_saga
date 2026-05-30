@@ -1,6 +1,6 @@
 # Authoring Saga Stories
 
-This guide explains the practical workflow for writing stories with Odin Saga. For exact grammar rules, see `docs/grammar.txt`.
+This guide explains the practical workflow for writing stories with Saga. For exact grammar rules, see `docs/grammar.txt`.
 
 ## Compile a story
 

@@ -1,6 +1,6 @@
-# Odin Saga
+# Saga
 
-Odin Saga is a small interactive fiction/story-game compiler written in [Odin](https://odin-lang.org/). It takes a directory of Markdown-like `.saga` files and emits a standalone HTML story with choices, state, widgets, images, character profiles, and dialogue bubbles.
+Saga is a small interactive fiction/story-game compiler written in [Odin](https://odin-lang.org/). It takes a directory of Markdown-like `.saga` files and emits a standalone HTML story with choices, state, widgets, images, character profiles, and dialogue bubbles.
 
 The project is approaching a v0.1 release. The current focus is a compact, author-friendly story language and a generated HTML runtime that is easy to preview locally.
 
@@ -96,7 +96,7 @@ For the full language reference, see `docs/grammar.txt`.
 ## Command line
 
 ```sh
-odin_saga <entry.saga> <output.html>
+saga <entry.saga> <output.html>
 ```
 
 Arguments:
@@ -145,7 +145,7 @@ odin test src
 
 ## Current limitations
 
-Odin Saga is not yet v0.1. Notable missing pieces include:
+Saga is not yet v0.1. Notable missing pieces include:
 
 - save/load,
 - title/authorship metadata,
@@ -154,6 +154,10 @@ Odin Saga is not yet v0.1. Notable missing pieces include:
 
 See `docs/backlog.md` for the short-term backlog.
 
-## License
+## License and terms
 
-No license file is currently included. Add one before publishing or accepting outside contributions.
+Saga itself is licensed under the GNU GPLv3-or-later. See `LICENSE`.
+
+Stories created with Saga remain owned by their authors and do not need to use the GPL. Generated HTML output may be distributed by the story author under the terms they choose, while the embedded Saga runtime/style code remains GPL-licensed.
+
+See `TERMS.md` for the full project/story/output licensing policy.

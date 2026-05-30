@@ -1,5 +1,5 @@
 {
-  description = "Interactive fiction/story-game compiler in Odin";
+  description = "Interactive fiction/story-game compiler";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
@@ -16,11 +16,11 @@
 
       perSystem = {pkgs, ...}: let
         odin = pkgs.callPackage ./nix/odin.nix {};
-        odin-saga = pkgs.callPackage ./nix {inherit odin;};
+        saga = pkgs.callPackage ./nix {inherit odin;};
       in {
-        packages.default = odin-saga;
+        packages.default = saga;
         devShells.default = pkgs.callPackage ./nix/shell.nix {inherit odin;};
-        checks.default = odin-saga;
+        checks.default = saga;
       };
     };
 }

@@ -17,7 +17,7 @@ read_support_file :: proc(name, fallback: string) -> string {
 }
 
 html :: struct {
-	generate:        proc(modules: []Module, title := "Odin Saga") -> string,
+	generate:        proc(modules: []Module, title := "Saga") -> string,
 	write_statement: proc(sb: ^strings.Builder, stmt: Statement),
 	write_transfer:  proc(sb: ^strings.Builder, transfer: Transfer),
 	runtime_script:  proc() -> string,
@@ -25,7 +25,7 @@ html :: struct {
 	js_string:       proc(s: string) -> string,
 	html_text:       proc(s: string) -> string,
 } {
-	generate = proc(modules: []Module, title := "Odin Saga") -> string {
+	generate = proc(modules: []Module, title := "Saga") -> string {
 		sb := strings.builder_make()
 
 		strings.write_string(&sb, "<!doctype html>\n<html lang=\"en\">\n<head>\n")

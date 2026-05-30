@@ -1,3 +1,7 @@
+// Saga generated story runtime
+// SPDX-License-Identifier: GPL-3.0-or-later
+// See the Saga TERMS.md for the story/output licensing policy.
+
 const app = document.getElementById("app");
 const dock = document.getElementById("dock");
 const modal = document.getElementById("modal");

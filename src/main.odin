@@ -21,7 +21,7 @@ Load_Context :: struct {
 main :: proc() {
 	args := os.args
 	if len(args) != 3 {
-		fmt.eprintln("usage: odin_saga <entry.saga> <output.html>")
+		fmt.eprintln("usage: saga <entry.saga> <output.html>")
 		os.exit(2)
 	}
 
@@ -35,7 +35,7 @@ main :: proc() {
 		os.exit(1)
 	}
 
-	document := html.generate(result.modules[:], "Odin Saga")
+	document := html.generate(result.modules[:], "Saga")
 	defer delete(document)
 	if !os.write_entire_file(args[2], transmute([]byte)document) {
 		fmt.eprintf("failed to write %s\n", args[2])
