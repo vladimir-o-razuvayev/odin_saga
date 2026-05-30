@@ -37,7 +37,7 @@ The story root is this directory. Root-relative module targets such as `("/marke
 - Parent targets with `[..]`.
 - Sibling targets with `[..Sibling]`.
 - Absolute in-module targets like `[Village.GateWatch]`.
-- Cross-module targets like `[Square]("/market.saga")`.
+- Cross-module targets like `[Visit the market](/market.saga#Square)`.
 - Persistent initialize-if-nil with `?=`.
 - Persistent assignment with `:=`.
 - Scene-local bindings with `=`.

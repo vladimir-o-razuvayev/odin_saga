@@ -3,8 +3,8 @@
   > The watchtower gate leans open between two stones carved like sleeping dogs.
   > Their muzzles are worn smooth by rain, but their eyes remain sharp, watching the road behind you instead of the ruin ahead.
   > `lantern_lit` Your lantern paints warm teeth along the archway stones. The dark beyond the gate retreats one careful inch.
-  *-> `!lantern_lit && !heard_bell_rumor` [.LoseNerve]
-  -> [.Approach]
+  + `!lantern_lit && !heard_bell_rumor` *-> [Continue](#.LoseNerve)
+  + -> [Continue](#.Approach)
 
 ## LoseNerve
   > The darkness beneath the arch presses against your face until you step back gasping.
@@ -29,7 +29,7 @@
   `found_chalk := true`
   > You pocket a stick of white chalk. It leaves a moon-pale smear on your thumb.
   > The smear does not wash away when rain touches it. If anything, it brightens.
-  -> [Gate.Approach]
+  + -> [Continue](#Gate.Approach)
 
 # Courtyard
   > The sunken courtyard lies open to the rain. Four doors wait under four broken arches.
@@ -45,19 +45,19 @@
   `well_echo = rand(100)`
   > You lean over the well. Far below, water repeats your breathing.
   > The echo is almost faithful, but not quite. It exhales half a beat after you stop.
-  *-> `well_echo > 70` [.CoinGlimmer]
-  -> [.QuietWater]
+  + `well_echo > 70` *-> [Continue](#.CoinGlimmer)
+  + -> [Continue](#.QuietWater)
 
 ### CoinGlimmer
   `coin := coin + 1`
   > Something bright spins up from the dark, lands at your feet, and becomes a coin.
   > It is dry. It is warm. The face stamped on it has been scratched away.
-  -> [..QuietWater]
+  + -> [Continue](#..QuietWater)
 
 ### QuietWater
   > The well gives nothing back but the small sound of rain.
   > Still, when you step away, your reflection lingers at the rim for one second too long.
-  -> [Courtyard]
+  + -> [Continue](#Courtyard)
 
 ## Archive
   > Shelves of stone tablets lean against the walls. Most are blank with age.
@@ -78,7 +78,7 @@
   `bronze_tongue := true`
   > The bronze tongue is cold and heavy, made for a bell that should not still exist.
   > It vibrates once in your hand, a silent note you feel in your teeth.
-  -> [Courtyard.Archive]
+  + -> [Continue](#Courtyard.Archive)
 
 ### RandomTablet
   `dust_count++`
@@ -95,8 +95,8 @@
 ## LowerDoor
   > The blackened key turns with a sound like a cough.
   > `lower_door_hint` You remember the locksmith's warning and work slowly, letting oil and patience do what force would ruin.
-  *-> `lower_door_hint && lantern_lit` [.OiledLock]
-  -> [.StubbornLock]
+  + `lower_door_hint && lantern_lit` *-> [Continue](#.OiledLock)
+  + -> [Continue](#.StubbornLock)
 
 ### StubbornLock
   > The lock resists you. Rust flakes fall like old scabs.

@@ -28,26 +28,26 @@
   `bell_rang_true := true`
   > The bell rings without sound. The black pool becomes a sky full of dawn.
   > Light pours upward, warm and impossible, carrying the smell of wet grass and banked hearth fires.
-  -> [Dawn]("/ending.saga")
+  + -> [Continue](/ending.saga#Dawn)
 
 ### FalseRing
   `bell_rang_false := true`
   > The bell screams. Every chain in the chamber snaps tight, then slackens.
   > The sound has no volume, only weight. It drops through you and keeps falling.
-  -> [Return]("/ending.saga")
+  + -> [Continue](/ending.saga#Return)
 
 ### Names
   `name_glimpse = rand(3)`
   > Your name is there, but the letters keep changing order.
   > Around it are other names: some familiar, some impossible, some written with strokes too deep to have been made by any hand.
-  *-> `name_glimpse == 0` [.HiddenName]
-  -> [..]
+  + `name_glimpse == 0` *-> [Continue](#.HiddenName)
+  + -> [Continue](#..)
 
 #### HiddenName
   `saw_hidden_name := true`
   > For one breath, the letters spell a name that is not yours, but answers when you think it.
   > It settles behind your ribs like a second heartbeat, then goes quiet.
-  -> [..]
+  + -> [Continue](#..)
 
 ## Pool
   > The pool reflects the chamber as it was: whole, full of candlelight, crowded with silent villagers.
@@ -62,10 +62,10 @@
   `pool_offering := true`
   > The coin falls upward through the reflection and lands in someone else's palm.
   > For a moment, the reflected crowd parts around the stranger as if they have been waiting for payment.
-  -> [..]
+  + -> [Continue](#..)
 
 ### Circle
   `chalk_circle := true`
   > The chalk line closes itself into a perfect ring. The pool grows still.
   > The reflected villagers lower their eyes. Whatever they expected, the circle has made them reconsider.
-  -> [..]
+  + -> [Continue](#..)

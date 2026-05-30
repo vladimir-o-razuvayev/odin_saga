@@ -15,13 +15,13 @@ The entry file's directory becomes the story root. Other `.saga` files under tha
 Root-relative module paths are resolved from the story root:
 
 ```saga
-+ Visit the market -> [Square]("/market.saga")
++ -> [Visit the market](/market.saga#Square)
 ```
 
 Root-relative image paths are also resolved from the story root:
 
 ```saga
-![Blue scarf portrait]("/assets/images/blue_scarf.png")
+![Blue scarf portrait](/assets/images/blue_scarf.png)
 ```
 
 ## File organization
@@ -133,7 +133,7 @@ Automatic transitions and older choices still accept legacy square-bracket targe
 ```saga
 [Scene]
 [.Child]
-[Scene]("/other.saga")
+[Scene](/other.saga)
 ```
 
 When in doubt, prefer explicit module-root paths for cross-file links.
@@ -187,7 +187,7 @@ The generated runtime currently evaluates expressions in JavaScript.
 Images use Markdown-style syntax:
 
 ```saga
-![Alt text]("/assets/images/letter.png")
+![Alt text](/assets/images/letter.png)
 ```
 
 Root-relative paths beginning with `/` are resolved against the story root and validated at compile time.
@@ -202,11 +202,11 @@ Widgets are normal scenes decorated with `@widget`.
 @widget std:inventory
 # Inventory
   > Your personal belongings
-  + `has_key` Blackened key w-> [.OldKey]
+  + `has_key` -> [Blackened key](#.OldKey)
 
 @widget std:item
 ## OldKey
-  ![Blackened key]("/assets/images/key.png")
+  ![Blackened key](/assets/images/key.png)
   > A cold iron key with oil-dark teeth.
 ```
 
@@ -218,7 +218,7 @@ Built-in widget renderers:
 - `std:item` — modal profile for an item.
 - `std:character` — modal profile for a character and valid dialogue speaker.
 
-The runtime automatically shows `std:contacts` widgets in the dock. Other dock widgets can be activated with `w->`.
+The runtime automatically shows `std:contacts` widgets in the dock. Other dock widgets can be activated by transferring to the widget scene with `->`.
 
 ## Local saves
 
@@ -231,14 +231,14 @@ Character profiles are `std:character` widgets:
 ```saga
 @widget std:character
 # BlueScarf
-  ![Blue scarf portrait]("/assets/images/blue_scarf.png")
+  ![Blue scarf portrait](/assets/images/blue_scarf.png)
   > The woman with the blue scarf.
 ```
 
 Dialogue uses `>>`:
 
 ```saga
->> [BlueScarf]("/characters.saga") Then you are already late.
+>> [Blue Scarf](/characters.saga#BlueScarf) Then you are already late.
 >> Find the archivist's mark beneath the tower.
 ```
 
@@ -247,7 +247,7 @@ The first line of a bubble names the speaker. Consecutive `>>` lines without a s
 Dialogue can be conditional:
 
 ```saga
->> `trust_blue_scarf` [BlueScarf]("/characters.saga") You came back. Good.
+>> `trust_blue_scarf` [Blue Scarf](/characters.saga#BlueScarf) You came back. Good.
 ```
 
 If all lines in a dialogue group are hidden by conditions, the runtime skips the bubble.

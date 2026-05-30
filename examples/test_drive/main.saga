@@ -7,7 +7,7 @@
 
 # Start
   `player_name ?= prompt("What is your name?") || "traveler"`
-  -> [Contacts]("/widgets/contacts.saga")
+  -> [Contacts](/widgets/contacts.saga)
   > Rain taps against the shutters of the Hollow Bell inn, patient as fingers on a tabletop.
   > The room is registered to #{player_name}, though you do not remember signing the ledger.
   > The common room below has gone quiet in that late-afternoon way when everyone is listening to the weather and pretending not to.
@@ -18,12 +18,12 @@
 ## Letter
   `visited_start := true`
   `map_known := true`
-  -> [Inventory]("/widgets/inventory.saga")
+  -> [Inventory](/widgets/inventory.saga)
   ![Letter with crescent seal](/assets/images/letter.png)
   > The letter is brief: "#{player_name}, find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
   > The ink looks fresh until you tilt the page, when it browns like something written years ago and only now remembered.
   > A charcoal map is sketched beneath the warning: village square, northern road, ruined tower, and one black circle where no road is drawn.
-  -> [Village]
+  + -> [Continue](#Village)
 
 # Village
   `village_visits++`
@@ -44,7 +44,7 @@
   > His stall smells of river mud, salt, and sharp green herbs packed around silver fish.
   >> [Fishmonger](/characters.saga#Fishmonger) Old road is north. Mind the stones. They listen.
   >> If a milestone turns its back on you, don't argue with it. Just thank it and keep walking.
-  -> [Village]
+  + -> [Continue](#Village)
 
 ## GateWatch
   `met_watchman := true`
@@ -68,21 +68,21 @@
   > He slips a blackened key into your palm. It is heavier than it should be and leaves an oily crescent across your skin.
   >> [Watchman](/characters.saga#Watchman) If the lower door still stands, this might remember it.
   >> Don't force it. Old locks take offense, and some of them have long memories.
-  -> [..]
+  + -> [Continue](#..)
 
 # Road
   `road_steps++`
   > The northern road narrows between leaning birches. Their white trunks gleam like bones washed clean by rain.
   > Somewhere ahead, stone shifts against stone, patient and deliberate, though the air is perfectly still.
   > `has_cloak` Rain beads on your borrowed cloak and rolls away instead of finding your collar. For once, Brindlewick's weather fails to get what it wants.
-  *-> `road_steps == 1` [.FirstSign]
-  -> `lantern_lit` [Gate]("/ruins.saga")
-  -> [.DarkRoad]
+  + `road_steps == 1` *-> [Continue](#.FirstSign)
+  + `lantern_lit` -> [Continue](/ruins.saga#Gate)
+  + -> [Continue](#.DarkRoad)
 
 ## FirstSign
   > A milestone turns as you pass it, revealing an arrow carved into its back.
   > Lichen flakes from the groove. The arrow points not down the road but slightly beneath it.
-  -> [Road]
+  + -> [Continue](#Road)
 
 ## DarkRoad
   > Without a lit lantern, the trees knit themselves into a wall of black needles.

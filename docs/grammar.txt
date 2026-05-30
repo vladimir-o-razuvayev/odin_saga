@@ -26,8 +26,8 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
   `man_ran := true`
   > You pick out a man in the crowd.
   > He notices you and runs out the front door.
-  + Give chase -> [ChaseMan]("/town_square.saga")
-  + Leave it be -> [Main]
+  + -> [Give chase](/town_square.saga#ChaseMan)
+  + -> [Leave it be](#Main)
 
 ## WomanInRedDress
   > A woman in a red dress notices you, and walks over.
@@ -162,7 +162,7 @@ A double greater-than sign `>>` adds character dialogue. The first line in a dia
 >> `trust_blue_scarf` You came back. Good.
 ```
 
-The older speaker form `>> [BlueScarf]("/characters.saga") ...` is still accepted during the v0.1 transition.
+Legacy speaker targets may use unquoted module paths, such as `>> [BlueScarf](/characters.saga) ...`, during the v0.1 transition.
 
 Speaker targets must resolve to scenes decorated with `@widget std:character`.
 
@@ -174,7 +174,7 @@ A scene can be marked as a widget by placing `@widget` immediately before its he
 @widget std:contacts
 # Contacts
   > People you have met
-  + `met_blue_scarf` Blue Scarf w-> [BlueScarf]("/characters.saga")
+  + `met_blue_scarf` -> [Blue Scarf](/characters.saga#BlueScarf)
 ```
 
 Built-in widget renderers are:
@@ -299,7 +299,7 @@ Automatic transitions and legacy choices still accept older square-bracket targe
 [.Child]
 [..]
 [..Sibling]
-[Scene]("/module.saga")
+[Scene](/module.saga)
 ```
 
 A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `[Main]` and `#Main` resolve to `Main`, not `Patrons.WomanInRedDress.Main`.
@@ -314,10 +314,10 @@ In a scene target, `..Sibling` resolves to a sibling of the current scene. For e
 
 If a target omits a module path, the current module is used. If a target includes a module path, the scene reference is resolved in that module.
 
-A legacy target may include a module path after the scene reference:
+A legacy target may include an unquoted module path after the scene reference:
 
 ```saga
-[Scene]("/path/to/module.saga")
+[Scene](/path/to/module.saga)
 ```
 
 A modern destination includes the root-relative module path before `#`:

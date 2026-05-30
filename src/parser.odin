@@ -437,16 +437,16 @@ parser :: struct {
 		rest := lexer.trim(trimmed_text[close + 1:])
 		module_path := ""
 		if len(rest) > 0 {
-			if len(rest) < 4 ||
-			   rest[0] != '(' ||
-			   rest[1] != '"' ||
-			   rest[len(rest) - 2] != '"' ||
-			   rest[len(rest) - 1] != ')' {
+			if len(rest) < 3 || rest[0] != '(' || rest[len(rest) - 1] != ')' {
 				parser.append_error(p, pos, "invalid module path syntax")
 				return Target{scene_ref = ref, pos = pos}, true
 			}
-			module_path = rest[2:len(rest) - 2]
-			if len(module_path) == 0 || module_path[0] != '/' {
+			module_path = lexer.trim(rest[1:len(rest) - 1])
+			if len(module_path) == 0 {
+				parser.append_error(p, pos, "module paths must be root-relative in v0")
+			} else if module_path[0] == '"' || module_path[len(module_path) - 1] == '"' {
+				parser.append_error(p, pos, "module paths should not be quoted")
+			} else if module_path[0] != '/' {
 				parser.append_error(p, pos, "module paths must be root-relative in v0")
 			}
 		}
@@ -484,6 +484,9 @@ parser :: struct {
 		label := trimmed_text[1:close_label]
 		destination := lexer.trim(trimmed_text[dest_start:dest_end])
 		if len(destination) == 0 || destination[0] == '"' {
+			return Parsed_Target_Link{}
+		}
+		if destination[0] == '/' && lexer.index_of(destination, "#") < 0 {
 			return Parsed_Target_Link{}
 		}
 
@@ -780,7 +783,7 @@ parser_new_module_destination_syntax_test :: proc(t: ^testing.T) {
 @(test)
 parser_dialogue_syntax_test :: proc(t: ^testing.T) {
 	result, lexed := parse_source_for_test(
-		"# Main\n>> [BlueScarf](\"/characters.saga\") Hello.\n>>\n>> `met` Again.\n",
+		"# Main\n>> [BlueScarf](/characters.saga) Hello.\n>>\n>> `met` Again.\n",
 	)
 	defer free_parse_result(result)
 	defer delete(lexed.lines)
@@ -850,10 +853,16 @@ parser_target_test :: proc(t: ^testing.T) {
 	p := parser.init(nil)
 	defer delete(p.errors)
 
-	target, ok := parser.parse_target(&p, "[Scene.Child](\"/other.saga\")", Source_Pos{}, 2)
+	target, ok := parser.parse_target(&p, "[Scene.Child](/other.saga)", Source_Pos{}, 2)
 	testing.expect(t, ok)
 	testing.expect(t, target.scene_ref == "Scene.Child")
 	testing.expect(t, target.module_path == "/other.saga")
+
+	_, quoted_ok := parser.parse_target(&p, "[Scene.Child](\"/other.saga\")", Source_Pos{}, 2)
+	testing.expect(t, quoted_ok)
+	testing.expect(t, len(p.errors) == 1)
+	delete(p.errors)
+	p.errors = make([dynamic]Diagnostic)
 
 	target, ok = parser.parse_target(&p, "[..]", Source_Pos{}, 3)
 	testing.expect(t, ok)

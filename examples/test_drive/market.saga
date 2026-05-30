@@ -23,7 +23,7 @@
   `has_cloak := true`
   > The cloak smells of cedar and sheep oil. It is ugly, warm, and yours.
   > When you fasten it, rain begins striking your shoulders with a frustrated, muffled patter.
-  -> [..]
+  + -> [Continue](#..)
 
 ### OddJob
   >> [Cloak Seller](/characters.saga#CloakSeller) Carry this crate to Mira in the alley. She pays if she likes your face.
@@ -35,7 +35,7 @@
   `has_crate := true`
   > The crate clinks with bottles wrapped in straw. A paper tag tied to the handle reads MIRA in blocky ink.
   > It is not heavy at first, but it has the stubborn balance of something that intends to become heavy later.
-  -> [Square.Alley]
+  + -> [Continue](#Square.Alley)
 
 ## BlueScarf
   `met_blue_scarf := true`
@@ -62,7 +62,7 @@
   >> [Blue Scarf](/characters.saga#BlueScarf) A bell inside a closed eye.
   >> If you see it, knock twice and wait.
   >> Do not knock three times. Three is an invitation, and you do not know what might answer.
-  -> [..]
+  + -> [Continue](#..)
 
 ### WatchtowerTalk
   >> [Blue Scarf](/characters.saga#BlueScarf) The tower was built over a well.
@@ -88,7 +88,7 @@
   > She does not hurry. Each coin lands in your palm after its own small judgment.
   >> [Mira](/characters.saga#Mira) Counted fair. Tell him I liked your face well enough.
   >> And tell him the blue bottle was short last time. If he acts surprised, charge him for the acting.
-  -> [..]
+  + -> [Continue](#..)
 
 ### Locksmith
   `met_locksmith := true`
@@ -105,11 +105,11 @@
   > He whistles, low and unwilling.
   >> [Locksmith](/characters.saga#Locksmith) That opens a lock that hates daylight. Oil it before you turn it.
   >> And if it turns too easily, stop. Some doors open wide because they are hungry.
-  -> [..]
+  + -> [Continue](#..)
 
 #### LampOil
   `coin := coin - 1`
   `lantern_lit := true`
   > He fills your lantern and lights it with a blue spark from his thumbnail.
   > The flame steadies at once, small and intent, as though it has been waiting for you to catch up.
-  -> [..]
+  + -> [Continue](#..)

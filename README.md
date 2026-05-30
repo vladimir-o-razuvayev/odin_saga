@@ -65,18 +65,18 @@ A tiny story can look like this:
 # Start
   `visited ?= false`
   > Rain taps against the shutters.
-  + Open the letter *-> [.Letter]
-  + Step outside -> [Village]
+  + *-> [Open the letter](#.Letter)
+  + -> [Step outside](#Village)
 
 ## Letter
   `visited := true`
   ![Letter](/assets/images/letter.png)
   > The letter says: Find the bell before moonrise.
-  -> [Village]
+  + -> [Continue](#Village)
 
 # Village
   > The road north disappears into rain.
-  + Walk north -> [Gate]("/ruins.saga")
+  + -> [Walk north](/ruins.saga#Gate)
 ```
 
 A character profile and dialogue bubble:
@@ -84,11 +84,11 @@ A character profile and dialogue bubble:
 ```saga
 @widget std:character
 # BlueScarf
-  ![Blue scarf portrait]("/assets/images/blue_scarf.png")
+  ![Blue scarf portrait](/assets/images/blue_scarf.png)
   > The woman with the blue scarf.
 
 # Market
-  >> [BlueScarf]("/characters.saga") Then you are already late.
+  >> [Blue Scarf](/characters.saga#BlueScarf) Then you are already late.
   >> Find the archivist's mark beneath the tower.
 ```
 
