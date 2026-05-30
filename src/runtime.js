@@ -467,8 +467,6 @@ function renderDock() {
 
 function resolveAssetPath(path) {
   if (!path.startsWith("/")) return path;
-  if (window.location.protocol === "file:" && storyRoot)
-    return storyRoot + path;
   const currentPath = window.location.pathname;
   const base = currentPath.slice(0, currentPath.lastIndexOf("/"));
   return base + path;

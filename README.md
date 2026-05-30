@@ -144,6 +144,14 @@ nix develop
 odin test src
 ```
 
+Build the release package with Nix:
+
+```sh
+nix build
+```
+
+This builds the `saga` binary and packages the test-drive story as `result/test_drive.zip` with `out.html` and `assets/` at the zip root.
+
 ## Current limitations
 
 Saga is not yet v0.1. Notable missing pieces include:
