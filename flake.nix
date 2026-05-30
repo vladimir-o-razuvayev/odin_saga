@@ -1,5 +1,5 @@
 {
-  description = "Ray Tracer Challenge in Odin";
+  description = "Interactive fiction/story-game compiler in Odin";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
@@ -16,11 +16,11 @@
 
       perSystem = {pkgs, ...}: let
         odin = pkgs.callPackage ./nix/odin.nix {};
-        raytracer = pkgs.callPackage ./nix {inherit odin;};
+        odin-saga = pkgs.callPackage ./nix {inherit odin;};
       in {
-        packages.default = raytracer;
+        packages.default = odin-saga;
         devShells.default = pkgs.callPackage ./nix/shell.nix {inherit odin;};
-        checks.default = raytracer;
+        checks.default = odin-saga;
       };
     };
 }

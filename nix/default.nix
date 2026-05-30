@@ -3,7 +3,7 @@
   odin,
 }:
 pkgs.stdenv.mkDerivation rec {
-  pname = "odin_ray_tracer";
+  pname = "odin_saga";
   version = "0.1";
   src = ../.;
 
@@ -22,7 +22,7 @@ pkgs.stdenv.mkDerivation rec {
   '';
 
   meta = {
-    description = "Ray Tracer Challenge in Odin";
+    description = "Interactive fiction/story-game compiler in Odin";
     platforms = pkgs.lib.platforms.all;
   };
 }
