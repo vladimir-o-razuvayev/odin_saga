@@ -8,6 +8,7 @@
   + Return to the village inn -> [Village]("/main.saga")
 
 ## CloakSeller
+  `met_cloak_seller := true`
   > A narrow man shakes rainwater from a row of heavy cloaks.
   > `has_cloak` He nods approvingly at the cloak you bought from him.
   + `coin >= 2` Buy a dry cloak -> [.BuyCloak]
@@ -21,7 +22,7 @@
   -> [..]
 
 ### OddJob
-  > "Carry this crate to Mira in the alley," he says. "She pays if she likes your face."
+  >> [CloakSeller]("/characters.saga") Carry this crate to Mira in the alley. She pays if she likes your face.
   + Take the crate *-> [.TakeCrate]
   + Decline politely -> [..]
 
@@ -33,7 +34,7 @@
 ## BlueScarf
   `met_blue_scarf := true`
   > The woman with the blue scarf watches the crowd reflected in a brass mirror.
-  > `trust_blue_scarf` She greets you with the smallest possible nod.
+  >> `trust_blue_scarf` [BlueScarf]("/characters.saga") You came back. Good.
   + `visited_start` Mention the crescent letter -> [.LetterTalk]
   + Ask about the old watchtower -> [.WatchtowerTalk]
   + Leave her to her mirror -> [Square]
@@ -47,11 +48,13 @@
 
 ### MarkDescription
   `knows_mark := true`
-  > "A bell inside a closed eye," she says. "If you see it, knock twice and wait."
+  >> [BlueScarf]("/characters.saga") A bell inside a closed eye.
+  >> If you see it, knock twice and wait.
   -> [..]
 
 ### WatchtowerTalk
-  > "The tower was built over a well," she says. "Everything important in Brindlewick is underneath something else."
+  >> [BlueScarf]("/characters.saga") The tower was built over a well.
+  >> Everything important in Brindlewick is underneath something else.
   + Thank her -> [..]
 
 ## Alley
@@ -63,12 +66,15 @@
   + Return to the square -> [Square]
 
 ### Mira
+  `met_mira := true`
   `has_crate := false`
   `coin := coin + 3`
-  > Mira counts the bottles, nods once, and presses three old coins into your hand.
+  > Mira counts the bottles and presses three old coins into your hand.
+  >> [Mira]("/characters.saga") Counted fair. Tell him I liked your face well enough.
   -> [..]
 
 ### Locksmith
+  `met_locksmith := true`
   > The locksmith's stall is hardly wider than its door. Keys hang from the ceiling like iron fruit.
   > `lantern_lit` The blue flame in your lantern makes every key cast two shadows.
   + `old_key` Show him the blackened key -> [.BlackKey]
@@ -77,7 +83,8 @@
 
 #### BlackKey
   `lower_door_hint := true`
-  > He whistles. "That opens a lock that hates daylight. Oil it before you turn it."
+  > He whistles.
+  >> [Locksmith]("/characters.saga") That opens a lock that hates daylight. Oil it before you turn it.
   -> [..]
 
 #### LampOil

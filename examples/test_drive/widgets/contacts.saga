@@ -2,3 +2,8 @@
 # Contacts
   > People you have met
   + `met_blue_scarf` Blue Scarf w-> [BlueScarf]("/characters.saga")
+  + `met_cloak_seller` Cloak seller w-> [CloakSeller]("/characters.saga")
+  + `met_fishmonger` Fishmonger w-> [Fishmonger]("/characters.saga")
+  + `met_locksmith` Locksmith w-> [Locksmith]("/characters.saga")
+  + `met_mira` Mira w-> [Mira]("/characters.saga")
+  + `met_watchman` Watchman w-> [Watchman]("/characters.saga")

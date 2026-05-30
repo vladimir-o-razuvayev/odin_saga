@@ -3,3 +3,33 @@
   ![Blue scarf portrait]("/assets/images/blue_scarf.png")
   > The woman with the blue scarf.
   > She watches crowds through reflections and seems to know which questions you have not asked yet.
+
+@widget std:character
+# CloakSeller
+  ![Cloak seller portrait]("/assets/images/cloak_seller.png")
+  > A narrow market seller with rainwater in his cuffs and arithmetic behind his eyes.
+  > He treats every errand like a bargain already half-won.
+
+@widget std:character
+# Fishmonger
+  ![Fishmonger portrait]("/assets/images/fishmonger.png")
+  > A pipe-smoking fishmonger who knows every road out of Brindlewick by rumor, weather, and smell.
+  > He points as if the village itself might change direction while no one is looking.
+
+@widget std:character
+# Locksmith
+  ![Locksmith portrait]("/assets/images/locksmith.png")
+  > A locksmith whose stall is barely wider than its door.
+  > He listens to keys before he listens to people.
+
+@widget std:character
+# Mira
+  ![Mira portrait]("/assets/images/mira.png")
+  > Mira works in the alley behind the market, counting deliveries under a crooked awning.
+  > Her nods are small, exact, and more binding than signatures.
+
+@widget std:character
+# Watchman
+  ![Watchman portrait]("/assets/images/watchman.png")
+  > The gate watchman leans beneath the village arch with practiced patience.
+  > He has the look of someone paid to notice everything and admit very little.

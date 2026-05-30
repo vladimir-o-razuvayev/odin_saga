@@ -30,10 +30,13 @@
 
 ## Directions
   `map_known := true`
-  > A fishmonger points with his pipe. "Old road is north. Mind the stones. They listen."
+  `met_fishmonger := true`
+  > A fishmonger points with his pipe.
+  >> [Fishmonger]("/characters.saga") Old road is north. Mind the stones. They listen.
   -> [Village]
 
 ## GateWatch
+  `met_watchman := true`
   > The watchman leans on his spear beneath the village arch.
   > `old_key` His eyes flick to the blackened key in your hand, then quickly away.
   + Ask about the watchtower -> [.WatchtowerRumor]
@@ -41,13 +44,14 @@
 
 ### WatchtowerRumor
   `heard_bell_rumor := true`
-  > "No bell there now," he says. "Not above ground, anyway."
+  >> [Watchman]("/characters.saga") No bell there now. Not above ground, anyway.
   + Press him for more *-> [..OldKey]
   + Thank him and leave -> [..]
 
 ### OldKey
   `old_key := true`
-  > He slips a blackened key into your palm. "If the lower door still stands, this might remember it."
+  > He slips a blackened key into your palm.
+  >> [Watchman]("/characters.saga") If the lower door still stands, this might remember it.
   -> [..]
 
 # Road
