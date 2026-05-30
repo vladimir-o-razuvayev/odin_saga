@@ -149,6 +149,25 @@ A double greater-than sign `>>` adds character dialogue. The first line in a dia
 
 Speaker targets must resolve to scenes decorated with `@widget std:character`.
 
+## Widget Decorator
+
+A scene can be marked as a widget by placing `@widget` immediately before its heading:
+
+```saga
+@widget std:contacts
+# Contacts
+  > People you have met
+  + `met_blue_scarf` Blue Scarf w-> [BlueScarf]("/characters.saga")
+```
+
+Built-in widget renderers are:
+
+- `std:inventory` — dock widget for inventory-style choice lists.
+- `std:contacts` — dock widget for people/contact lists.
+- `std:status` — dock widget for status-style displays.
+- `std:item` — modal widget for item details.
+- `std:character` — modal/profile widget for characters and dialogue speakers.
+
 ## Image
 
 Markdown image syntax renders an image from the story bundle:
@@ -157,7 +176,7 @@ Markdown image syntax renders an image from the story bundle:
 ![Alt text](/assets/images/example.png)
 ```
 
-In v0, image paths may be root-relative to the story bundle or relative to the generated HTML file. Root-relative image paths are validated at compile time.
+In v0, image paths may be root-relative to the story bundle or relative to the generated HTML file. Root-relative image paths are validated at compile time. When previewing a generated HTML file locally, root-relative image paths are resolved against the source story bundle.
 
 ## Choice
 
@@ -331,7 +350,10 @@ Any statement after an unconditional `end(...)` effect is unreachable and should
 ```text
 module             = line*
 
-line               = indentation? (blank | comment | heading | statement)
+line               = indentation? (blank | comment | decorator | heading | statement)
+
+decorator          = "@widget" space widget_renderer
+widget_renderer    = "std:inventory" | "std:contacts" | "std:status" | "std:item" | "std:character"
 
 heading            = heading_marker space scene_label
 heading_marker     = "#" { "#" }

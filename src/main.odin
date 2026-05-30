@@ -359,6 +359,7 @@ has_scene :: proc(scenes: []Scene, path: string) -> bool {
 is_builtin_widget :: proc(widget: string) -> bool {
 	return(
 		widget == "std:inventory" ||
+		widget == "std:contacts" ||
 		widget == "std:item" ||
 		widget == "std:status" ||
 		widget == "std:character" \

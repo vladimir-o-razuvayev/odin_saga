@@ -1,0 +1,4 @@
+@widget std:contacts
+# Contacts
+  > People you have met
+  + `met_blue_scarf` Blue Scarf w-> [BlueScarf]("/characters.saga")

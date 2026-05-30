@@ -3,6 +3,7 @@
   `map_known ?= false`
   `lantern_lit ?= false`
   `coin ?= 0`
+  w-> [Contacts]("/widgets/contacts.saga")
   > Rain taps against the shutters of the Hollow Bell inn.
   > `!visited_start` A sealed letter waits on your table. Its wax bears the mark of a crescent moon.
   + Open the letter *-> [.Letter]

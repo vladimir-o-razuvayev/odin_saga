@@ -657,6 +657,7 @@ parser_parses_test_drive_examples_test :: proc(t: ^testing.T) {
 		"examples/test_drive/ending.saga",
 		"examples/test_drive/characters.saga",
 		"examples/test_drive/widgets/inventory.saga",
+		"examples/test_drive/widgets/contacts.saga",
 	}
 
 	for path in paths {

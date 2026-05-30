@@ -173,6 +173,14 @@ for (const module of story.modules) {
   }
 }
 
+function initializeDockWidgets() {
+  for (const module of story.modules) {
+    for (const scene of module.scenes) {
+      if (scene.widget === 'std:contacts') activeDockWidgets.add(scene.key);
+    }
+  }
+}
+
 function proxyState() {
   return new Proxy(state, {
     has: (target, prop) => prop !== 'rand' && prop !== 'state',
@@ -240,7 +248,7 @@ function go(transfer, fromScene) {
 }
 
 function runWidget(scene) {
-  if (scene.widget === 'std:inventory' || scene.widget === 'std:status') {
+  if (scene.widget === 'std:inventory' || scene.widget === 'std:contacts' || scene.widget === 'std:status') {
     activeDockWidgets.add(scene.key);
     renderDock();
   } else if (scene.widget === 'std:item' || scene.widget === 'std:character') {
@@ -360,7 +368,7 @@ function renderDock() {
     if (!scene) continue;
     const card = document.createElement('section');
     card.className = 'dock-card';
-    if (scene.widget === 'std:inventory' || scene.widget === 'std:status') {
+    if (scene.widget === 'std:inventory' || scene.widget === 'std:contacts' || scene.widget === 'std:status') {
       renderWidgetScene(scene, card, 'dock');
     }
     dock.appendChild(card);
@@ -369,6 +377,7 @@ function renderDock() {
 
 function resolveAssetPath(path) {
   if (!path.startsWith('/')) return path;
+  if (window.location.protocol === 'file:' && storyRoot) return storyRoot + path;
   const currentPath = window.location.pathname;
   const base = currentPath.slice(0, currentPath.lastIndexOf('/'));
   return base + path;
@@ -612,6 +621,7 @@ function render() {
   renderDock();
 }
 
+initializeDockWidgets();
 current = story.modules[0]?.scenes[0];
 if (current) render();
 else {
