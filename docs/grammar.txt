@@ -9,9 +9,9 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
 # Main
   `ale_count ?= 0` // Initializes ale_count only if it is nil.
   > The inn is crowded. The innkeeper is cleaning a glass at the bar.
-  + Speak to the innkeeper -> [Innkeeper]
-  + Join the patrons and try to overhear rumors -> [Patrons]
-  + Head out -> [Main]("/town_square.saga")
+  + -> [Speak to the innkeeper](#Innkeeper)
+  + -> [Join the patrons and try to overhear rumors](#Patrons)
+  + -> [Head out](/town_square.saga#Main)
 
 # Patrons
   > You join the patrons for drinks and order an ale for yourself.
@@ -75,7 +75,7 @@ For readability and simpler parsing, choice arrows must be surrounded by whitesp
 
 Passage and choice text are trimmed of leading and trailing whitespace.
 
-Choice text cannot contain `->` or `*->` literally in v0.
+The modern choice form stores button text in `[label]` and the destination in `(destination)`. The older `+ text -> [Target]` form is still accepted during the v0.1 transition.
 
 Comments start with `//` when `//` appears outside a backtick expression and is either:
 
@@ -144,8 +144,8 @@ Displayed text can include JavaScript expressions inside `#{...}`:
 ```saga
 `player_name ?= prompt("What is your name?") || "traveler"`
 > Welcome, #{player_name}.
->> [Guide]("/characters.saga") As I was telling #{player_name}, the princess is in another castle.
-+ Ask #{player_name}'s question -> [.Question]
+>> [Guide](/characters.saga#Guide) As I was telling #{player_name}, the princess is in another castle.
++ -> [Ask #{player_name}'s question](#.Question)
 ```
 
 Interpolation is evaluated at render time in passages, dialogue text, choice text, and image alt text. Values are inserted as text, not HTML.
@@ -157,10 +157,12 @@ Backticks remain the syntax for Saga conditions and effects. `#{...}` is only in
 A double greater-than sign `>>` adds character dialogue. The first line in a dialogue bubble names a speaker target. Consecutive `>>` lines without a speaker continue the same bubble. Any non-dialogue statement ends the bubble.
 
 ```saga
->> [BlueScarf]("/characters.saga") Then you are already late.
+>> [Blue Scarf](/characters.saga#BlueScarf) Then you are already late.
 >>
 >> `trust_blue_scarf` You came back. Good.
 ```
+
+The older speaker form `>> [BlueScarf]("/characters.saga") ...` is still accepted during the v0.1 transition.
 
 Speaker targets must resolve to scenes decorated with `@widget std:character`.
 
@@ -195,18 +197,33 @@ In v0, image paths may be root-relative to the story bundle or relative to the g
 
 ## Choice
 
-A plus sign `+` adds a choice the player can make:
+A plus sign `+` adds a choice button the player can select:
 
 ```saga
-+ Choice text -> [Target]
-+ `show_condition` Choice text -> [Target]
-+ Choice text -> `enable_condition` [Target]
-+ `show_condition` Choice text -> `enable_condition` [Target]
++ -> [Choice text](#Target)
++ `show_condition` -> [Choice text](#Target)
++ -> `enable_condition` [Choice text](#Target)
++ `show_condition` -> `enable_condition` [Choice text](#Target)
++ *-> [One-shot choice text](#.Child)
++ -> [Cross-module choice](/module.saga#Scene)
+```
+
+The choice grammar is:
+
+```text
++ show_condition? arrow enable_condition? [button text](destination)
 ```
 
 In a choice, an optional condition immediately after `+` controls whether the choice is visible.
 
 In a choice, an optional condition immediately after the arrow controls whether the choice is enabled.
+
+The older form is still accepted during the v0.1 transition:
+
+```saga
++ Choice text -> [Target]
++ `show_condition` Choice text -> `enable_condition` [Target]
+```
 
 If the choice is not visible, it is not shown to the player. If the choice is visible but not enabled, it is shown as disabled and cannot be selected.
 
@@ -259,7 +276,19 @@ For automatic transitions, `*->` is consumed only when the transition is taken. 
 
 For choices, `*->` is consumed only when the player selects the choice and transfers. On future visits, the consumed choice is no longer visible.
 
-Targets use square brackets:
+Choice and dialogue speaker links use Markdown-style labels with Saga destinations:
+
+```saga
+[Go to scene](#Scene)
+[Go to child](#.Child)
+[Go to parent](#..)
+[Go to sibling](#..Sibling)
+[Go to another module](/module.saga#Scene)
+```
+
+The square brackets contain user-facing text. The destination after `#` is the scene target.
+
+Automatic transitions and legacy choices still accept older square-bracket targets:
 
 ```saga
 [Scene]
@@ -271,7 +300,7 @@ Targets use square brackets:
 [Scene]("/module.saga")
 ```
 
-A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `[Main]` resolves to `Main`, not `Patrons.WomanInRedDress.Main`.
+A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `[Main]` and `#Main` resolve to `Main`, not `Patrons.WomanInRedDress.Main`.
 
 In a scene target, `[.]` resolves to the current scene.
 
@@ -283,10 +312,16 @@ In a scene target, `..Sibling` resolves to a sibling of the current scene. For e
 
 If a target omits a module path, the current module is used. If a target includes a module path, the scene reference is resolved in that module.
 
-A target may include a module path after the scene reference:
+A legacy target may include a module path after the scene reference:
 
 ```saga
 [Scene]("/path/to/module.saga")
+```
+
+A modern destination includes the root-relative module path before `#`:
+
+```saga
+[Button text](/path/to/module.saga#Scene)
 ```
 
 In v0, module paths are root-relative and must begin with `/`.

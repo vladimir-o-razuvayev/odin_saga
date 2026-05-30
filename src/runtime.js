@@ -478,15 +478,7 @@ function renderImage(container, stmt) {
   const img = document.createElement("img");
   img.src = resolveAssetPath(stmt.imageSrc);
   img.alt = interpolateText(stmt.text);
-  img.style.display = "block";
-  img.style.maxWidth = "100%";
-  img.style.maxHeight = "360px";
-  img.style.width = "auto";
-  img.style.height = "auto";
-  img.style.margin = "0 auto";
-  img.style.objectFit = "contain";
-  figure.style.margin = "1rem 0";
-  figure.style.overflow = "hidden";
+  img.className = "story-image";
   figure.appendChild(img);
   container.appendChild(figure);
 }
@@ -538,10 +530,7 @@ function renderDialogueBlock(statements, start, container, fromScene) {
     const img = document.createElement("img");
     img.src = resolveAssetPath(image.imageSrc);
     img.alt = image.text;
-    img.style.width = "48px";
-    img.style.height = "48px";
-    img.style.borderRadius = "50%";
-    img.style.objectFit = "cover";
+    img.className = "avatar-image";
     avatarSlot.appendChild(img);
   } else {
     avatarSlot.textContent = speaker ? speaker.name.slice(0, 1) : "?";

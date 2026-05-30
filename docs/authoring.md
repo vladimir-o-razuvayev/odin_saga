@@ -77,15 +77,17 @@ The optional backtick expression after `>` controls visibility.
 
 ## Choices
 
-Choices use `+` and a transfer arrow:
+Choices use `+`, a transfer arrow, and a labeled destination:
 
 ```saga
-+ Open the letter -> [.Letter]
-+ `coin >= 2` Buy a cloak -> [Square.CloakSeller]("/market.saga")
-+ Enter -> `has_key` [LockedRoom]
++ -> [Open the letter](#.Letter)
++ `coin >= 2` -> [Buy a cloak](/market.saga#Square.CloakSeller)
++ -> `has_key` [Enter](#LockedRoom)
 ```
 
 The first condition controls visibility. The condition after the arrow controls whether the choice is enabled.
+
+The older `+ Choice text -> [Target]` form is still accepted during the v0.1 transition.
 
 ## Transfers
 
@@ -111,15 +113,25 @@ Use `w->` to open or activate a widget without replacing the current main scene.
 
 ## Targets
 
-Targets are scene references in square brackets:
+Modern choice and dialogue speaker targets use Markdown-style labels with Saga destinations:
 
 ```saga
-[Scene]          // scene from module root
-[Scene.Child]    // nested scene from module root
-[.]              // current scene
-[.Child]         // child of current scene
-[..]             // parent scene
-[..Sibling]      // sibling under current parent
+[Button text](#Scene)              // scene from module root
+[Button text](#Scene.Child)        // nested scene from module root
+[Button text](#.)                  // current scene
+[Button text](#.Child)             // child of current scene
+[Button text](#..)                 // parent scene
+[Button text](#..Sibling)          // sibling under current parent
+[Button text](/other.saga#Scene)   // scene in another module
+```
+
+The text inside `[]` is what the reader sees. The destination inside `()` tells Saga where it points.
+
+Automatic transitions and older choices still accept legacy square-bracket targets:
+
+```saga
+[Scene]
+[.Child]
 [Scene]("/other.saga")
 ```
 
@@ -131,8 +143,8 @@ Displayed story text can interpolate runtime values with `#{...}`:
 
 ```saga
 > Welcome, #{player_name}.
->> [Guide]("/characters.saga") As I was telling #{player_name}, the princess is in another castle.
-+ Ask #{player_name}'s question -> [.Question]
+>> [Guide](/characters.saga#Guide) As I was telling #{player_name}, the princess is in another castle.
++ -> [Ask #{player_name}'s question](#.Question)
 ```
 
 Interpolation works in passages, dialogue text, choice text, and image alt text. Values are inserted as text, not HTML.
