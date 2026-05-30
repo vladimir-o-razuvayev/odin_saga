@@ -3,3 +3,23 @@ Use markdown style nested back qoutes. for example"
 becomes
   > The letter is brief:
   >> Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf.
+
+---
+
+images are rendered using markdown syntax.
+![Tux, the Linux mascot](/assets/images/tux.png)
+
+---
+
+Like in markdown, text in block qoutes can uses some markdown syntax:
+
+Blockquotes with Other Elements
+
+Blockquotes can contain other Markdown formatted elements. Not all elements can be used — you’ll need to experiment to see which ones work.
+
+> #### The quarterly results look great!
+>
+> - Revenue was off the chart.
+> - Profits were higher than ever.
+>
+>  *Everything* is going according to **plan**.

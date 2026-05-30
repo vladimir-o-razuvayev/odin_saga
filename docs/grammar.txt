@@ -137,6 +137,16 @@ A greater-than sign `>` is used for passages shown on screen:
 
 In a passage, an optional condition immediately after `>` controls whether the passage is displayed. If the condition is falsey, the passage is skipped and scene evaluation continues to the next statement.
 
+## Image
+
+Markdown image syntax renders an image from the story bundle:
+
+```saga
+![Alt text](/assets/images/example.png)
+```
+
+In v0, image paths may be root-relative to the story bundle or relative to the generated HTML file. Root-relative image paths are validated at compile time.
+
 ## Choice
 
 A plus sign `+` adds a choice the player can make:
@@ -196,6 +206,8 @@ When `end(...)` is reached, no later statements in the scene are evaluated.
 `->` is a normal transfer symbol for choices and automatic transitions.
 
 `*->` marks a transfer as consumable once per playthrough.
+
+`w->` invokes a widget target without replacing the current scene. The target scene must have an `@widget` decorator.
 
 For automatic transitions, `*->` is consumed only when the transition is taken. On future visits, the consumed transition no-ops and evaluation continues to the next line.
 
@@ -313,11 +325,13 @@ heading            = heading_marker space scene_label
 heading_marker     = "#" { "#" }
 
 statement          = passage
+                   | image
                    | choice
                    | transition
                    | effect
 
 passage            = ">" space show_condition? text
+image              = "![" alt_text "](" image_path ")"
 
 choice             = "+" space show_condition? choice_text space arrow space enable_condition? target
 
@@ -333,7 +347,7 @@ take_condition     = expression space
 
 expression         = "`" expression_text "`"
 
-arrow              = "->" | "*->"
+arrow              = "->" | "*->" | "w->"
 
 target             = "[" scene_ref "]" module_ref?
 module_ref         = "(" string ")"

@@ -37,6 +37,7 @@ Transfer :: struct {
 
 Statement_Kind :: enum {
 	Passage,
+	Image,
 	Choice,
 	Transition,
 	Effect,
@@ -45,6 +46,7 @@ Statement_Kind :: enum {
 Statement :: struct {
 	kind:      Statement_Kind,
 	text:      string,
+	image_src: string,
 	show_if:   string,
 	enable_if: string,
 	take_if:   string,

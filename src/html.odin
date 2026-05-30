@@ -71,6 +71,8 @@ html :: struct {
 		strings.write_string(sb, html.js_string(fmt.tprintf("%v", stmt.kind)))
 		strings.write_string(sb, ",text:")
 		strings.write_string(sb, html.js_string(stmt.text))
+		strings.write_string(sb, ",imageSrc:")
+		strings.write_string(sb, html.js_string(stmt.image_src))
 		strings.write_string(sb, ",showIf:")
 		strings.write_string(sb, html.js_string(stmt.show_if))
 		strings.write_string(sb, ",enableIf:")
@@ -244,16 +246,37 @@ function runWidget(scene) {
   }
 }
 
+function closeModal() {
+  modal.hidden = true;
+  modal.innerHTML = '';
+}
+
+modal.addEventListener('click', event => {
+  if (event.target === modal) closeModal();
+});
+
+function addModalCloseButton(card) {
+  const close = document.createElement('button');
+  close.className = 'modal-close';
+  close.textContent = '×';
+  close.style.float = 'right';
+  close.style.border = '0';
+  close.style.background = 'transparent';
+  close.style.padding = '0 .25rem';
+  close.style.fontSize = '1.8rem';
+  close.style.lineHeight = '1';
+  close.style.color = 'var(--muted)';
+  close.setAttribute('aria-label', 'Close');
+  close.addEventListener('click', closeModal);
+  card.appendChild(close);
+}
+
 function openItemModal(scene) {
   modal.hidden = false;
   modal.innerHTML = '';
   const card = document.createElement('section');
   card.className = 'modal-card';
-  const close = document.createElement('button');
-  close.className = 'modal-close';
-  close.textContent = 'Close';
-  close.addEventListener('click', () => { modal.hidden = true; modal.innerHTML = ''; });
-  card.appendChild(close);
+  addModalCloseButton(card);
   renderWidgetScene(scene, card, 'modal');
   modal.appendChild(card);
 }
@@ -299,8 +322,13 @@ function renderSettingsCard() {
   card.className = 'dock-card';
   card.innerHTML = '<h2>Settings</h2>';
   const button = document.createElement('button');
-  button.className = 'dock-button';
   button.textContent = 'Debug';
+  button.style.border = '0';
+  button.style.background = 'transparent';
+  button.style.padding = '0';
+  button.style.color = 'var(--muted)';
+  button.style.textDecoration = 'underline';
+  button.style.textUnderlineOffset = '.2em';
   armButton(button, true, openDebugModal);
   card.appendChild(button);
   dock.appendChild(card);
@@ -311,11 +339,7 @@ function openDebugModal() {
   modal.innerHTML = '';
   const card = document.createElement('section');
   card.className = 'modal-card';
-  const close = document.createElement('button');
-  close.className = 'modal-close';
-  close.textContent = 'Close';
-  close.addEventListener('click', () => { modal.hidden = true; modal.innerHTML = ''; });
-  card.appendChild(close);
+  addModalCloseButton(card);
   const title = document.createElement('h1');
   title.textContent = 'Debug';
   card.appendChild(title);
@@ -339,6 +363,32 @@ function renderDock() {
     }
     dock.appendChild(card);
   }
+}
+
+function resolveAssetPath(path) {
+  if (!path.startsWith('/')) return path;
+  const currentPath = window.location.pathname;
+  const base = currentPath.slice(0, currentPath.lastIndexOf('/'));
+  return base + path;
+}
+
+function renderImage(container, stmt) {
+  const figure = document.createElement('figure');
+  figure.className = 'image-block';
+  const img = document.createElement('img');
+  img.src = resolveAssetPath(stmt.imageSrc);
+  img.alt = stmt.text;
+  img.style.display = 'block';
+  img.style.maxWidth = '100%';
+  img.style.maxHeight = '360px';
+  img.style.width = 'auto';
+  img.style.height = 'auto';
+  img.style.margin = '0 auto';
+  img.style.objectFit = 'contain';
+  figure.style.margin = '1rem 0';
+  figure.style.overflow = 'hidden';
+  figure.appendChild(img);
+  container.appendChild(figure);
 }
 
 function armButton(button, enabled, onClick) {
@@ -372,6 +422,8 @@ function renderWidgetScene(scene, container, surface) {
       p.className = 'passage';
       p.textContent = stmt.text;
       container.appendChild(p);
+    } else if (stmt.kind === 'Image') {
+      renderImage(container, stmt);
     } else if (stmt.kind === 'Transition' && evalExpr(stmt.takeIf)) {
       go(stmt.transfer, scene);
     } else if (stmt.kind === 'Choice' && evalExpr(stmt.showIf)) {
@@ -380,11 +432,21 @@ function renderWidgetScene(scene, container, surface) {
   }
   if (choices.length > 0) {
     const div = document.createElement('div');
-    div.className = 'choices';
+    div.className = surface === 'dock' ? 'state-list' : 'choices';
     container.appendChild(div);
     for (const choice of choices) {
       const button = document.createElement('button');
       button.textContent = choice.text;
+      if (surface === 'dock') {
+        button.className = 'state-row';
+        button.style.width = '100%';
+        button.style.background = 'transparent';
+        button.style.border = '0';
+        button.style.borderBottom = '1px solid #252b38';
+        button.style.borderRadius = '0';
+        button.style.padding = '.45rem 0';
+        button.style.color = 'var(--muted)';
+      }
       armButton(button, evalExpr(choice.enableIf), () => go(choice.transfer, scene));
       div.appendChild(button);
     }
@@ -409,6 +471,8 @@ function render() {
       p.className = 'passage';
       p.textContent = stmt.text;
       section.appendChild(p);
+    } else if (stmt.kind === 'Image') {
+      renderImage(section, stmt);
     } else if (stmt.kind === 'Transition' && evalExpr(stmt.takeIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;

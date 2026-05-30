@@ -12,6 +12,7 @@
   `visited_start := true`
   `map_known := true`
   w-> [Inventory]("/widgets/inventory.saga")
+  ![Letter with crescent seal]("/assets/images/letter.png")
   > The letter is brief: "Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
   > A charcoal map is sketched beneath the warning.
   -> [Village]
@@ -21,9 +22,9 @@
   > The village of Brindlewick curls around a muddy square. Lanterns glow like fireflies in the rain.
   > `map_known` The charcoal map from the letter is already soft at the creases.
   + Visit the market square -> [Square]("/market.saga")
-  + Walk to the old watchtower road -> `map_known` [Road]
+  + `map_known` Walk to the old watchtower road -> [Road]
   + `!map_known` Ask around for directions -> [.Directions]
-  + `coin >= 2` Buy a dry cloak before leaving -> `coin >= 2` [Square.CloakSeller]("/market.saga")
+  + `coin >= 2` Buy a dry cloak before leaving -> [Square.CloakSeller]("/market.saga")
   + Speak with the gate watch -> [.GateWatch]
 
 ## Directions
@@ -63,4 +64,4 @@
 ## DarkRoad
   > Without a lit lantern, the trees knit themselves into a wall of black needles.
   + Return to Brindlewick -> [Village]
-  + Try the road anyway -> `heard_bell_rumor` [Gate]("/ruins.saga")
+  + `heard_bell_rumor` Try the road anyway -> [Gate]("/ruins.saga")

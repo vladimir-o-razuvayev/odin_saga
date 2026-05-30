@@ -174,6 +174,10 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 			}
 
 			for stmt in scene.statements {
+				if stmt.kind == .Image {
+					validate_image(result, base_dir, stmt)
+					continue
+				}
 				if stmt.kind != .Choice && stmt.kind != .Transition {
 					continue
 				}
@@ -235,6 +239,22 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 				}
 			}
 		}
+	}
+}
+
+validate_image :: proc(result: ^Build_Result, base_dir: string, stmt: Statement) {
+	if len(stmt.image_src) == 0 || !lexer.starts_with(stmt.image_src, "/") {
+		return
+	}
+	asset_path := fmt.tprintf("%s%s", base_dir, stmt.image_src)
+	if !os.exists(asset_path) {
+		append(
+			&result.errors,
+			Diagnostic {
+				message = fmt.tprintf("missing image asset %q", stmt.image_src),
+				pos = stmt.pos,
+			},
+		)
 	}
 }
 
@@ -336,6 +356,7 @@ own_module_strings :: proc(module: ^Module) {
 		scene.widget = clone_non_empty(scene.widget)
 		for &stmt in scene.statements {
 			stmt.text = clone_non_empty(stmt.text)
+			stmt.image_src = clone_non_empty(stmt.image_src)
 			stmt.show_if = clone_non_empty(stmt.show_if)
 			stmt.enable_if = clone_non_empty(stmt.enable_if)
 			stmt.take_if = clone_non_empty(stmt.take_if)
@@ -361,6 +382,7 @@ free_build_result :: proc(result: Build_Result) {
 			free_string_if_non_empty(scene.widget)
 			for stmt in scene.statements {
 				free_string_if_non_empty(stmt.text)
+				free_string_if_non_empty(stmt.image_src)
 				free_string_if_non_empty(stmt.show_if)
 				free_string_if_non_empty(stmt.enable_if)
 				free_string_if_non_empty(stmt.take_if)

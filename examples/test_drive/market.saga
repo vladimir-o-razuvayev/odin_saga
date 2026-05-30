@@ -10,7 +10,7 @@
 ## CloakSeller
   > A narrow man shakes rainwater from a row of heavy cloaks.
   > `has_cloak` He nods approvingly at the cloak you bought from him.
-  + Buy a dry cloak -> `coin >= 2` [.BuyCloak]
+  + `coin >= 2` Buy a dry cloak -> [.BuyCloak]
   + Ask for work -> [.OddJob]
   + Browse and leave -> [Square]
 
@@ -34,7 +34,7 @@
   `met_blue_scarf := true`
   > The woman with the blue scarf watches the crowd reflected in a brass mirror.
   > `trust_blue_scarf` She greets you with the smallest possible nod.
-  + Mention the crescent letter -> `visited_start` [.LetterTalk]
+  + `visited_start` Mention the crescent letter -> [.LetterTalk]
   + Ask about the old watchtower -> [.WatchtowerTalk]
   + Leave her to her mirror -> [Square]
 
@@ -56,7 +56,7 @@
 ## Alley
   > The alley behind the market smells of rain, onions, and lamp smoke.
   > `has_crate` Mira's crate grows heavier the longer you carry it.
-  + Deliver the crate to Mira -> `has_crate` [.Mira]
+  + `has_crate` Deliver the crate to Mira -> [.Mira]
   + Visit the locksmith -> [.Locksmith]
   + Return to the cloak seller -> [..CloakSeller]
   + Return to the square -> [Square]
@@ -70,8 +70,8 @@
 ### Locksmith
   > The locksmith's stall is hardly wider than its door. Keys hang from the ceiling like iron fruit.
   > `lantern_lit` The blue flame in your lantern makes every key cast two shadows.
-  + Show him the blackened key -> `old_key` [.BlackKey]
-  + Buy lamp oil -> `coin >= 1` [.LampOil]
+  + `old_key` Show him the blackened key -> [.BlackKey]
+  + `coin >= 1` Buy lamp oil -> [.LampOil]
   + Leave the stall -> [..]
 
 #### BlackKey

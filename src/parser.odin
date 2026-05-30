@@ -33,6 +33,7 @@ parser :: struct {
 	) -> bool,
 	parse_statement:        proc(p: ^Parser, line: Source_Line, scene: ^Scene),
 	parse_passage:          proc(p: ^Parser, line: Source_Line) -> Statement,
+	parse_image:            proc(p: ^Parser, line: Source_Line) -> Statement,
 	parse_choice:           proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_transition:       proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_effect:           proc(p: ^Parser, line: Source_Line) -> Statement,
@@ -167,6 +168,8 @@ parser :: struct {
 
 		if lexer.starts_with(text, ">") {
 			stmt = parser.parse_passage(p, line)
+		} else if lexer.starts_with(text, "![") {
+			stmt = parser.parse_image(p, line)
 		} else if lexer.starts_with(text, "+") {
 			stmt = parser.parse_choice(p, line, scene.depth)
 		} else if lexer.starts_with(text, "*->") ||
@@ -194,6 +197,24 @@ parser :: struct {
 			parser.append_error(p, line.pos, "expected passage text")
 		}
 		return Statement{kind = .Passage, text = rest, show_if = show_if, pos = line.pos}
+	},
+	parse_image = proc(p: ^Parser, line: Source_Line) -> Statement {
+		text := line.text
+		close_alt := lexer.index_of(text, "](")
+		if close_alt < 0 || len(text) < 5 || text[len(text) - 1] != ')' {
+			parser.append_error(p, line.pos, "invalid image syntax")
+			return Statement{kind = .Image, pos = line.pos}
+		}
+
+		alt := text[2:close_alt]
+		src := lexer.trim(text[close_alt + 2:len(text) - 1])
+		if len(src) >= 2 && src[0] == '"' && src[len(src) - 1] == '"' {
+			src = src[1:len(src) - 1]
+		}
+		if len(src) == 0 {
+			parser.append_error(p, line.pos, "expected image path")
+		}
+		return Statement{kind = .Image, text = alt, image_src = src, pos = line.pos}
 	},
 	parse_choice = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
 		rest := lexer.trim(line.text[1:])
@@ -510,6 +531,20 @@ parser_parse_v0_story_test :: proc(t: ^testing.T) {
 	testing.expect(t, transition.take_if == "auto")
 	testing.expect(t, transition.transfer.kind == .Once)
 	testing.expect(t, transition.transfer.target.scene_ref == ".")
+}
+
+@(test)
+parser_image_syntax_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test("# Main\n![Alt text](/assets/images/test.png)\n")
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	testing.expect(t, len(result.errors) == 0)
+	stmt := result.module.scenes[0].statements[0]
+	testing.expect(t, stmt.kind == .Image)
+	testing.expect(t, stmt.text == "Alt text")
+	testing.expect(t, stmt.image_src == "/assets/images/test.png")
 }
 
 @(test)

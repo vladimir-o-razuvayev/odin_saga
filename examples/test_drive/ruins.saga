@@ -31,7 +31,7 @@
   > `found_chalk` The chalk in your pocket leaves a pale crescent on your fingertips.
   + Inspect the well -> [.Well]
   + Enter the archive -> [.Archive]
-  + Try the lower door -> `old_key` [.LowerDoor]
+  + `old_key` Try the lower door -> [.LowerDoor]
   + `!old_key` Examine the sealed lower door -> [.SealedDoor]
   + Retreat to the gate -> [Gate]
 
@@ -53,7 +53,7 @@
 ## Archive
   > Shelves of stone tablets lean against the walls. Most are blank with age.
   > `knows_mark` You keep searching for a bell inside a closed eye.
-  + Look for the archivist's mark -> `knows_mark` [.MarkedTablet]
+  + `knows_mark` Look for the archivist's mark -> [.MarkedTablet]
   + Search randomly -> [.RandomTablet]
   + Return to the courtyard -> [Courtyard]
 
@@ -71,7 +71,7 @@
 ### RandomTablet
   `dust_count++`
   > Dust coats your hands. The tablets say nothing you understand.
-  + Keep searching -> `dust_count < 3` [.]
+  + `dust_count < 3` Keep searching -> [.]
   + Give up -> [..]
 
 ## SealedDoor

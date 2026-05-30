@@ -1,10 +1,27 @@
 @widget std:inventory
 # Inventory
   > Your personal belongings
+  + `visited_start` Crescent letter w-> [.Letter]
+  + `map_known` Charcoal map w-> [.Map]
+  + `has_crate` Cloak seller's crate w-> [.Crate]
   + `has_cloak` Dry cloak w-> [.DryCloak]
   + `old_key` Blackened key w-> [.OldKey]
+  + `lantern_lit` Blue-lit lantern w-> [.Lantern]
   + `found_chalk` White chalk w-> [.Chalk]
   + `bronze_tongue` Bronze tongue w-> [.BronzeTongue]
+
+@widget std:item
+## Letter
+  ![Letter with crescent seal]("/assets/images/letter.png")
+  > The unsealed letter with the broken crescent seal is brief: find the bell beneath the old watchtower before moonrise.
+
+@widget std:item
+## Map
+  > A charcoal map of Brindlewick and the old road, already soft at the creases.
+
+@widget std:item
+## Crate
+  > A rain-dark crate from the cloak seller. Bottles clink softly under the lid.
 
 @widget std:item
 ## DryCloak
@@ -13,6 +30,10 @@
 @widget std:item
 ## OldKey
   > The blackened key is cold no matter how long you hold it.
+
+@widget std:item
+## Lantern
+  > Your lantern burns with a small blue flame that makes every shadow look twice as deep.
 
 @widget std:item
 ## Chalk
