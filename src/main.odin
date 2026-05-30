@@ -567,6 +567,19 @@ semantic_accepts_contacts_widget_transfer_test :: proc(t: ^testing.T) {
 }
 
 @(test)
+semantic_accepts_normal_transfer_to_widget_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Main\n+ -> [Contacts](#.Contacts)\n@widget std:contacts\n## Contacts\n> People\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 0)
+}
+
+@(test)
 semantic_reports_unknown_widget_test :: proc(t: ^testing.T) {
 	build, lexed := build_result_from_source_for_test(
 		"@widget std:mystery\n# Mystery\n> Unknown\n",

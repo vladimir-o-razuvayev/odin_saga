@@ -91,25 +91,26 @@ The older `+ Choice text -> [Target]` form is still accepted during the v0.1 tra
 
 ## Transfers
 
-Saga has three transfer arrows:
+Saga has two primary transfer arrows:
 
 ```saga
-->  normal transfer
-*-> one-shot transfer
-w-> widget transfer
+->  normal transfer/action
+*-> one-shot transfer/action
 ```
 
 Examples:
 
 ```saga
 -> [Village]
-+ Take the key *-> [.TakeKey]
-w-> [Inventory]("/widgets/inventory.saga")
++ *-> [Take the key](#.TakeKey)
++ -> [Inventory](/widgets/inventory.saga#Inventory)
 ```
 
 Use `*->` when a choice or automatic transition should only be available once per playthrough.
 
-Use `w->` to open or activate a widget without replacing the current main scene.
+When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. For example, transferring to an inventory dock widget activates it, while transferring to an item or character widget opens it as a modal.
+
+The older `w->` widget arrow is still accepted during the v0.1 transition, but new stories should usually use `->` and let the target widget decide the behavior.
 
 ## Targets
 

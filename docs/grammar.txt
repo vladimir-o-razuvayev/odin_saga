@@ -266,11 +266,13 @@ When `end(...)` is reached, no later statements in the scene are evaluated.
 // Transfers and Targets
 //****************************************/
 
-`->` is a normal transfer symbol for choices and automatic transitions.
+`->` is a normal transfer/action symbol for choices and automatic transitions.
 
-`*->` marks a transfer as consumable once per playthrough.
+`*->` marks a transfer/action as consumable once per playthrough.
 
-`w->` invokes a widget target without replacing the current scene. The target scene must have an `@widget` decorator.
+When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. Dock widgets are activated, while modal widgets open in a modal.
+
+`w->` is the legacy widget arrow. It is still accepted during the v0.1 transition and still requires its target scene to have an `@widget` decorator.
 
 For automatic transitions, `*->` is consumed only when the transition is taken. On future visits, the consumed transition no-ops and evaluation continues to the next line.
 

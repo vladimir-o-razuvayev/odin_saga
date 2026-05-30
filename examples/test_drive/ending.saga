@@ -4,32 +4,32 @@
   > In the village square, every bell rope trembles though no bell is visible.
   > People step from doorways with cups in their hands and questions on their faces, blinking at a sky the color of clean linen.
   > `pool_offering` Somewhere nearby, a stranger laughs and flips a coin into the fountain. It lands without a splash.
-  + Visit the changed village -> [.Aftermath]
+  + -> [Visit the changed village](#.Aftermath)
 
 ## Aftermath
   > The woman with the blue scarf waits beside the dry fountain.
   > Her brass mirror is open on her palm, reflecting not the square but the pale shape of the vanished bell.
-  + Ask what happened -> [.Explanation]
-  + Leave Brindlewick by the north road -> [Epilogue]
+  + -> [Ask what happened](#.Explanation)
+  + -> [Leave Brindlewick by the north road](#Epilogue)
 
 ### Explanation
-  >> [BlueScarf]("/characters.saga") You woke what was buried.
+  >> [Blue Scarf](/characters.saga#BlueScarf) You woke what was buried.
   >> That is not the same as saving it. But sometimes it is enough.
   >> Brindlewick will remember differently now. That may be mercy, or only another kind of bell.
-  + Continue -> [..]
+  + -> [Continue](#..)
 
 # Return
   `ending := "return"`
   > You wake at the table in the Hollow Bell inn. Rain taps against the shutters.
   > The letter is gone, but your palm is black with old key oil.
   > Downstairs, someone laughs at a joke you almost remember. The sound stops when you try to place it.
-  + Check what remains -> [.Inventory]
+  + -> [Check what remains](#.Inventory)
 
 ## Inventory
   > You remember fragments: a tower, a pool, the shape of a bell inside an eye.
   > Your pockets are ordinary, but your hands feel as if they have carried something too heavy to keep.
-  + `saw_hidden_name` Whisper the hidden name -> [Epilogue]
-  + Go back to sleep -> [.Sleep]
+  + `saw_hidden_name` -> [Whisper the hidden name](#Epilogue)
+  + -> [Go back to sleep](#.Sleep)
 
 ### Sleep
   > You close your eyes and let the rain count the seconds.

@@ -1,21 +1,24 @@
+# Setup
+ `coin ?= 0`
+ ![The Bell Beneath](/assets/images/title.png)
+ > by Vlad Raz
+ > Check out the source on [GitHub](https://github.com/vladimir-o-razuvayev/odin_saga)
+ + -> [Start the Game](#Start)
+
 # Start
-  `visited_start ?= false`
-  `map_known ?= false`
-  `lantern_lit ?= false`
-  `coin ?= 0`
   `player_name ?= prompt("What is your name?") || "traveler"`
-  w-> [Contacts]("/widgets/contacts.saga")
+  -> [Contacts]("/widgets/contacts.saga")
   > Rain taps against the shutters of the Hollow Bell inn, patient as fingers on a tabletop.
   > The room is registered to #{player_name}, though you do not remember signing the ledger.
   > The common room below has gone quiet in that late-afternoon way when everyone is listening to the weather and pretending not to.
   > `!visited_start` A sealed letter waits on your table. Its wax bears the mark of a crescent moon, pressed so deep the paper puckers around it.
-  + Open the letter *-> [.Letter]
-  + Step into the village -> [Village]
+  + *-> [Open the letter](#.Letter)
+  + -> [Step into the village](#Village)
 
 ## Letter
   `visited_start := true`
   `map_known := true`
-  w-> [Inventory]("/widgets/inventory.saga")
+  -> [Inventory]("/widgets/inventory.saga")
   ![Letter with crescent seal]("/assets/images/letter.png")
   > The letter is brief: "#{player_name}, find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
   > The ink looks fresh until you tilt the page, when it browns like something written years ago and only now remembered.
@@ -27,11 +30,11 @@
   > The village of Brindlewick curls around a muddy square. Lanterns glow like fireflies in the rain, each one haloed in gold.
   > Roof gutters mutter into barrels. Somewhere a goat complains with the exhausted dignity of an old magistrate.
   > `map_known` The charcoal map from the letter is already soft at the creases, but the marked road seems darker than the rest no matter how often you fold it away.
-  + Visit the market square -> [Square]("/market.saga")
-  + `map_known` Walk to the old watchtower road -> [Road]
-  + `!map_known` Ask around for directions -> [.Directions]
-  + `coin >= 2` Buy a dry cloak before leaving -> [Square.CloakSeller]("/market.saga")
-  + Speak with the gate watch -> [.GateWatch]
+  + -> [Visit the market square](/market.saga#Square)
+  + `map_known` -> [Walk to the old watchtower road](#Road)
+  + `!map_known` -> [Ask around for directions](#.Directions)
+  + `coin >= 2` -> [Buy a dry cloak before leaving](/market.saga#Square.CloakSeller)
+  + -> [Speak with the gate watch](#.GateWatch)
 
 ## Directions
   `map_known := true`
@@ -39,7 +42,7 @@
   ![Fishmonger]("/assets/images/fishmonger.png")
   > A fishmonger points with his pipe, drawing a wavering line through the rain as if sketching the road in smoke.
   > His stall smells of river mud, salt, and sharp green herbs packed around silver fish.
-  >> [Fishmonger]("/characters.saga") Old road is north. Mind the stones. They listen.
+  >> [Fishmonger](/characters.saga#Fishmonger) Old road is north. Mind the stones. They listen.
   >> If a milestone turns its back on you, don't argue with it. Just thank it and keep walking.
   -> [Village]
 
@@ -49,21 +52,21 @@
   > The watchman leans on his spear beneath the village arch, rain ticking from the brim of his iron cap.
   > His eyes move over you, the square, the road, and back again, measuring which of you is most likely to cause trouble.
   > `old_key` His eyes flick to the blackened key in your hand, then quickly away, as if the key has noticed him first.
-  + Ask about the watchtower -> [.WatchtowerRumor]
-  + Return to the square -> [Village]
+  + -> [Ask about the watchtower](#.WatchtowerRumor)
+  + -> [Return to the square](#Village)
 
 ### WatchtowerRumor
   `heard_bell_rumor := true`
-  >> [Watchman]("/characters.saga") No bell there now. Not above ground, anyway.
+  >> [Watchman](/characters.saga#Watchman) No bell there now. Not above ground, anyway.
   >> Folk used to say the tower rang for fog, fire, and weddings. Then one winter it rang all by itself for three nights.
   >> After that, people found reasons to build their houses facing south.
-  + Press him for more *-> [..OldKey]
-  + Thank him and leave -> [..]
+  + *-> [Press him for more](#..OldKey)
+  + -> [Thank him and leave](#..)
 
 ### OldKey
   `old_key := true`
   > He slips a blackened key into your palm. It is heavier than it should be and leaves an oily crescent across your skin.
-  >> [Watchman]("/characters.saga") If the lower door still stands, this might remember it.
+  >> [Watchman](/characters.saga#Watchman) If the lower door still stands, this might remember it.
   >> Don't force it. Old locks take offense, and some of them have long memories.
   -> [..]
 
@@ -84,5 +87,5 @@
 ## DarkRoad
   > Without a lit lantern, the trees knit themselves into a wall of black needles.
   > The road remains under your boots, but every step sounds as if it lands in a room with a ceiling.
-  + Return to Brindlewick -> [Village]
-  + `heard_bell_rumor` Try the road anyway -> [Gate]("/ruins.saga")
+  + -> [Return to Brindlewick](#Village)
+  + `heard_bell_rumor` -> [Try the road anyway](/ruins.saga#Gate)

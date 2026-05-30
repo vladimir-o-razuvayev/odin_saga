@@ -9,21 +9,21 @@
 ## LoseNerve
   > The darkness beneath the arch presses against your face until you step back gasping.
   > For a moment you are certain the tower is breathing, and that it has mistaken you for something it once swallowed.
-  + Return to the village -> [Village]("/main.saga")
+  + -> [Return to the village](/main.saga#Village)
 
 ## Approach
   > Your lantern throws gold over a stair spiraling down under the tower.
   > The steps are slick but unworn. No one has used them in years, or else everyone who used them learned to leave no mark.
-  + Descend into the courtyard -> [Courtyard]
-  + Search the gatehouse -> [.Gatehouse]
-  + Return to Brindlewick -> [Village]("/main.saga")
+  + -> [Descend into the courtyard](#Courtyard)
+  + -> [Search the gatehouse](#.Gatehouse)
+  + -> [Return to Brindlewick](/main.saga#Village)
 
 ### Gatehouse
   `found_chalk ?= false`
   > The gatehouse roof has collapsed, but a dry shelf remains beneath a slab of slate.
   > Old watch rosters have melted into gray pulp. A mug sits upright in the dust, full of rain that never reached it.
-  + Take the white chalk *-> [.TakeChalk]
-  + Return to the gate -> [..]
+  + *-> [Take the white chalk](#.TakeChalk)
+  + -> [Return to the gate](#..)
 
 #### TakeChalk
   `found_chalk := true`
@@ -35,11 +35,11 @@
   > The sunken courtyard lies open to the rain. Four doors wait under four broken arches.
   > Grass grows between the stones in thin, colorless blades. The place feels less abandoned than paused.
   > `found_chalk` The chalk in your pocket leaves a pale crescent on your fingertips whenever you touch it.
-  + Inspect the well -> [.Well]
-  + Enter the archive -> [.Archive]
-  + `old_key` Try the lower door -> [.LowerDoor]
-  + `!old_key` Examine the sealed lower door -> [.SealedDoor]
-  + Retreat to the gate -> [Gate]
+  + -> [Inspect the well](#.Well)
+  + -> [Enter the archive](#.Archive)
+  + `old_key` -> [Try the lower door](#.LowerDoor)
+  + `!old_key` -> [Examine the sealed lower door](#.SealedDoor)
+  + -> [Retreat to the gate](#Gate)
 
 ## Well
   `well_echo = rand(100)`
@@ -63,16 +63,16 @@
   > Shelves of stone tablets lean against the walls. Most are blank with age.
   > The air tastes of limestone dust and sealed rooms. Your footsteps come back to you from the wrong corners.
   > `knows_mark` You keep searching for a bell inside a closed eye, the shape Blue Scarf pressed into your thoughts like a thumbprint.
-  + `knows_mark` Look for the archivist's mark -> [.MarkedTablet]
-  + Search randomly -> [.RandomTablet]
-  + Return to the courtyard -> [Courtyard]
+  + `knows_mark` -> [Look for the archivist's mark](#.MarkedTablet)
+  + -> [Search randomly](#.RandomTablet)
+  + -> [Return to the courtyard](#Courtyard)
 
 ### MarkedTablet
   `archive_mark := true`
   > You find the bell-in-eye mark on a tablet tucked behind three blank stones.
   > When you knock twice, a hidden drawer opens with a sigh of old air and powdered bronze.
-  + Take the bronze tongue *-> [.BronzeTongue]
-  + Leave the drawer alone -> [..]
+  + *-> [Take the bronze tongue](#.BronzeTongue)
+  + -> [Leave the drawer alone](#..)
 
 #### BronzeTongue
   `bronze_tongue := true`
@@ -84,13 +84,13 @@
   `dust_count++`
   > Dust coats your hands. The tablets say nothing you understand.
   > You find lists of names, then lists of bells, then a list where every name has been carefully chiseled away.
-  + `dust_count < 3` Keep searching -> [.]
-  + Give up -> [..]
+  + `dust_count < 3` -> [Keep searching](#.)
+  + -> [Give up](#..)
 
 ## SealedDoor
   > The lower door has no handle, only a keyhole shaped like a crooked tooth.
   > Rain runs down its face and parts around the keyhole, refusing to enter.
-  + Return to the courtyard -> [Courtyard]
+  + -> [Return to the courtyard](#Courtyard)
 
 ## LowerDoor
   > The blackened key turns with a sound like a cough.
@@ -101,9 +101,9 @@
 ### StubbornLock
   > The lock resists you. Rust flakes fall like old scabs.
   > Something on the other side shifts closer, then thinks better of it.
-  + Return to the courtyard -> [Courtyard]
+  + -> [Return to the courtyard](#Courtyard)
 
 ### OiledLock
   > The lock remembers the key. The lower door opens inward.
   > The stair beyond is dry, and the air rising from it smells faintly of metal, rainless stone, and old thunder.
-  + Enter the bell chamber -> [Chamber]("/bell.saga")
+  + -> [Enter the bell chamber](/bell.saga#Chamber)

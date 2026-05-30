@@ -4,25 +4,25 @@
   > A cracked silver bell hangs from three chains over a black pool. The chains vanish into the ceiling without hooks or beams.
   > Sound behaves strangely here. Your breath arrives late, and your footsteps seem embarrassed to have interrupted.
   > `chalk_circle` A chalk ring glows faintly at the pool's edge, thin and steady as moonlight trapped under ice.
-  + Inspect the bell -> [.Bell]
-  + Study the pool -> [.Pool]
-  + Climb back to the courtyard -> [Courtyard]("/ruins.saga")
+  + -> [Inspect the bell](#.Bell)
+  + -> [Study the pool](#.Pool)
+  + -> [Climb back to the courtyard](/ruins.saga#Courtyard)
 
 ## Bell
   > The bell has no tongue. Its inner curve is scratched with names you almost recognize.
   > Some names are written in old village script, some in careful modern hands, and one seems to rearrange itself when you blink.
   > `bronze_tongue` The bronze tongue hums softly in your pack. It is not a sound so much as a pressure behind your eyes.
-  + `bronze_tongue` Fit the bronze tongue into place -> [.Restore]
-  + Touch the scratched names -> [.Names]
-  + Step away -> [Chamber]
+  + `bronze_tongue` -> [Fit the bronze tongue into place](#.Restore)
+  + -> [Touch the scratched names](#.Names)
+  + -> [Step away](#Chamber)
 
 ### Restore
   `bell_restored := true`
   > The bronze tongue rises from your hand and locks itself inside the bell.
   > The chamber tightens around the gesture. Even the black pool seems to hold its surface still.
-  + `trust_blue_scarf` Ring the bell *-> [..TrueRing]
-  + Ring the bell anyway -> [..FalseRing]
-  + Wait and listen -> [..Names]
+  + `trust_blue_scarf` *-> [Ring the bell](#..TrueRing)
+  + -> [Ring the bell anyway](#..FalseRing)
+  + -> [Wait and listen](#..Names)
 
 ### TrueRing
   `bell_rang_true := true`
@@ -53,9 +53,9 @@
   > The pool reflects the chamber as it was: whole, full of candlelight, crowded with silent villagers.
   > Their faces are turned upward toward the bell. None of them move until you do.
   > `pool_offering` A stranger in the reflection turns your coin over in their fingers and smiles at a joke you have not heard yet.
-  + `coin >= 1` Drop a coin into the pool -> [.Offering]
-  + `found_chalk` Draw a chalk circle at the pool's edge -> [.Circle]
-  + Return to the bell -> [..Bell]
+  + `coin >= 1` -> [Drop a coin into the pool](#.Offering)
+  + `found_chalk` -> [Draw a chalk circle at the pool's edge](#.Circle)
+  + -> [Return to the bell](#..Bell)
 
 ### Offering
   `coin := coin - 1`

@@ -165,6 +165,14 @@ function resolveTarget(transfer, fromScene) {
   return scenes[module + "#" + path];
 }
 
+function transferKey(transfer, fromScene, target) {
+  return fromScene.key + "->" + target.key + ":" + transfer.target.sceneRef;
+}
+
+function isWidgetScene(scene) {
+  return !!scene?.widget;
+}
+
 function go(transfer, fromScene) {
   const target = resolveTarget(transfer, fromScene);
   if (!target) {
@@ -174,14 +182,12 @@ function go(transfer, fromScene) {
       "</p>";
     return;
   }
-  if (transfer.kind === "widget") {
+  if (transfer.kind === "once")
+    consumed.add(transferKey(transfer, fromScene, target));
+  if (transfer.kind === "widget" || isWidgetScene(target)) {
     runWidget(target);
     return;
   }
-  if (transfer.kind === "once")
-    consumed.add(
-      fromScene.key + "->" + target.key + ":" + transfer.target.sceneRef,
-    );
   current = target;
   render();
 }
@@ -665,26 +671,19 @@ function render() {
       renderImage(section, stmt);
     } else if (stmt.kind === "Transition" && evalExpr(stmt.takeIf)) {
       const target = resolveTarget(stmt.transfer, current);
-      const key =
-        current.key +
-        "->" +
-        (target ? target.key : "?") +
-        ":" +
-        stmt.transfer.target.sceneRef;
-      if (stmt.transfer.kind === "widget") {
-        if (target) runWidget(target);
+      const key = target ? transferKey(stmt.transfer, current, target) : "?";
+      if (stmt.transfer.kind === "widget" || isWidgetScene(target)) {
+        if (target && (stmt.transfer.kind !== "once" || !consumed.has(key))) {
+          if (stmt.transfer.kind === "once") consumed.add(key);
+          runWidget(target);
+        }
       } else if (stmt.transfer.kind !== "once" || !consumed.has(key)) {
         pendingTransition = stmt;
         break;
       }
     } else if (stmt.kind === "Choice" && evalExpr(stmt.showIf)) {
       const target = resolveTarget(stmt.transfer, current);
-      const key =
-        current.key +
-        "->" +
-        (target ? target.key : "?") +
-        ":" +
-        stmt.transfer.target.sceneRef;
+      const key = target ? transferKey(stmt.transfer, current, target) : "?";
       if (stmt.transfer.kind !== "once" || !consumed.has(key))
         choices.push(stmt);
     }

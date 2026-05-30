@@ -1,14 +1,14 @@
 @widget std:inventory
 # Inventory
   > Your personal belongings
-  + `visited_start` Crescent letter w-> [.Letter]
-  + `map_known` Charcoal map w-> [.Map]
-  + `has_crate` Cloak seller's crate w-> [.Crate]
-  + `has_cloak` Dry cloak w-> [.DryCloak]
-  + `old_key` Blackened key w-> [.OldKey]
-  + `lantern_lit` Blue-lit lantern w-> [.Lantern]
-  + `found_chalk` White chalk w-> [.Chalk]
-  + `bronze_tongue` Bronze tongue w-> [.BronzeTongue]
+  + `visited_start` -> [Crescent letter](#.Letter)
+  + `map_known` -> [Charcoal map](#.Map)
+  + `has_crate` -> [Cloak seller's crate](#.Crate)
+  + `has_cloak` -> [Dry cloak](#.DryCloak)
+  + `old_key` -> [Blackened key](#.OldKey)
+  + `lantern_lit` -> [Blue-lit lantern](#.Lantern)
+  + `found_chalk` -> [White chalk](#.Chalk)
+  + `bronze_tongue` -> [Bronze tongue](#.BronzeTongue)
 
 @widget std:item
 ## Letter
