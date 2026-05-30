@@ -173,11 +173,25 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 				)
 			}
 
+			has_dialogue_speaker := false
 			for stmt in scene.statements {
 				if stmt.kind == .Image {
 					validate_image(result, base_dir, stmt)
+					has_dialogue_speaker = false
 					continue
 				}
+				if stmt.kind == .Dialogue {
+					validate_dialogue(
+						result,
+						base_dir,
+						module.file,
+						scene.path,
+						stmt,
+						&has_dialogue_speaker,
+					)
+					continue
+				}
+				has_dialogue_speaker = false
 				if stmt.kind != .Choice && stmt.kind != .Transition {
 					continue
 				}
@@ -242,6 +256,68 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 	}
 }
 
+validate_dialogue :: proc(
+	result: ^Build_Result,
+	base_dir, module_file, scene_path: string,
+	stmt: Statement,
+	has_dialogue_speaker: ^bool,
+) {
+	if len(stmt.speaker.scene_ref) == 0 {
+		if !has_dialogue_speaker^ {
+			append(
+				&result.errors,
+				Diagnostic{message = "dialogue continuation has no speaker", pos = stmt.pos},
+			)
+		}
+		return
+	}
+
+	target_module_path := module_file
+	if len(stmt.speaker.module_path) > 0 {
+		target_module_path = fmt.tprintf("%s%s", base_dir, stmt.speaker.module_path)
+	}
+	target_module := find_module(result.modules[:], target_module_path)
+	if target_module == nil {
+		append(
+			&result.errors,
+			Diagnostic {
+				message = fmt.tprintf(
+					"unresolved dialogue speaker module %q",
+					stmt.speaker.module_path,
+				),
+				pos = stmt.pos,
+			},
+		)
+		return
+	}
+	target_scene_path := resolve_target_scene_path(scene_path, stmt.speaker.scene_ref)
+	target_scene := find_scene(target_module.scenes[:], target_scene_path)
+	if target_scene == nil {
+		append(
+			&result.errors,
+			Diagnostic {
+				message = fmt.tprintf("unresolved dialogue speaker %q", target_scene_path),
+				pos = stmt.pos,
+			},
+		)
+		return
+	}
+	if target_scene.widget != "std:character" {
+		append(
+			&result.errors,
+			Diagnostic {
+				message = fmt.tprintf(
+					"dialogue speaker %q is not a std:character widget",
+					target_scene_path,
+				),
+				pos = stmt.pos,
+			},
+		)
+		return
+	}
+	has_dialogue_speaker^ = true
+}
+
 validate_image :: proc(result: ^Build_Result, base_dir: string, stmt: Statement) {
 	if len(stmt.image_src) == 0 || !lexer.starts_with(stmt.image_src, "/") {
 		return
@@ -281,7 +357,12 @@ has_scene :: proc(scenes: []Scene, path: string) -> bool {
 }
 
 is_builtin_widget :: proc(widget: string) -> bool {
-	return widget == "std:inventory" || widget == "std:item" || widget == "std:status"
+	return(
+		widget == "std:inventory" ||
+		widget == "std:item" ||
+		widget == "std:status" ||
+		widget == "std:character" \
+	)
 }
 
 resolve_target_scene_path :: proc(current_path, ref: string) -> string {
@@ -363,6 +444,8 @@ own_module_strings :: proc(module: ^Module) {
 			stmt.effect = clone_non_empty(stmt.effect)
 			stmt.transfer.target.scene_ref = clone_non_empty(stmt.transfer.target.scene_ref)
 			stmt.transfer.target.module_path = clone_non_empty(stmt.transfer.target.module_path)
+			stmt.speaker.scene_ref = clone_non_empty(stmt.speaker.scene_ref)
+			stmt.speaker.module_path = clone_non_empty(stmt.speaker.module_path)
 		}
 	}
 }
@@ -389,6 +472,8 @@ free_build_result :: proc(result: Build_Result) {
 				free_string_if_non_empty(stmt.effect)
 				free_string_if_non_empty(stmt.transfer.target.scene_ref)
 				free_string_if_non_empty(stmt.transfer.target.module_path)
+				free_string_if_non_empty(stmt.speaker.scene_ref)
+				free_string_if_non_empty(stmt.speaker.module_path)
 			}
 			delete(scene.statements)
 		}

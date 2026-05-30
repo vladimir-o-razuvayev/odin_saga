@@ -34,6 +34,7 @@ parser :: struct {
 	parse_statement:        proc(p: ^Parser, line: Source_Line, scene: ^Scene),
 	parse_passage:          proc(p: ^Parser, line: Source_Line) -> Statement,
 	parse_image:            proc(p: ^Parser, line: Source_Line) -> Statement,
+	parse_dialogue:         proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_choice:           proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_transition:       proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_effect:           proc(p: ^Parser, line: Source_Line) -> Statement,
@@ -166,7 +167,9 @@ parser :: struct {
 		text := line.text
 		stmt: Statement
 
-		if lexer.starts_with(text, ">") {
+		if lexer.starts_with(text, ">>") {
+			stmt = parser.parse_dialogue(p, line, scene.depth)
+		} else if lexer.starts_with(text, ">") {
 			stmt = parser.parse_passage(p, line)
 		} else if lexer.starts_with(text, "![") {
 			stmt = parser.parse_image(p, line)
@@ -215,6 +218,46 @@ parser :: struct {
 			parser.append_error(p, line.pos, "expected image path")
 		}
 		return Statement{kind = .Image, text = alt, image_src = src, pos = line.pos}
+	},
+	parse_dialogue = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
+		rest := lexer.trim(line.text[2:])
+		show_if := ""
+		parsed := parser.parse_leading_expr(rest)
+		if parsed.ok {
+			show_if = parsed.expr
+			rest = lexer.trim(parsed.rest)
+		}
+
+		speaker := Target{}
+		if len(rest) > 0 && rest[0] == '[' {
+			close := lexer.index_of(rest, "]")
+			if close >= 0 {
+				target_end := close + 1
+				after_target := lexer.trim(rest[target_end:])
+				if len(after_target) > 0 && after_target[0] == '(' {
+					module_end := lexer.index_of(after_target, ")")
+					if module_end >= 0 {
+						// Account for trimmed text by rebuilding from the target prefix.
+						target_end = len(rest) - len(after_target) + module_end + 1
+					}
+				}
+
+				target_text := rest[:target_end]
+				target, ok := parser.parse_target(p, target_text, line.pos, current_depth)
+				if ok {
+					speaker = target
+					rest = lexer.trim(rest[target_end:])
+				}
+			}
+		}
+
+		return Statement {
+			kind = .Dialogue,
+			text = rest,
+			show_if = show_if,
+			speaker = speaker,
+			pos = line.pos,
+		}
 	},
 	parse_choice = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
 		rest := lexer.trim(line.text[1:])
@@ -534,6 +577,26 @@ parser_parse_v0_story_test :: proc(t: ^testing.T) {
 }
 
 @(test)
+parser_dialogue_syntax_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test(
+		"# Main\n>> [BlueScarf](\"/characters.saga\") Hello.\n>>\n>> `met` Again.\n",
+	)
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	testing.expect(t, len(result.errors) == 0)
+	first := result.module.scenes[0].statements[0]
+	testing.expect(t, first.kind == .Dialogue)
+	testing.expect(t, first.speaker.scene_ref == "BlueScarf")
+	testing.expect(t, first.speaker.module_path == "/characters.saga")
+	testing.expect(t, first.text == "Hello.")
+	third := result.module.scenes[0].statements[2]
+	testing.expect(t, third.show_if == "met")
+	testing.expect(t, third.text == "Again.")
+}
+
+@(test)
 parser_image_syntax_test :: proc(t: ^testing.T) {
 	result, lexed := parse_source_for_test("# Main\n![Alt text](/assets/images/test.png)\n")
 	defer free_parse_result(result)
@@ -592,6 +655,7 @@ parser_parses_test_drive_examples_test :: proc(t: ^testing.T) {
 		"examples/test_drive/ruins.saga",
 		"examples/test_drive/bell.saga",
 		"examples/test_drive/ending.saga",
+		"examples/test_drive/characters.saga",
 		"examples/test_drive/widgets/inventory.saga",
 	}
 

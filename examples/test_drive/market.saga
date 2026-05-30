@@ -40,7 +40,8 @@
 
 ### LetterTalk
   `trust_blue_scarf := true`
-  > She folds the mirror shut. "Then you are already late. Find the archivist's mark beneath the tower."
+  > She folds the mirror shut.
+  >> [BlueScarf]("/characters.saga") Then you are already late. Find the archivist's mark beneath the tower.
   + Ask what the mark looks like *-> [..MarkDescription]
   + Return to the market -> [..]
 

@@ -137,6 +137,18 @@ A greater-than sign `>` is used for passages shown on screen:
 
 In a passage, an optional condition immediately after `>` controls whether the passage is displayed. If the condition is falsey, the passage is skipped and scene evaluation continues to the next statement.
 
+## Dialogue
+
+A double greater-than sign `>>` adds character dialogue. The first line in a dialogue bubble names a speaker target. Consecutive `>>` lines without a speaker continue the same bubble. Any non-dialogue statement ends the bubble.
+
+```saga
+>> [BlueScarf]("/characters.saga") Then you are already late.
+>>
+>> `trust_blue_scarf` You came back. Good.
+```
+
+Speaker targets must resolve to scenes decorated with `@widget std:character`.
+
 ## Image
 
 Markdown image syntax renders an image from the story bundle:
@@ -326,12 +338,14 @@ heading_marker     = "#" { "#" }
 
 statement          = passage
                    | image
+                   | dialogue
                    | choice
                    | transition
                    | effect
 
 passage            = ">" space show_condition? text
 image              = "![" alt_text "](" image_path ")"
+dialogue           = ">>" space show_condition? speaker_target? text
 
 choice             = "+" space show_condition? choice_text space arrow space enable_condition? target
 

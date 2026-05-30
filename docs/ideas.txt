@@ -6,11 +6,6 @@ becomes
 
 ---
 
-images are rendered using markdown syntax.
-![Tux, the Linux mascot](/assets/images/tux.png)
-
----
-
 Like in markdown, text in block qoutes can uses some markdown syntax:
 
 Blockquotes with Other Elements

@@ -83,6 +83,8 @@ html :: struct {
 		strings.write_string(sb, html.js_string(stmt.effect))
 		strings.write_string(sb, ",transfer:")
 		html.write_transfer(sb, stmt.transfer)
+		strings.write_string(sb, ",speaker:")
+		html.write_transfer(sb, Transfer{target = stmt.speaker})
 		strings.write_string(sb, "}")
 	},
 	write_transfer = proc(sb: ^strings.Builder, transfer: Transfer) {
@@ -241,7 +243,7 @@ function runWidget(scene) {
   if (scene.widget === 'std:inventory' || scene.widget === 'std:status') {
     activeDockWidgets.add(scene.key);
     renderDock();
-  } else if (scene.widget === 'std:item') {
+  } else if (scene.widget === 'std:item' || scene.widget === 'std:character') {
     openItemModal(scene);
   }
 }
@@ -410,12 +412,99 @@ function armButton(button, enabled, onClick) {
   });
 }
 
+function characterImage(scene) {
+  for (const stmt of scene.statements) {
+    if (stmt.kind === 'Image') return stmt;
+  }
+  return null;
+}
+
+function renderDialogueBlock(statements, start, container, fromScene) {
+  const first = statements[start];
+  const speaker = resolveTarget(first.speaker, fromScene);
+  const bubble = document.createElement('div');
+  bubble.className = 'speech-bubble';
+  bubble.style.display = 'grid';
+  bubble.style.gridTemplateColumns = '48px 1fr';
+  bubble.style.gap = '.75rem';
+  bubble.style.alignItems = 'start';
+  bubble.style.background = '#202634';
+  bubble.style.border = '1px solid #343c4f';
+  bubble.style.borderRadius = '14px';
+  bubble.style.padding = '.85rem';
+  bubble.style.margin = '1rem 0';
+
+  const avatarSlot = document.createElement('div');
+  const image = speaker ? characterImage(speaker) : null;
+  if (image) {
+    const img = document.createElement('img');
+    img.src = resolveAssetPath(image.imageSrc);
+    img.alt = image.text;
+    img.style.width = '48px';
+    img.style.height = '48px';
+    img.style.borderRadius = '50%';
+    img.style.objectFit = 'cover';
+    avatarSlot.appendChild(img);
+  } else {
+    avatarSlot.textContent = speaker ? speaker.name.slice(0, 1) : '?';
+    avatarSlot.style.width = '48px';
+    avatarSlot.style.height = '48px';
+    avatarSlot.style.borderRadius = '50%';
+    avatarSlot.style.display = 'grid';
+    avatarSlot.style.placeItems = 'center';
+    avatarSlot.style.background = '#2a3142';
+    avatarSlot.style.color = 'var(--accent)';
+    avatarSlot.style.fontWeight = '700';
+  }
+  bubble.appendChild(avatarSlot);
+
+  const body = document.createElement('div');
+  const name = document.createElement('div');
+  name.textContent = speaker ? speaker.name : 'Unknown';
+  name.style.color = 'var(--accent)';
+  name.style.fontWeight = '700';
+  name.style.marginBottom = '.35rem';
+  body.appendChild(name);
+
+  let i = start;
+  let paragraph = null;
+  while (i < statements.length) {
+    const stmt = statements[i];
+    if (stmt.kind !== 'Dialogue') break;
+    if (i !== start && stmt.speaker.target.sceneRef) break;
+    if (evalExpr(stmt.showIf)) {
+      if (stmt.text === '') {
+        paragraph = null;
+      } else {
+        if (paragraph == null) {
+          paragraph = document.createElement('p');
+          paragraph.className = 'passage';
+          body.appendChild(paragraph);
+        } else {
+          paragraph.appendChild(document.createTextNode(' '));
+        }
+        paragraph.appendChild(document.createTextNode(stmt.text));
+      }
+    }
+    i += 1;
+  }
+
+  bubble.appendChild(body);
+  container.appendChild(bubble);
+  return i;
+}
+
 function renderWidgetScene(scene, container, surface) {
   const title = document.createElement(surface === 'dock' ? 'h2' : 'h1');
   title.textContent = scene.name;
   container.appendChild(title);
   const choices = [];
-  for (const stmt of scene.statements) {
+  for (let index = 0; index < scene.statements.length;) {
+    const stmt = scene.statements[index];
+    if (stmt.kind === 'Dialogue') {
+      index = renderDialogueBlock(scene.statements, index, container, scene);
+      continue;
+    }
     if (stmt.kind === 'Effect') runEffect(stmt.effect);
     else if (stmt.kind === 'Passage' && evalExpr(stmt.showIf)) {
       const p = document.createElement('p');
@@ -429,6 +518,7 @@ function renderWidgetScene(scene, container, surface) {
     } else if (stmt.kind === 'Choice' && evalExpr(stmt.showIf)) {
       choices.push(stmt);
     }
+    index += 1;
   }
   if (choices.length > 0) {
     const div = document.createElement('div');
@@ -463,8 +553,13 @@ function render() {
 
   let choices = [];
   let pendingTransition = null;
-  for (const stmt of current.statements) {
+  for (let index = 0; index < current.statements.length;) {
+    const stmt = current.statements[index];
     if (ended) break;
+    if (stmt.kind === 'Dialogue') {
+      index = renderDialogueBlock(current.statements, index, section, current);
+      continue;
+    }
     if (stmt.kind === 'Effect') runEffect(stmt.effect);
     else if (stmt.kind === 'Passage' && evalExpr(stmt.showIf)) {
       const p = document.createElement('p');
@@ -487,6 +582,7 @@ function render() {
       const key = current.key + '->' + (target ? target.key : '?') + ':' + stmt.transfer.target.sceneRef;
       if (stmt.transfer.kind !== 'once' || !consumed.has(key)) choices.push(stmt);
     }
+    index += 1;
   }
 
   if (pendingTransition && !ended) {

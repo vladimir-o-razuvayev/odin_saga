@@ -38,6 +38,7 @@ Transfer :: struct {
 Statement_Kind :: enum {
 	Passage,
 	Image,
+	Dialogue,
 	Choice,
 	Transition,
 	Effect,
@@ -52,6 +53,7 @@ Statement :: struct {
 	take_if:   string,
 	effect:    string,
 	transfer:  Transfer,
+	speaker:   Target,
 	pos:       Source_Pos,
 }
 
