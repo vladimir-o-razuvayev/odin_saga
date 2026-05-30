@@ -16,6 +16,7 @@ The project is approaching a v0.1 release. The current focus is a compact, autho
 - Dock widgets such as Inventory and Contacts.
 - Modal widgets for items and character profiles.
 - Inline character dialogue bubbles with portraits.
+- Local browser save/load slots via `localStorage`.
 - Compile-time validation for targets, widgets, dialogue speakers, and image assets.
 
 ## Quick start
@@ -147,7 +148,7 @@ odin test src
 
 Saga is not yet v0.1. Notable missing pieces include:
 
-- save/load,
+- save import/export,
 - title/authorship metadata,
 - richer release packaging,
 - and broader documentation/examples.

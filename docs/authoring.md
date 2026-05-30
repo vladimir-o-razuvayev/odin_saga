@@ -207,6 +207,10 @@ Built-in widget renderers:
 
 The runtime automatically shows `std:contacts` widgets in the dock. Other dock widgets can be activated with `w->`.
 
+## Local saves
+
+Generated stories include local browser save slots in the Settings dock widget. Saves are stored with `localStorage` in the reader's browser and include the current scene, state variables, consumed one-shot transitions, and active dock widgets. Import/export saves are not implemented yet.
+
 ## Character profiles and dialogue
 
 Character profiles are `std:character` widgets:
@@ -259,7 +263,7 @@ odin run src -- examples/test_drive/main.saga examples/test_drive/out.html
 Current v0 limitations to keep in mind:
 
 - Statements are single-line.
-- There is no save/load yet.
+- Save/load is local browser `localStorage` only; there is no import/export yet.
 - Story metadata such as title and author is not implemented yet.
 - The generated runtime evaluates expressions as JavaScript.
 - Packaging/install-path behavior for `src/runtime.js` and `src/style.css` still needs a release pass.

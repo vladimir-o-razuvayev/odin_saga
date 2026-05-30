@@ -12,6 +12,9 @@ const activeDockWidgets = new Set();
 let current = null;
 let ended = false;
 
+const saveSlotCount = 3;
+const saveStoragePrefix = "saga:v0.1:" + location.pathname + ":";
+
 const storyRoot =
   story.modules[0]?.file.slice(
     0,
@@ -270,21 +273,161 @@ function renderStateList(container) {
   }
 }
 
+function saveStorageKey(slot) {
+  return saveStoragePrefix + "slot:" + slot;
+}
+
+function createSaveData() {
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    current: current?.key ?? null,
+    state: { ...state },
+    consumed: Array.from(consumed),
+    activeDockWidgets: Array.from(activeDockWidgets),
+  };
+}
+
+function readSaveSlot(slot) {
+  try {
+    const text = localStorage.getItem(saveStorageKey(slot));
+    return text ? JSON.parse(text) : null;
+  } catch (err) {
+    console.warn("save slot read failed:", slot, err);
+    return null;
+  }
+}
+
+function saveSlot(slot) {
+  try {
+    localStorage.setItem(
+      saveStorageKey(slot),
+      JSON.stringify(createSaveData()),
+    );
+    openSaveModal();
+  } catch (err) {
+    console.warn("save failed:", err);
+    alert("Save failed. Your browser may be blocking localStorage.");
+  }
+}
+
+function restoreState(savedState) {
+  for (const key of Object.keys(state)) delete state[key];
+  if (!savedState || typeof savedState !== "object") return;
+  for (const [key, value] of Object.entries(savedState)) state[key] = value;
+}
+
+function restoreStringSet(set, values, knownScenesOnly) {
+  set.clear();
+  if (!Array.isArray(values)) return;
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    if (knownScenesOnly && !scenes[value]) continue;
+    set.add(value);
+  }
+}
+
+function loadSlot(slot) {
+  const data = readSaveSlot(slot);
+  if (!data) return;
+  const scene = scenes[data.current];
+  if (!scene) {
+    alert("This save points to a scene that no longer exists.");
+    return;
+  }
+  current = scene;
+  ended = false;
+  restoreState(data.state);
+  restoreStringSet(consumed, data.consumed, false);
+  restoreStringSet(activeDockWidgets, data.activeDockWidgets, true);
+  closeModal();
+  render();
+}
+
+function formatSaveTime(value) {
+  if (!value) return "Empty slot";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Saved";
+  return "Saved " + date.toLocaleString();
+}
+
 function renderSettingsCard() {
   const card = document.createElement("section");
   card.className = "dock-card";
   card.innerHTML = "<h2>Settings</h2>";
-  const button = document.createElement("button");
-  button.textContent = "Debug";
-  button.style.border = "0";
-  button.style.background = "transparent";
-  button.style.padding = "0";
-  button.style.color = "var(--muted)";
-  button.style.textDecoration = "underline";
-  button.style.textUnderlineOffset = ".2em";
-  armButton(button, true, openDebugModal);
-  card.appendChild(button);
+
+  const actions = document.createElement("div");
+  actions.className = "settings-actions";
+
+  const saves = document.createElement("button");
+  saves.className = "link-button";
+  saves.textContent = "Saves";
+  armButton(saves, true, openSaveModal);
+  actions.appendChild(saves);
+
+  const debug = document.createElement("button");
+  debug.className = "link-button";
+  debug.textContent = "Debug";
+  armButton(debug, true, openDebugModal);
+  actions.appendChild(debug);
+
+  card.appendChild(actions);
   dock.appendChild(card);
+}
+
+function openSaveModal() {
+  modal.hidden = false;
+  modal.innerHTML = "";
+  const card = document.createElement("section");
+  card.className = "modal-card";
+  addModalCloseButton(card);
+
+  const title = document.createElement("h1");
+  title.textContent = "Settings";
+  card.appendChild(title);
+
+  const list = document.createElement("div");
+  list.className = "save-slots";
+  card.appendChild(list);
+
+  for (let slot = 1; slot <= saveSlotCount; slot += 1) {
+    const data = readSaveSlot(slot);
+    const row = document.createElement("div");
+    row.className = "save-slot";
+
+    const info = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "save-slot-title";
+    name.textContent = "Slot " + slot;
+    info.appendChild(name);
+
+    const meta = document.createElement("div");
+    meta.className = "save-slot-meta";
+    meta.textContent = data
+      ? formatSaveTime(data.savedAt) +
+        (data.current ? " · " + data.current : "")
+      : "Empty slot";
+    info.appendChild(meta);
+    row.appendChild(info);
+
+    const actions = document.createElement("div");
+    actions.className = "save-slot-actions";
+
+    const save = document.createElement("button");
+    save.textContent = "Save";
+    armButton(save, true, () => saveSlot(slot));
+    actions.appendChild(save);
+
+    const load = document.createElement("button");
+    load.textContent = "Load";
+    armButton(load, !!data, () => loadSlot(slot));
+    actions.appendChild(load);
+
+    row.appendChild(actions);
+    list.appendChild(row);
+  }
+
+  modal.appendChild(card);
 }
 
 function openDebugModal() {

@@ -63,6 +63,23 @@ body {
     width: 100%;
     display: block;
 }
+.settings-actions {
+    display: grid;
+    gap: 0.45rem;
+    justify-items: start;
+}
+.link-button {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+.link-button:hover:not(:disabled) {
+    border-color: transparent;
+    color: var(--accent);
+}
 .state-list {
     display: grid;
     gap: 0.55rem;
@@ -178,6 +195,36 @@ button:disabled {
 .modal-close {
     float: right;
 }
+.save-slots {
+    display: grid;
+    gap: 0.8rem;
+}
+.save-slot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    border: 1px solid #2b3140;
+    border-radius: 14px;
+    padding: 1rem;
+    background: #181d28;
+}
+.save-slot-title {
+    font-weight: 700;
+}
+.save-slot-meta {
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+.save-slot-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.save-slot-actions button {
+    padding: 0.55rem 0.75rem;
+}
 @media (max-width: 900px) {
     .dock {
         position: static;
@@ -188,5 +235,11 @@ button:disabled {
     main {
         padding: 24px 16px;
         margin: 0 auto;
+    }
+    .save-slot {
+        grid-template-columns: 1fr;
+    }
+    .save-slot-actions {
+        justify-content: stretch;
     }
 }
