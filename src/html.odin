@@ -5,11 +5,23 @@ import "core:os"
 import "core:strings"
 import "core:testing"
 
+read_support_file :: proc(name, fallback: string) -> string {
+	paths := [?]string{fmt.tprintf("src/%s", name), fmt.tprintf("odin_saga/src/%s", name)}
+	for path in paths {
+		data, ok := os.read_entire_file(path, context.temp_allocator)
+		if ok {
+			return string(data)
+		}
+	}
+	return fallback
+}
+
 html :: struct {
 	generate:        proc(modules: []Module, title := "Odin Saga") -> string,
 	write_statement: proc(sb: ^strings.Builder, stmt: Statement),
 	write_transfer:  proc(sb: ^strings.Builder, transfer: Transfer),
 	runtime_script:  proc() -> string,
+	stylesheet:      proc() -> string,
 	js_string:       proc(s: string) -> string,
 	html_text:       proc(s: string) -> string,
 } {
@@ -24,10 +36,7 @@ html :: struct {
 		strings.write_string(&sb, "<title>")
 		strings.write_string(&sb, html.html_text(title))
 		strings.write_string(&sb, "</title>\n<style>\n")
-		strings.write_string(
-			&sb,
-			":root{color-scheme:dark;--bg:#111318;--panel:#1b1f2a;--dock:#151923;--text:#eceff4;--muted:#aab1c2;--accent:#8fbcbb;--disabled:#596070}body{margin:0;background:var(--bg);color:var(--text);font:18px/1.55 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.dock{position:fixed;inset:0 auto 0 0;width:280px;box-sizing:border-box;padding:24px 18px;background:var(--dock);border-right:1px solid #2b3140;overflow:auto}.dock-card{background:#1b1f2a;border:1px solid #2b3140;border-radius:14px;padding:14px;margin-bottom:14px}.dock h2{margin:0 0 1rem;font-size:1rem;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}.dock h3{margin:1.25rem 0 .75rem;font-size:.85rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.dock-menu{display:grid;gap:.65rem}.dock-button{width:100%;display:block}.state-list{display:grid;gap:.55rem}.state-empty{color:var(--muted);font-size:.9rem}.state-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;align-items:baseline;border-bottom:1px solid #252b38;padding-bottom:.45rem}.state-key{min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem}.state-value{max-width:130px;overflow:hidden;text-overflow:ellipsis;color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;text-align:right}main{max-width:760px;margin:0 auto;padding:48px 20px 48px 320px}.scene{display:none;background:var(--panel);border:1px solid #2b3140;border-radius:18px;padding:28px;box-shadow:0 20px 60px #0006}.scene.active{display:block}h1{margin:0 0 20px;font-size:2rem}.passage{margin:0 0 1rem}.choices{display:grid;gap:.75rem;margin-top:1.5rem}button{appearance:none;text-align:left;border:1px solid #3a4254;border-radius:12px;background:#242a36;color:var(--text);padding:.8rem 1rem;font:inherit;cursor:pointer}button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}button:disabled{color:var(--disabled);cursor:not-allowed}.end{margin-top:1.5rem;color:var(--accent);font-weight:700}.missing{color:#ffb4ab}.meta{color:var(--muted);font-size:.9rem;margin-top:1.5rem}.modal{position:fixed;inset:0;display:grid;place-items:center;background:#0008;padding:24px}.modal[hidden]{display:none}.modal-card{width:min(620px,100%);background:var(--panel);border:1px solid #3a4254;border-radius:18px;padding:24px;box-shadow:0 20px 80px #000}.modal-close{float:right}@media(max-width:900px){.dock{position:static;width:auto;border-right:0;border-bottom:1px solid #2b3140}main{padding:24px 16px;margin:0 auto}}\n",
-		)
+		strings.write_string(&sb, html.stylesheet())
 		strings.write_string(
 			&sb,
 			"</style>\n</head>\n<body>\n<aside id=\"dock\" class=\"dock\"></aside>\n<main id=\"app\"></main>\n<div id=\"modal\" class=\"modal\" hidden></div>\n<script>\n",
@@ -105,14 +114,16 @@ html :: struct {
 		strings.write_string(sb, "}}")
 	},
 	runtime_script = proc() -> string {
-		paths := [?]string{"src/runtime.js", "odin_saga/src/runtime.js"}
-		for path in paths {
-			data, ok := os.read_entire_file(path, context.temp_allocator)
-			if ok {
-				return string(data)
-			}
-		}
-		return "throw new Error('Unable to load Saga runtime from src/runtime.js');\n"
+		return read_support_file(
+			"runtime.js",
+			"throw new Error('Unable to load Saga runtime from src/runtime.js');\n",
+		)
+	},
+	stylesheet = proc() -> string {
+		return read_support_file(
+			"style.css",
+			"body{font-family:sans-serif}\n.missing{color:red}\n",
+		)
 	},
 	js_string = proc(s: string) -> string {
 		sb := strings.builder_make(context.temp_allocator)
@@ -170,5 +181,6 @@ html_generates_document_test :: proc(t: ^testing.T) {
 	testing.expect(t, lexer.index_of(doc, "<!doctype html>") == 0)
 	testing.expect(t, lexer.index_of(doc, "Hello <world>") >= 0)
 	testing.expect(t, lexer.index_of(doc, "function render()") >= 0)
+	testing.expect(t, lexer.index_of(doc, ".dock-card") >= 0)
 	testing.expect(t, lexer.index_of(doc, "%!(MISSING") < 0)
 }
