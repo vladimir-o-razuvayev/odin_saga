@@ -1,16 +1,19 @@
 # Gate
   `ruins_visits++`
   > The watchtower gate leans open between two stones carved like sleeping dogs.
-  > `lantern_lit` Your lantern paints warm teeth along the archway stones.
+  > Their muzzles are worn smooth by rain, but their eyes remain sharp, watching the road behind you instead of the ruin ahead.
+  > `lantern_lit` Your lantern paints warm teeth along the archway stones. The dark beyond the gate retreats one careful inch.
   *-> `!lantern_lit && !heard_bell_rumor` [.LoseNerve]
   -> [.Approach]
 
 ## LoseNerve
   > The darkness beneath the arch presses against your face until you step back gasping.
+  > For a moment you are certain the tower is breathing, and that it has mistaken you for something it once swallowed.
   + Return to the village -> [Village]("/main.saga")
 
 ## Approach
   > Your lantern throws gold over a stair spiraling down under the tower.
+  > The steps are slick but unworn. No one has used them in years, or else everyone who used them learned to leave no mark.
   + Descend into the courtyard -> [Courtyard]
   + Search the gatehouse -> [.Gatehouse]
   + Return to Brindlewick -> [Village]("/main.saga")
@@ -18,17 +21,20 @@
 ### Gatehouse
   `found_chalk ?= false`
   > The gatehouse roof has collapsed, but a dry shelf remains beneath a slab of slate.
+  > Old watch rosters have melted into gray pulp. A mug sits upright in the dust, full of rain that never reached it.
   + Take the white chalk *-> [.TakeChalk]
   + Return to the gate -> [..]
 
 #### TakeChalk
   `found_chalk := true`
   > You pocket a stick of white chalk. It leaves a moon-pale smear on your thumb.
+  > The smear does not wash away when rain touches it. If anything, it brightens.
   -> [Gate.Approach]
 
 # Courtyard
   > The sunken courtyard lies open to the rain. Four doors wait under four broken arches.
-  > `found_chalk` The chalk in your pocket leaves a pale crescent on your fingertips.
+  > Grass grows between the stones in thin, colorless blades. The place feels less abandoned than paused.
+  > `found_chalk` The chalk in your pocket leaves a pale crescent on your fingertips whenever you touch it.
   + Inspect the well -> [.Well]
   + Enter the archive -> [.Archive]
   + `old_key` Try the lower door -> [.LowerDoor]
@@ -38,56 +44,66 @@
 ## Well
   `well_echo = rand(100)`
   > You lean over the well. Far below, water repeats your breathing.
+  > The echo is almost faithful, but not quite. It exhales half a beat after you stop.
   *-> `well_echo > 70` [.CoinGlimmer]
   -> [.QuietWater]
 
 ### CoinGlimmer
   `coin := coin + 1`
   > Something bright spins up from the dark, lands at your feet, and becomes a coin.
+  > It is dry. It is warm. The face stamped on it has been scratched away.
   -> [..QuietWater]
 
 ### QuietWater
   > The well gives nothing back but the small sound of rain.
+  > Still, when you step away, your reflection lingers at the rim for one second too long.
   -> [Courtyard]
 
 ## Archive
   > Shelves of stone tablets lean against the walls. Most are blank with age.
-  > `knows_mark` You keep searching for a bell inside a closed eye.
+  > The air tastes of limestone dust and sealed rooms. Your footsteps come back to you from the wrong corners.
+  > `knows_mark` You keep searching for a bell inside a closed eye, the shape Blue Scarf pressed into your thoughts like a thumbprint.
   + `knows_mark` Look for the archivist's mark -> [.MarkedTablet]
   + Search randomly -> [.RandomTablet]
   + Return to the courtyard -> [Courtyard]
 
 ### MarkedTablet
   `archive_mark := true`
-  > You find the bell-in-eye mark. When you knock twice, a hidden drawer opens.
+  > You find the bell-in-eye mark on a tablet tucked behind three blank stones.
+  > When you knock twice, a hidden drawer opens with a sigh of old air and powdered bronze.
   + Take the bronze tongue *-> [.BronzeTongue]
   + Leave the drawer alone -> [..]
 
 #### BronzeTongue
   `bronze_tongue := true`
   > The bronze tongue is cold and heavy, made for a bell that should not still exist.
+  > It vibrates once in your hand, a silent note you feel in your teeth.
   -> [Courtyard.Archive]
 
 ### RandomTablet
   `dust_count++`
   > Dust coats your hands. The tablets say nothing you understand.
+  > You find lists of names, then lists of bells, then a list where every name has been carefully chiseled away.
   + `dust_count < 3` Keep searching -> [.]
   + Give up -> [..]
 
 ## SealedDoor
   > The lower door has no handle, only a keyhole shaped like a crooked tooth.
+  > Rain runs down its face and parts around the keyhole, refusing to enter.
   + Return to the courtyard -> [Courtyard]
 
 ## LowerDoor
   > The blackened key turns with a sound like a cough.
-  > `lower_door_hint` You remember the locksmith's warning and work slowly.
+  > `lower_door_hint` You remember the locksmith's warning and work slowly, letting oil and patience do what force would ruin.
   *-> `lower_door_hint && lantern_lit` [.OiledLock]
   -> [.StubbornLock]
 
 ### StubbornLock
   > The lock resists you. Rust flakes fall like old scabs.
+  > Something on the other side shifts closer, then thinks better of it.
   + Return to the courtyard -> [Courtyard]
 
 ### OiledLock
   > The lock remembers the key. The lower door opens inward.
+  > The stair beyond is dry, and the air rising from it smells faintly of metal, rainless stone, and old thunder.
   + Enter the bell chamber -> [Chamber]("/bell.saga")

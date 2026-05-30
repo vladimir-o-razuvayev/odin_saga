@@ -4,8 +4,9 @@
   `lantern_lit ?= false`
   `coin ?= 0`
   w-> [Contacts]("/widgets/contacts.saga")
-  > Rain taps against the shutters of the Hollow Bell inn.
-  > `!visited_start` A sealed letter waits on your table. Its wax bears the mark of a crescent moon.
+  > Rain taps against the shutters of the Hollow Bell inn, patient as fingers on a tabletop.
+  > The common room below has gone quiet in that late-afternoon way when everyone is listening to the weather and pretending not to.
+  > `!visited_start` A sealed letter waits on your table. Its wax bears the mark of a crescent moon, pressed so deep the paper puckers around it.
   + Open the letter *-> [.Letter]
   + Step into the village -> [Village]
 
@@ -15,13 +16,15 @@
   w-> [Inventory]("/widgets/inventory.saga")
   ![Letter with crescent seal]("/assets/images/letter.png")
   > The letter is brief: "Find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
-  > A charcoal map is sketched beneath the warning.
+  > The ink looks fresh until you tilt the page, when it browns like something written years ago and only now remembered.
+  > A charcoal map is sketched beneath the warning: village square, northern road, ruined tower, and one black circle where no road is drawn.
   -> [Village]
 
 # Village
   `village_visits++`
-  > The village of Brindlewick curls around a muddy square. Lanterns glow like fireflies in the rain.
-  > `map_known` The charcoal map from the letter is already soft at the creases.
+  > The village of Brindlewick curls around a muddy square. Lanterns glow like fireflies in the rain, each one haloed in gold.
+  > Roof gutters mutter into barrels. Somewhere a goat complains with the exhausted dignity of an old magistrate.
+  > `map_known` The charcoal map from the letter is already soft at the creases, but the marked road seems darker than the rest no matter how often you fold it away.
   + Visit the market square -> [Square]("/market.saga")
   + `map_known` Walk to the old watchtower road -> [Road]
   + `!map_known` Ask around for directions -> [.Directions]
@@ -32,43 +35,52 @@
   `map_known := true`
   `met_fishmonger := true`
   ![Fishmonger]("/assets/images/fishmonger.png")
-  > A fishmonger points with his pipe.
+  > A fishmonger points with his pipe, drawing a wavering line through the rain as if sketching the road in smoke.
+  > His stall smells of river mud, salt, and sharp green herbs packed around silver fish.
   >> [Fishmonger]("/characters.saga") Old road is north. Mind the stones. They listen.
+  >> If a milestone turns its back on you, don't argue with it. Just thank it and keep walking.
   -> [Village]
 
 ## GateWatch
   `met_watchman := true`
   ![Watchman]("/assets/images/watchman.png")
-  > The watchman leans on his spear beneath the village arch.
-  > `old_key` His eyes flick to the blackened key in your hand, then quickly away.
+  > The watchman leans on his spear beneath the village arch, rain ticking from the brim of his iron cap.
+  > His eyes move over you, the square, the road, and back again, measuring which of you is most likely to cause trouble.
+  > `old_key` His eyes flick to the blackened key in your hand, then quickly away, as if the key has noticed him first.
   + Ask about the watchtower -> [.WatchtowerRumor]
   + Return to the square -> [Village]
 
 ### WatchtowerRumor
   `heard_bell_rumor := true`
   >> [Watchman]("/characters.saga") No bell there now. Not above ground, anyway.
+  >> Folk used to say the tower rang for fog, fire, and weddings. Then one winter it rang all by itself for three nights.
+  >> After that, people found reasons to build their houses facing south.
   + Press him for more *-> [..OldKey]
   + Thank him and leave -> [..]
 
 ### OldKey
   `old_key := true`
-  > He slips a blackened key into your palm.
+  > He slips a blackened key into your palm. It is heavier than it should be and leaves an oily crescent across your skin.
   >> [Watchman]("/characters.saga") If the lower door still stands, this might remember it.
+  >> Don't force it. Old locks take offense, and some of them have long memories.
   -> [..]
 
 # Road
   `road_steps++`
-  > The northern road narrows between leaning birches. Somewhere ahead, stone shifts against stone.
-  > `has_cloak` Rain beads on your borrowed cloak and rolls away instead of finding your collar.
+  > The northern road narrows between leaning birches. Their white trunks gleam like bones washed clean by rain.
+  > Somewhere ahead, stone shifts against stone, patient and deliberate, though the air is perfectly still.
+  > `has_cloak` Rain beads on your borrowed cloak and rolls away instead of finding your collar. For once, Brindlewick's weather fails to get what it wants.
   *-> `road_steps == 1` [.FirstSign]
   -> `lantern_lit` [Gate]("/ruins.saga")
   -> [.DarkRoad]
 
 ## FirstSign
   > A milestone turns as you pass it, revealing an arrow carved into its back.
+  > Lichen flakes from the groove. The arrow points not down the road but slightly beneath it.
   -> [Road]
 
 ## DarkRoad
   > Without a lit lantern, the trees knit themselves into a wall of black needles.
+  > The road remains under your boots, but every step sounds as if it lands in a room with a ceiling.
   + Return to Brindlewick -> [Village]
   + `heard_bell_rumor` Try the road anyway -> [Gate]("/ruins.saga")

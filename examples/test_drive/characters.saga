@@ -3,33 +3,45 @@
   ![Blue scarf portrait]("/assets/images/blue_scarf.png")
   > The woman with the blue scarf.
   > She watches crowds through reflections and seems to know which questions you have not asked yet.
+  > Her brass mirror is polished bright enough to hold more than faces. When she tilts it, you glimpse streets behind you that are not there when you turn.
+  > She speaks like someone rationing matches in the dark: sparingly, carefully, and only when flame matters.
 
 @widget std:character
 # CloakSeller
   ![Cloak seller portrait]("/assets/images/cloak_seller.png")
   > A narrow market seller with rainwater in his cuffs and arithmetic behind his eyes.
   > He treats every errand like a bargain already half-won.
+  > His stall is patched from three kinds of canvas, each allegedly waterproof and each disproving the claim in its own way.
+  > He knows who owes whom in Brindlewick, which favors can be carried in crates, and which smiles cost extra.
 
 @widget std:character
 # Fishmonger
   ![Fishmonger portrait]("/assets/images/fishmonger.png")
   > A pipe-smoking fishmonger who knows every road out of Brindlewick by rumor, weather, and smell.
   > He points as if the village itself might change direction while no one is looking.
+  > His fish are arranged with military precision. His advice is not, but it has the slippery shine of truth.
+  > He claims the northern stones listen better than most customers and complain less about the price.
 
 @widget std:character
 # Locksmith
   ![Locksmith portrait]("/assets/images/locksmith.png")
   > A locksmith whose stall is barely wider than its door.
   > He listens to keys before he listens to people.
+  > His fingers are stained with oil, soot, and the green-gray dust that gathers inside locks no one should still be opening.
+  > He distrusts any mechanism that works too smoothly. In his experience, honest doors make a little trouble.
 
 @widget std:character
 # Mira
   ![Mira portrait]("/assets/images/mira.png")
   > Mira works in the alley behind the market, counting deliveries under a crooked awning.
   > Her nods are small, exact, and more binding than signatures.
+  > Bottles, debts, and secrets pass through her hands with the same brisk competence.
+  > She does not raise her voice. People lean closer anyway.
 
 @widget std:character
 # Watchman
   ![Watchman portrait]("/assets/images/watchman.png")
   > The gate watchman leans beneath the village arch with practiced patience.
   > He has the look of someone paid to notice everything and admit very little.
+  > Rain has polished his spear shaft smooth where his hands rest. His silence has the same worn, familiar shape.
+  > He knows the old tower should be left alone, which is not quite the same as believing it can be.

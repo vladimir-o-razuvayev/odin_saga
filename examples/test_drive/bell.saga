@@ -1,15 +1,17 @@
 # Chamber
   `entered_chamber := true`
   > The bell chamber is round, dry, and impossibly deep beneath the ruined tower.
-  > A cracked silver bell hangs from three chains over a black pool.
-  > `chalk_circle` A chalk ring glows faintly at the pool's edge.
+  > A cracked silver bell hangs from three chains over a black pool. The chains vanish into the ceiling without hooks or beams.
+  > Sound behaves strangely here. Your breath arrives late, and your footsteps seem embarrassed to have interrupted.
+  > `chalk_circle` A chalk ring glows faintly at the pool's edge, thin and steady as moonlight trapped under ice.
   + Inspect the bell -> [.Bell]
   + Study the pool -> [.Pool]
   + Climb back to the courtyard -> [Courtyard]("/ruins.saga")
 
 ## Bell
   > The bell has no tongue. Its inner curve is scratched with names you almost recognize.
-  > `bronze_tongue` The bronze tongue hums softly in your pack.
+  > Some names are written in old village script, some in careful modern hands, and one seems to rearrange itself when you blink.
+  > `bronze_tongue` The bronze tongue hums softly in your pack. It is not a sound so much as a pressure behind your eyes.
   + `bronze_tongue` Fit the bronze tongue into place -> [.Restore]
   + Touch the scratched names -> [.Names]
   + Step away -> [Chamber]
@@ -17,6 +19,7 @@
 ### Restore
   `bell_restored := true`
   > The bronze tongue rises from your hand and locks itself inside the bell.
+  > The chamber tightens around the gesture. Even the black pool seems to hold its surface still.
   + `trust_blue_scarf` Ring the bell *-> [..TrueRing]
   + Ring the bell anyway -> [..FalseRing]
   + Wait and listen -> [..Names]
@@ -24,27 +27,32 @@
 ### TrueRing
   `bell_rang_true := true`
   > The bell rings without sound. The black pool becomes a sky full of dawn.
+  > Light pours upward, warm and impossible, carrying the smell of wet grass and banked hearth fires.
   -> [Dawn]("/ending.saga")
 
 ### FalseRing
   `bell_rang_false := true`
   > The bell screams. Every chain in the chamber snaps tight, then slackens.
+  > The sound has no volume, only weight. It drops through you and keeps falling.
   -> [Return]("/ending.saga")
 
 ### Names
   `name_glimpse = rand(3)`
   > Your name is there, but the letters keep changing order.
+  > Around it are other names: some familiar, some impossible, some written with strokes too deep to have been made by any hand.
   *-> `name_glimpse == 0` [.HiddenName]
   -> [..]
 
 #### HiddenName
   `saw_hidden_name := true`
   > For one breath, the letters spell a name that is not yours, but answers when you think it.
+  > It settles behind your ribs like a second heartbeat, then goes quiet.
   -> [..]
 
 ## Pool
   > The pool reflects the chamber as it was: whole, full of candlelight, crowded with silent villagers.
-  > `pool_offering` A stranger in the reflection turns your coin over in their fingers.
+  > Their faces are turned upward toward the bell. None of them move until you do.
+  > `pool_offering` A stranger in the reflection turns your coin over in their fingers and smiles at a joke you have not heard yet.
   + `coin >= 1` Drop a coin into the pool -> [.Offering]
   + `found_chalk` Draw a chalk circle at the pool's edge -> [.Circle]
   + Return to the bell -> [..Bell]
@@ -53,9 +61,11 @@
   `coin := coin - 1`
   `pool_offering := true`
   > The coin falls upward through the reflection and lands in someone else's palm.
+  > For a moment, the reflected crowd parts around the stranger as if they have been waiting for payment.
   -> [..]
 
 ### Circle
   `chalk_circle := true`
   > The chalk line closes itself into a perfect ring. The pool grows still.
+  > The reflected villagers lower their eyes. Whatever they expected, the circle has made them reconsider.
   -> [..]

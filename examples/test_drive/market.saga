@@ -1,7 +1,8 @@
 # Square
   `market_visits++`
   > Brindlewick's market is a ring of dripping awnings, bright apples, wet boots, and sharper eyes.
-  > `has_crate` The crate from the cloak seller knocks against your knee with every step.
+  > Tarps sag under rainwater until sellers jab them upward with broom handles, sending silver sheets crashing into the mud.
+  > `has_crate` The crate from the cloak seller knocks against your knee with every step. Whatever is inside answers each jolt with a nervous little clink.
   + Visit the cloak seller -> [.CloakSeller]
   + Speak to the woman with the blue scarf -> [.BlueScarf]
   + Slip into the alley -> [.Alley]
@@ -10,8 +11,9 @@
 ## CloakSeller
   `met_cloak_seller := true`
   ![Cloak Seller]("/assets/images/cloak_seller.png")
-  > A narrow man shakes rainwater from a row of heavy cloaks.
-  > `has_cloak` He nods approvingly at the cloak you bought from him.
+  > A narrow man shakes rainwater from a row of heavy cloaks. Each cloak hangs from its peg like a patient, hooded witness.
+  > He smiles without showing teeth, which somehow makes the smile feel more expensive.
+  > `has_cloak` He nods approvingly at the cloak you bought from him, as if pleased to see his merchandise surviving the argument with the weather.
   + `coin >= 2` Buy a dry cloak -> [.BuyCloak]
   + Ask for work -> [.OddJob]
   + Browse and leave -> [Square]
@@ -20,31 +22,38 @@
   `coin := coin - 2`
   `has_cloak := true`
   > The cloak smells of cedar and sheep oil. It is ugly, warm, and yours.
+  > When you fasten it, rain begins striking your shoulders with a frustrated, muffled patter.
   -> [..]
 
 ### OddJob
   >> [CloakSeller]("/characters.saga") Carry this crate to Mira in the alley. She pays if she likes your face.
+  >> If she doesn't, bring the crate back and I'll pretend I never trusted you with it.
   + Take the crate *-> [.TakeCrate]
   + Decline politely -> [..]
 
 #### TakeCrate
   `has_crate := true`
-  > The crate clinks with bottles wrapped in straw.
+  > The crate clinks with bottles wrapped in straw. A paper tag tied to the handle reads MIRA in blocky ink.
+  > It is not heavy at first, but it has the stubborn balance of something that intends to become heavy later.
   -> [Square.Alley]
 
 ## BlueScarf
   `met_blue_scarf := true`
   ![Blue Scarf]("/assets/images/blue_scarf.png")
   > The woman with the blue scarf watches the crowd reflected in a brass mirror.
+  > She never looks directly at you until you are close enough to see the whole market bent in the mirror's curved face.
   >> `trust_blue_scarf` [BlueScarf]("/characters.saga") You came back. Good.
+  >> `trust_blue_scarf` That means either you listened, or Brindlewick failed to scare you off. Both are rarer than they should be.
   + `visited_start` Mention the crescent letter -> [.LetterTalk]
   + Ask about the old watchtower -> [.WatchtowerTalk]
   + Leave her to her mirror -> [Square]
 
 ### LetterTalk
   `trust_blue_scarf := true`
-  > She folds the mirror shut.
+  > She folds the mirror shut. The market vanishes from its face with a soft click.
+  > For the first time, she looks at you directly, and the noise of the square seems to step backward.
   >> [BlueScarf]("/characters.saga") Then you are already late. Find the archivist's mark beneath the tower.
+  >> The tower is only the lid. Whatever matters in Brindlewick is always under something else.
   + Ask what the mark looks like *-> [..MarkDescription]
   + Return to the market -> [..]
 
@@ -52,16 +61,19 @@
   `knows_mark := true`
   >> [BlueScarf]("/characters.saga") A bell inside a closed eye.
   >> If you see it, knock twice and wait.
+  >> Do not knock three times. Three is an invitation, and you do not know what might answer.
   -> [..]
 
 ### WatchtowerTalk
   >> [BlueScarf]("/characters.saga") The tower was built over a well.
   >> Everything important in Brindlewick is underneath something else.
+  >> People forget that. The ground does not.
   + Thank her -> [..]
 
 ## Alley
   > The alley behind the market smells of rain, onions, and lamp smoke.
-  > `has_crate` Mira's crate grows heavier the longer you carry it.
+  > Water runs down the center channel carrying apple peels, candle stubs, and one playing card with all its faces washed blank.
+  > `has_crate` Mira's crate grows heavier the longer you carry it, as if the bottles are drinking in the damp.
   + `has_crate` Deliver the crate to Mira -> [.Mira]
   + Visit the locksmith -> [.Locksmith]
   + Return to the cloak seller -> [..CloakSeller]
@@ -73,26 +85,31 @@
   `has_crate := false`
   `coin := coin + 3`
   > Mira counts the bottles and presses three old coins into your hand.
+  > She does not hurry. Each coin lands in your palm after its own small judgment.
   >> [Mira]("/characters.saga") Counted fair. Tell him I liked your face well enough.
+  >> And tell him the blue bottle was short last time. If he acts surprised, charge him for the acting.
   -> [..]
 
 ### Locksmith
   `met_locksmith := true`
   ![Locksmith]("/assets/images/locksmith.png")
   > The locksmith's stall is hardly wider than its door. Keys hang from the ceiling like iron fruit.
-  > `lantern_lit` The blue flame in your lantern makes every key cast two shadows.
+  > Every time the wind moves, the keys touch and whisper in a language of teeth and tumblers.
+  > `lantern_lit` The blue flame in your lantern makes every key cast two shadows. The locksmith watches the second shadows more carefully than the first.
   + `old_key` Show him the blackened key -> [.BlackKey]
   + `coin >= 1` Buy lamp oil -> [.LampOil]
   + Leave the stall -> [..]
 
 #### BlackKey
   `lower_door_hint := true`
-  > He whistles.
+  > He whistles, low and unwilling.
   >> [Locksmith]("/characters.saga") That opens a lock that hates daylight. Oil it before you turn it.
+  >> And if it turns too easily, stop. Some doors open wide because they are hungry.
   -> [..]
 
 #### LampOil
   `coin := coin - 1`
   `lantern_lit := true`
   > He fills your lantern and lights it with a blue spark from his thumbnail.
+  > The flame steadies at once, small and intent, as though it has been waiting for you to catch up.
   -> [..]
