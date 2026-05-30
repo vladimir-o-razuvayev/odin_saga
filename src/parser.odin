@@ -598,7 +598,9 @@ parser_dialogue_syntax_test :: proc(t: ^testing.T) {
 
 @(test)
 parser_image_syntax_test :: proc(t: ^testing.T) {
-	result, lexed := parse_source_for_test("# Main\n![Alt text](/assets/images/test.png)\n")
+	result, lexed := parse_source_for_test(
+		"# Main\n![Alt text](/assets/images/test.png)\n![Quoted](\"/assets/images/quoted.png\")\n",
+	)
 	defer free_parse_result(result)
 	defer delete(lexed.lines)
 	defer delete(lexed.errors)
@@ -608,6 +610,23 @@ parser_image_syntax_test :: proc(t: ^testing.T) {
 	testing.expect(t, stmt.kind == .Image)
 	testing.expect(t, stmt.text == "Alt text")
 	testing.expect(t, stmt.image_src == "/assets/images/test.png")
+
+	quoted := result.module.scenes[0].statements[1]
+	testing.expect(t, quoted.kind == .Image)
+	testing.expect(t, quoted.text == "Quoted")
+	testing.expect(t, quoted.image_src == "/assets/images/quoted.png")
+}
+
+@(test)
+parser_reports_image_and_decorator_errors_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test(
+		"# Main\n![Missing close](/assets/images/test.png\n@unknown value\n@widget\n> text\n",
+	)
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	testing.expect(t, len(result.errors) >= 3)
 }
 
 @(test)

@@ -66,6 +66,7 @@ build_story :: proc(entry_path: string) -> Build_Result {
 		return result
 	}
 	base_dir := filepath.dir(entry_abs)
+	defer delete(base_dir)
 	load_module(&result, &loaded, base_dir, entry_abs)
 	load_all_saga_files(&result, &loaded, base_dir, base_dir)
 	if len(result.errors) == 0 {
@@ -550,4 +551,81 @@ semantic_accepts_sibling_target_test :: proc(t: ^testing.T) {
 
 	validate_targets(&build, "")
 	testing.expect(t, len(build.errors) == 0)
+}
+
+@(test)
+semantic_accepts_contacts_widget_transfer_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Main\nw-> [.Contacts]\n@widget std:contacts\n## Contacts\n> People\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 0)
+}
+
+@(test)
+semantic_reports_unknown_widget_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"@widget std:mystery\n# Mystery\n> Unknown\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 1)
+	testing.expect(t, lexer.index_of(build.errors[0].message, "unknown widget renderer") >= 0)
+}
+
+@(test)
+semantic_reports_dialogue_without_speaker_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test("# Main\n>> Hello.\n")
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 1)
+	testing.expect(t, lexer.index_of(build.errors[0].message, "no speaker") >= 0)
+}
+
+@(test)
+semantic_reports_dialogue_speaker_that_is_not_character_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Main\n>> [Speaker] Hello.\n@widget std:item\n# Speaker\n> Not a character.\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 1)
+	testing.expect(t, lexer.index_of(build.errors[0].message, "not a std:character") >= 0)
+}
+
+@(test)
+semantic_reports_missing_root_relative_image_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test(
+		"# Main\n![Missing](/assets/images/does_not_exist.png)\n",
+	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "examples/test_drive")
+	testing.expect(t, len(build.errors) == 1)
+	testing.expect(t, lexer.index_of(build.errors[0].message, "missing image asset") >= 0)
+}
+
+@(test)
+build_test_drive_story_test :: proc(t: ^testing.T) {
+	build := build_story("examples/test_drive/main.saga")
+	defer free_build_result(build)
+
+	testing.expect(t, len(build.errors) == 0)
+	testing.expect(t, len(build.modules) >= 7)
+	testing.expect(t, len(build.source_files) >= 7)
 }
