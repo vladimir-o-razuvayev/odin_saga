@@ -39,7 +39,6 @@ Statement_Kind :: enum {
 	Image,
 	Dialogue,
 	Choice,
-	Transition,
 	Effect,
 }
 
@@ -49,7 +48,6 @@ Statement :: struct {
 	image_src: string,
 	show_if:   string,
 	enable_if: string,
-	take_if:   string,
 	effect:    string,
 	transfer:  Transfer,
 	speaker:   Target,

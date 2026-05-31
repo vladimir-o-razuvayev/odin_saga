@@ -8,8 +8,8 @@ The project is approaching a v0.1 release. The current focus is a compact, autho
 
 - Markdown-style scene headings: `# Start`, `## ChildScene`, `### NestedScene`.
 - Passage text with optional conditions.
-- Choices and automatic transitions.
-- One-shot transfers for choices/transitions.
+- Choice buttons and transfers.
+- One-shot transfers for choices.
 - Cross-module story files.
 - Simple state/effect expressions.
 - Root-relative image assets.

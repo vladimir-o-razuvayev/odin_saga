@@ -39,7 +39,6 @@ parser :: struct {
 	parse_image:            proc(p: ^Parser, line: Source_Line) -> Statement,
 	parse_dialogue:         proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_choice:           proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
-	parse_transition:       proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement,
 	parse_effect:           proc(p: ^Parser, line: Source_Line) -> Statement,
 	parse_link_target:      proc(
 		p: ^Parser,
@@ -184,8 +183,6 @@ parser :: struct {
 			stmt = parser.parse_image(p, line)
 		} else if lexer.starts_with(text, "+") {
 			stmt = parser.parse_choice(p, line, scene.depth)
-		} else if lexer.starts_with(text, "*->") || lexer.starts_with(text, "->") {
-			stmt = parser.parse_transition(p, line, scene.depth)
 		} else if lexer.starts_with(text, "`") {
 			stmt = parser.parse_effect(p, line)
 		} else {
@@ -298,32 +295,6 @@ parser :: struct {
 
 		parser.append_error(p, line.pos, "expected choice arrow followed by [label](destination)")
 		return Statement{kind = .Choice, show_if = show_if, pos = line.pos}
-	},
-	parse_transition = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
-		kind, rest, ok := parser.starts_with_arrow(line.text)
-		if !ok {
-			parser.append_error(p, line.pos, "expected transition arrow")
-			return Statement{kind = .Transition, pos = line.pos}
-		}
-
-		take_if := ""
-		parsed := parser.parse_leading_expr(rest)
-		if parsed.ok {
-			take_if = parsed.expr
-			rest = lexer.trim(parsed.rest)
-		}
-
-		link := parser.parse_link_target(p, rest, line.pos, current_depth)
-		if !link.ok {
-			parser.append_error(p, line.pos, "expected transition target")
-		}
-
-		return Statement {
-			kind = .Transition,
-			take_if = take_if,
-			transfer = Transfer{kind = kind, target = link.target},
-			pos = line.pos,
-		}
 	},
 	parse_effect = proc(p: ^Parser, line: Source_Line) -> Statement {
 		parsed := parser.parse_leading_expr(line.text)
@@ -555,7 +526,7 @@ parse_source_for_test :: proc(source: string) -> (Parse_Result, Lexer_Result) {
 @(test)
 parser_parse_v0_story_test :: proc(t: ^testing.T) {
 	result, lexed := parse_source_for_test(
-		"# Main\n  `seen ?= false`\n  > `!seen` Hello there.\n  + `seen` -> `ready` [Continue](#.Next)\n  *-> `auto` [Continue](#.)\n## Next\n  `end(\"Done\")`\n",
+		"# Main\n  `seen ?= false`\n  > `!seen` Hello there.\n  + `seen` -> `ready` [Continue](#.Next)\n## Next\n  `end(\"Done\")`\n",
 	)
 	defer free_parse_result(result)
 	defer delete(lexed.lines)
@@ -565,7 +536,7 @@ parser_parse_v0_story_test :: proc(t: ^testing.T) {
 	testing.expect(t, len(result.module.scenes) == 2)
 	testing.expect(t, result.module.scenes[0].path == "Main")
 	testing.expect(t, result.module.scenes[1].path == "Main.Next")
-	testing.expect(t, len(result.module.scenes[0].statements) == 4)
+	testing.expect(t, len(result.module.scenes[0].statements) == 3)
 
 	passage := result.module.scenes[0].statements[1]
 	testing.expect(t, passage.kind == .Passage)
@@ -578,11 +549,6 @@ parser_parse_v0_story_test :: proc(t: ^testing.T) {
 	testing.expect(t, choice.enable_if == "ready")
 	testing.expect(t, choice.transfer.target.scene_ref == ".Next")
 
-	transition := result.module.scenes[0].statements[3]
-	testing.expect(t, transition.kind == .Transition)
-	testing.expect(t, transition.take_if == "auto")
-	testing.expect(t, transition.transfer.kind == .Once)
-	testing.expect(t, transition.transfer.target.scene_ref == ".")
 }
 
 @(test)

@@ -91,7 +91,7 @@ The first condition controls visibility. The condition after the arrow controls 
 
 ## Transfers
 
-Saga has two primary transfer arrows:
+Choice buttons use transfer arrows after `+`:
 
 ```saga
 ->  normal transfer/action
@@ -101,14 +101,14 @@ Saga has two primary transfer arrows:
 Examples:
 
 ```saga
--> [Continue](#Village)
++ -> [Continue](#Village)
 + *-> [Take the key](#.TakeKey)
 + -> [Inventory](/widgets/inventory.saga#Inventory)
 ```
 
-Use `*->` when a choice or automatic transition should only be available once per playthrough.
+Use `*->` when a choice should only be available once per playthrough.
 
-When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. For example, transferring to an inventory dock widget activates it, while transferring to an item or character widget opens it as a modal.
+When a choice target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. For example, transferring to an inventory dock widget activates it, while transferring to an item or character widget opens it as a modal.
 
 Use `activate(destination)` in an effect when setup should activate a widget without showing a reader-facing button:
 
@@ -219,7 +219,7 @@ The runtime automatically shows `std:contacts` widgets in the dock. Other dock w
 
 ## Local saves
 
-Generated stories include local browser save slots in the Settings dock widget. Saves are stored with `localStorage` in the reader's browser and include the current scene, state variables, consumed one-shot transitions, and active dock widgets. Import/export saves are not implemented yet.
+Generated stories include local browser save slots in the Settings dock widget. Saves are stored with `localStorage` in the reader's browser and include the current scene, state variables, consumed one-shot choices, and active dock widgets. Import/export saves are not implemented yet.
 
 ## Character profiles and dialogue
 

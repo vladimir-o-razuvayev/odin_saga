@@ -17,10 +17,9 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
   > You join the patrons for drinks and order an ale for yourself.
   `ale_count++` // Assigns 1 if ale_count is nil.
   `x = rand(100)` // x is a scene-local binding for this visit to Patrons.
-  // Automatic transitions are evaluated top-to-bottom. The first one to fire exits the scene.
-  *-> `x > 80 && !man_ran` [Continue](#.Man)
-  -> `x <= 20 && !met_woman` [Continue](#.WomanInRedDress)
-  -> [Continue](#.NoOne)
+  + `x > 80 && !man_ran` *-> [Continue](#.Man)
+  + `x <= 20 && !met_woman` -> [Continue](#.WomanInRedDress)
+  + -> [Continue](#.NoOne)
 
 ## Man
   `man_ran := true`
@@ -38,11 +37,11 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
   `met_woman := true`
   > The woman introduces herself as Clair. She tells you to go to the bank, and tell Joe that she sent you.
   > The woman turns away, and walks upstairs.
-  -> [Continue](#Main)
+  + -> [Continue](#Main)
 
 ## NoOne
   > None of the bar patrons catch your interest.
-  -> [Continue](#Main)
+  + -> [Continue](#Main)
 
 # Innkeeper
   > The man looks at you gruffly.
@@ -51,7 +50,7 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
 
 ## AskAboutMan
   > The innkeeper lowers his voice. "Best not chase trouble through town."
-  -> [Continue](#Main)
+  + -> [Continue](#Main)
 
 //****************************************/
 // Lexical Rules
@@ -69,13 +68,13 @@ Blank lines are ignored.
 
 Leading indentation before statements is ignored by the compiler. Authors may use indentation for readability, but indentation has no semantic meaning in v0.
 
-Statements are single-line in v0. Multiline passages, choices, transitions, and effects are not supported.
+Statements are single-line in v0. Multiline passages, choices, and effects are not supported.
 
-For readability and simpler parsing, transfer arrows must be followed by whitespace.
+For readability and simpler parsing, choice transfer arrows must be followed by whitespace.
 
 Passage and choice text are trimmed of leading and trailing whitespace.
 
-Choice and transition targets store display text in `[label]` and the destination in `(destination)`.
+Choice targets store display text in `[label]` and the destination in `(destination)`.
 
 Comments start with `//` when `//` appears outside a backtick expression and is either:
 
@@ -218,22 +217,6 @@ In a choice, an optional condition immediately after the arrow controls whether 
 
 If the choice is not visible, it is not shown to the player. If the choice is visible but not enabled, it is shown as disabled and cannot be selected.
 
-## Automatic Transition
-
-An automatic transition starts with an arrow:
-
-```saga
--> [Continue](#Target)
--> `take_condition` [Continue](#Target)
-*-> [Continue](#Target)
-*-> `take_condition` [Continue](#Target)
-```
-
-When an automatic transition is reached and its optional condition is truthy, the scene transfers immediately and no later statements in the scene are evaluated.
-
-When an automatic transition has no condition, it always transfers.
-
-When an automatic transition has a condition and the condition is falsey, the transition no-ops and evaluation continues to the next line.
 
 ## Effect
 
@@ -257,19 +240,15 @@ When `end(...)` is reached, no later statements in the scene are evaluated.
 // Transfers and Targets
 //****************************************/
 
-`->` is a normal transfer/action symbol for choices and automatic transitions.
+`->` is a normal transfer/action symbol for choices.
 
-`*->` marks a transfer/action as consumable once per playthrough.
+`*->` marks a choice action as consumable once per playthrough.
 
-When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. Dock widgets are activated, while modal widgets open in a modal.
-
-
-
-For automatic transitions, `*->` is consumed only when the transition is taken. On future visits, the consumed transition no-ops and evaluation continues to the next line.
+When a choice target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. Dock widgets are activated, while modal widgets open in a modal.
 
 For choices, `*->` is consumed only when the player selects the choice and transfers. On future visits, the consumed choice is no longer visible.
 
-Choice, transition, and dialogue speaker links use Markdown-style labels with Saga destinations:
+Choice and dialogue speaker links use Markdown-style labels with Saga destinations:
 
 ```saga
 [Go to scene](#Scene)
@@ -358,13 +337,10 @@ Mutation operators apply to the nearest resolved binding. If a local binding exi
 // Scene Validity
 //****************************************/
 
-Each scene must have at least one possible completion path:
+Each scene should have at least one possible completion path:
 
-- one or more choices with transfers,
-- one or more automatic transitions, or
+- one or more choices with transfers, or
 - a reachable `end(...)` effect.
-
-Any statement after an unconditional automatic transition is unreachable and should be reported as a semantic error.
 
 Any statement after an unconditional `end(...)` effect is unreachable and should be reported as a semantic error.
 
@@ -387,7 +363,6 @@ statement          = passage
                    | image
                    | dialogue
                    | choice
-                   | transition
                    | effect
 
 passage            = ">" space show_condition? text
@@ -396,15 +371,12 @@ dialogue           = ">>" space show_condition? speaker_target? text
 
 choice             = "+" space show_condition? arrow space enable_condition? link_target
 
-transition         = arrow space take_condition? link_target
-
 comment            = "//" text
 
 effect             = expression
 
 show_condition     = expression space
 enable_condition   = expression space
-take_condition     = expression space
 
 expression         = "`" expression_text "`"
 

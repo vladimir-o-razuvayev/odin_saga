@@ -88,8 +88,6 @@ html :: struct {
 		strings.write_string(sb, html.js_string(stmt.show_if))
 		strings.write_string(sb, ",enableIf:")
 		strings.write_string(sb, html.js_string(stmt.enable_if))
-		strings.write_string(sb, ",takeIf:")
-		strings.write_string(sb, html.js_string(stmt.take_if))
 		strings.write_string(sb, ",effect:")
 		strings.write_string(sb, html.js_string(stmt.effect))
 		strings.write_string(sb, ",transfer:")

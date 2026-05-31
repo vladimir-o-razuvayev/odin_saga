@@ -657,8 +657,6 @@ function renderWidgetScene(scene, container, surface) {
       container.appendChild(p);
     } else if (stmt.kind === "Image") {
       renderImage(container, stmt);
-    } else if (stmt.kind === "Transition" && evalExpr(stmt.takeIf)) {
-      go(stmt.transfer, scene);
     } else if (stmt.kind === "Choice" && evalExpr(stmt.showIf)) {
       choices.push(stmt);
     }
@@ -698,7 +696,6 @@ function render() {
   app.appendChild(section);
 
   let choices = [];
-  let pendingTransition = null;
   for (let index = 0; index < current.statements.length; ) {
     const stmt = current.statements[index];
     if (ended) break;
@@ -714,18 +711,6 @@ function render() {
       section.appendChild(p);
     } else if (stmt.kind === "Image") {
       renderImage(section, stmt);
-    } else if (stmt.kind === "Transition" && evalExpr(stmt.takeIf)) {
-      const target = resolveTarget(stmt.transfer, current);
-      const key = target ? transferKey(stmt.transfer, current, target) : "?";
-      if (isWidgetScene(target)) {
-        if (target && (stmt.transfer.kind !== "once" || !consumed.has(key))) {
-          if (stmt.transfer.kind === "once") consumed.add(key);
-          runWidget(target);
-        }
-      } else if (stmt.transfer.kind !== "once" || !consumed.has(key)) {
-        pendingTransition = stmt;
-        break;
-      }
     } else if (stmt.kind === "Choice" && evalExpr(stmt.showIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = target ? transferKey(stmt.transfer, current, target) : "?";
@@ -735,15 +720,7 @@ function render() {
     index += 1;
   }
 
-  if (pendingTransition && !ended) {
-    const div = document.createElement("div");
-    div.className = "choices";
-    section.appendChild(div);
-    const button = document.createElement("button");
-    button.textContent = "Continue";
-    armButton(button, true, () => go(pendingTransition.transfer, current));
-    div.appendChild(button);
-  } else if (choices.length > 0 && !ended) {
+  if (choices.length > 0 && !ended) {
     const div = document.createElement("div");
     div.className = "choices";
     section.appendChild(div);

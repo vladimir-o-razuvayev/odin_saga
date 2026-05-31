@@ -193,7 +193,7 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 					continue
 				}
 				has_dialogue_speaker = false
-				if stmt.kind != .Choice && stmt.kind != .Transition {
+				if stmt.kind != .Choice {
 					continue
 				}
 
@@ -430,7 +430,6 @@ own_module_strings :: proc(module: ^Module) {
 			stmt.image_src = clone_non_empty(stmt.image_src)
 			stmt.show_if = clone_non_empty(stmt.show_if)
 			stmt.enable_if = clone_non_empty(stmt.enable_if)
-			stmt.take_if = clone_non_empty(stmt.take_if)
 			stmt.effect = clone_non_empty(stmt.effect)
 			stmt.transfer.target.scene_ref = clone_non_empty(stmt.transfer.target.scene_ref)
 			stmt.transfer.target.module_path = clone_non_empty(stmt.transfer.target.module_path)
@@ -458,7 +457,6 @@ free_build_result :: proc(result: Build_Result) {
 				free_string_if_non_empty(stmt.image_src)
 				free_string_if_non_empty(stmt.show_if)
 				free_string_if_non_empty(stmt.enable_if)
-				free_string_if_non_empty(stmt.take_if)
 				free_string_if_non_empty(stmt.effect)
 				free_string_if_non_empty(stmt.transfer.target.scene_ref)
 				free_string_if_non_empty(stmt.transfer.target.module_path)
