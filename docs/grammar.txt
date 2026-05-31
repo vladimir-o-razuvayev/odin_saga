@@ -17,9 +17,9 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
   > You join the patrons for drinks and order an ale for yourself.
   `ale_count++` // Assigns 1 if ale_count is nil.
   `x = rand(100)` // x is a scene-local binding for this visit to Patrons.
-  + `x > 80 && !man_ran` *-> [Continue](#.Man)
-  + `x <= 20 && !met_woman` -> [Continue](#.WomanInRedDress)
-  + -> [Continue](#.NoOne)
+  - `x > 80 && !man_ran` *-> [Continue](#.Man)
+  - `x <= 20 && !met_woman` -> [Continue](#.WomanInRedDress)
+  - -> [Continue](#.NoOne)
 
 ## Man
   `man_ran := true`
@@ -194,7 +194,7 @@ In v0, image paths may be root-relative to the story bundle or relative to the g
 
 ## Choice
 
-A plus sign `+` adds a choice button the player can select:
+A plus sign `+` adds an additive choice button the player can select:
 
 ```saga
 + -> [Choice text](#Target)
@@ -205,13 +205,21 @@ A plus sign `+` adds a choice button the player can select:
 + -> [Cross-module choice](/module.saga#Scene)
 ```
 
+A minus sign `-` adds a fallback choice button. Fallback choices are evaluated top-to-bottom, and only the first visible fallback choice renders:
+
+```saga
+- `x > 80 && !man_ran` *-> [Continue](#.Man)
+- `x <= 20 && !met_woman` -> [Continue](#.WomanInRedDress)
+- -> [Continue](#.NoOne)
+```
+
 The choice grammar is:
 
 ```text
-+ show_condition? arrow enable_condition? [button text](destination)
+("+" | "-") show_condition? arrow enable_condition? [button text](destination)
 ```
 
-In a choice, an optional condition immediately after `+` controls whether the choice is visible.
+In a choice, an optional condition immediately after `+` or `-` controls whether the choice is visible.
 
 In a choice, an optional condition immediately after the arrow controls whether the choice is enabled.
 
@@ -239,6 +247,10 @@ When `end(...)` is reached, no later statements in the scene are evaluated.
 //****************************************/
 // Transfers and Targets
 //****************************************/
+
+`+` choices all render if visible.
+
+`-` choices are fallback choices: they are evaluated top-to-bottom, and only the first visible fallback choice renders.
 
 `->` is a normal transfer/action symbol for choices.
 

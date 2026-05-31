@@ -90,6 +90,12 @@ html :: struct {
 		strings.write_string(sb, html.js_string(stmt.enable_if))
 		strings.write_string(sb, ",effect:")
 		strings.write_string(sb, html.js_string(stmt.effect))
+		choice_mode := "additive"
+		if stmt.choice_mode == .Fallback {
+			choice_mode = "fallback"
+		}
+		strings.write_string(sb, ",choiceMode:")
+		strings.write_string(sb, html.js_string(choice_mode))
 		strings.write_string(sb, ",transfer:")
 		html.write_transfer(sb, stmt.transfer)
 		strings.write_string(sb, ",speaker:")

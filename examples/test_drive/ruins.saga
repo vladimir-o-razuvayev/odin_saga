@@ -3,8 +3,8 @@
   > The watchtower gate leans open between two stones carved like sleeping dogs.
   > Their muzzles are worn smooth by rain, but their eyes remain sharp, watching the road behind you instead of the ruin ahead.
   > `lantern_lit` Your lantern paints warm teeth along the archway stones. The dark beyond the gate retreats one careful inch.
-  + `!lantern_lit && !heard_bell_rumor` *-> [Continue](#.LoseNerve)
-  + -> [Continue](#.Approach)
+  - `!lantern_lit && !heard_bell_rumor` *-> [Continue](#.LoseNerve)
+  - -> [Continue](#.Approach)
 
 ## LoseNerve
   > The darkness beneath the arch presses against your face until you step back gasping.

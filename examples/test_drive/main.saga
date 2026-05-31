@@ -75,9 +75,9 @@
   > The northern road narrows between leaning birches. Their white trunks gleam like bones washed clean by rain.
   > Somewhere ahead, stone shifts against stone, patient and deliberate, though the air is perfectly still.
   > `has_cloak` Rain beads on your borrowed cloak and rolls away instead of finding your collar. For once, Brindlewick's weather fails to get what it wants.
-  + `road_steps == 1` *-> [Continue](#.FirstSign)
-  + `lantern_lit` -> [Continue](/ruins.saga#Gate)
-  + -> [Continue](#.DarkRoad)
+  - `road_steps == 1` *-> [Continue](#.FirstSign)
+  - `lantern_lit` -> [Continue](/ruins.saga#Gate)
+  - -> [Continue](#.DarkRoad)
 
 ## FirstSign
   > A milestone turns as you pass it, revealing an arrow carved into its back.

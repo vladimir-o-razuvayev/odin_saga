@@ -40,8 +40,8 @@
   `name_glimpse = rand(3)`
   > Your name is there, but the letters keep changing order.
   > Around it are other names: some familiar, some impossible, some written with strokes too deep to have been made by any hand.
-  + `name_glimpse == 0` *-> [Continue](#.HiddenName)
-  + -> [Continue](#..)
+  - `name_glimpse == 0` *-> [Continue](#.HiddenName)
+  - -> [Continue](#..)
 
 #### HiddenName
   `saw_hidden_name := true`

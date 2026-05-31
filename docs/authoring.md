@@ -85,13 +85,21 @@ Choices use `+`, a transfer arrow, and a labeled destination:
 + -> `has_key` [Enter](#LockedRoom)
 ```
 
+Use `-` for exclusive fallback choices. Fallback choices are evaluated top-to-bottom, and only the first visible fallback choice renders:
+
+```saga
+- `road_steps == 1` *-> [Continue](#.FirstSign)
+- `lantern_lit` -> [Continue](/ruins.saga#Gate)
+- -> [Continue](#.DarkRoad)
+```
+
 The first condition controls visibility. The condition after the arrow controls whether the choice is enabled.
 
 
 
 ## Transfers
 
-Choice buttons use transfer arrows after `+`:
+Choice buttons use transfer arrows after `+` or `-`:
 
 ```saga
 ->  normal transfer/action

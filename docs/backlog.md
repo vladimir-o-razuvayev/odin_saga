@@ -1,11 +1,9 @@
 # Active Sprint
-1. Add `-` fallback choice statement.
-2. Convert example automatic/continue chains to `-`.
-3. Add `end:` destination handling.
-4. Convert `end(...)` examples to `end:` choices.
-5. Add whole-line image rendering in `>` and `>>`.
-6. Convert standalone image statements to `> ![...]`.
-7. Remove standalone image statement parsing once examples/docs/tests are migrated.
+1. Add `end:` destination handling.
+2. Convert `end(...)` examples to `end:` choices.
+3. Add whole-line image rendering in `>` and `>>`.
+4. Convert standalone image statements to `> ![...]`.
+5. Remove standalone image statement parsing once examples/docs/tests are migrated.
 
 # Backlog
 2. Authorship metadata

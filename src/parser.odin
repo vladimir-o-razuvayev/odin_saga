@@ -181,7 +181,7 @@ parser :: struct {
 			stmt = parser.parse_passage(p, line)
 		} else if lexer.starts_with(text, "![") {
 			stmt = parser.parse_image(p, line)
-		} else if lexer.starts_with(text, "+") {
+		} else if lexer.starts_with(text, "+") || lexer.starts_with(text, "-") {
 			stmt = parser.parse_choice(p, line, scene.depth)
 		} else if lexer.starts_with(text, "`") {
 			stmt = parser.parse_effect(p, line)
@@ -250,6 +250,10 @@ parser :: struct {
 		}
 	},
 	parse_choice = proc(p: ^Parser, line: Source_Line, current_depth: int) -> Statement {
+		mode := Choice_Mode.Additive
+		if line.text[0] == '-' {
+			mode = .Fallback
+		}
 		rest := lexer.trim(line.text[1:])
 		show_if := ""
 		parsed := parser.parse_leading_expr(rest)
@@ -274,6 +278,7 @@ parser :: struct {
 					kind = .Choice,
 					show_if = show_if,
 					enable_if = enable_if,
+					choice_mode = mode,
 					pos = line.pos,
 				}
 			}
@@ -288,13 +293,14 @@ parser :: struct {
 				text = link.label,
 				show_if = show_if,
 				enable_if = enable_if,
+				choice_mode = mode,
 				transfer = Transfer{kind = new_kind, target = link.target},
 				pos = line.pos,
 			}
 		}
 
 		parser.append_error(p, line.pos, "expected choice arrow followed by [label](destination)")
-		return Statement{kind = .Choice, show_if = show_if, pos = line.pos}
+		return Statement{kind = .Choice, show_if = show_if, choice_mode = mode, pos = line.pos}
 	},
 	parse_effect = proc(p: ^Parser, line: Source_Line) -> Statement {
 		parsed := parser.parse_leading_expr(line.text)
@@ -554,7 +560,7 @@ parser_parse_v0_story_test :: proc(t: ^testing.T) {
 @(test)
 parser_new_choice_target_syntax_test :: proc(t: ^testing.T) {
 	result, lexed := parse_source_for_test(
-		"# Main\n+ -> [Begin](#Start)\n+ `has_key` *-> `ready` [Open the door](#.Door)\n## Start\n## Door\n",
+		"# Main\n+ -> [Begin](#Start)\n- `has_key` *-> `ready` [Open the door](#.Door)\n## Start\n## Door\n",
 	)
 	defer free_parse_result(result)
 	defer delete(lexed.lines)
@@ -573,6 +579,7 @@ parser_new_choice_target_syntax_test :: proc(t: ^testing.T) {
 	testing.expect(t, second.text == "Open the door")
 	testing.expect(t, second.show_if == "has_key")
 	testing.expect(t, second.enable_if == "ready")
+	testing.expect(t, second.choice_mode == .Fallback)
 	testing.expect(t, second.transfer.kind == .Once)
 	testing.expect(t, second.transfer.target.scene_ref == ".Door")
 }

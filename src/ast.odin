@@ -23,6 +23,11 @@ Transfer_Kind :: enum {
 	Once,
 }
 
+Choice_Mode :: enum {
+	Additive,
+	Fallback,
+}
+
 Target :: struct {
 	scene_ref:   string,
 	module_path: string,
@@ -43,15 +48,16 @@ Statement_Kind :: enum {
 }
 
 Statement :: struct {
-	kind:      Statement_Kind,
-	text:      string,
-	image_src: string,
-	show_if:   string,
-	enable_if: string,
-	effect:    string,
-	transfer:  Transfer,
-	speaker:   Target,
-	pos:       Source_Pos,
+	kind:        Statement_Kind,
+	text:        string,
+	image_src:   string,
+	show_if:     string,
+	enable_if:   string,
+	effect:      string,
+	choice_mode: Choice_Mode,
+	transfer:    Transfer,
+	speaker:     Target,
+	pos:         Source_Pos,
 }
 
 Scene :: struct {

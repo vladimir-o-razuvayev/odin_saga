@@ -638,11 +638,31 @@ function renderDialogueBlock(statements, start, container, fromScene) {
   return i;
 }
 
+function isChoiceVisible(choice, fromScene) {
+  if (!evalExpr(choice.showIf)) return false;
+  const target = resolveTarget(choice.transfer, fromScene);
+  const key = target ? transferKey(choice.transfer, fromScene, target) : "?";
+  return choice.transfer.kind !== "once" || !consumed.has(key);
+}
+
+function collectVisibleChoices(statements, fromScene) {
+  const choices = [];
+  let fallbackChosen = false;
+  for (const stmt of statements) {
+    if (stmt.kind !== "Choice" || !isChoiceVisible(stmt, fromScene)) continue;
+    if (stmt.choiceMode === "fallback") {
+      if (fallbackChosen) continue;
+      fallbackChosen = true;
+    }
+    choices.push(stmt);
+  }
+  return choices;
+}
+
 function renderWidgetScene(scene, container, surface) {
   const title = document.createElement(surface === "dock" ? "h2" : "h1");
   title.textContent = scene.name;
   container.appendChild(title);
-  const choices = [];
   for (let index = 0; index < scene.statements.length; ) {
     const stmt = scene.statements[index];
     if (stmt.kind === "Dialogue") {
@@ -657,11 +677,10 @@ function renderWidgetScene(scene, container, surface) {
       container.appendChild(p);
     } else if (stmt.kind === "Image") {
       renderImage(container, stmt);
-    } else if (stmt.kind === "Choice" && evalExpr(stmt.showIf)) {
-      choices.push(stmt);
     }
     index += 1;
   }
+  const choices = collectVisibleChoices(scene.statements, scene);
   if (choices.length > 0) {
     const div = document.createElement("div");
     div.className = surface === "dock" ? "state-list" : "choices";
@@ -695,7 +714,6 @@ function render() {
   section.innerHTML = "<h1>" + escapeHtml(current.name) + "</h1>";
   app.appendChild(section);
 
-  let choices = [];
   for (let index = 0; index < current.statements.length; ) {
     const stmt = current.statements[index];
     if (ended) break;
@@ -711,15 +729,11 @@ function render() {
       section.appendChild(p);
     } else if (stmt.kind === "Image") {
       renderImage(section, stmt);
-    } else if (stmt.kind === "Choice" && evalExpr(stmt.showIf)) {
-      const target = resolveTarget(stmt.transfer, current);
-      const key = target ? transferKey(stmt.transfer, current, target) : "?";
-      if (stmt.transfer.kind !== "once" || !consumed.has(key))
-        choices.push(stmt);
     }
     index += 1;
   }
 
+  const choices = collectVisibleChoices(current.statements, current);
   if (choices.length > 0 && !ended) {
     const div = document.createElement("div");
     div.className = "choices";
