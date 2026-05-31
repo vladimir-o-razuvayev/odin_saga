@@ -182,6 +182,9 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 					continue
 				}
 				if stmt.kind == .Dialogue {
+					if len(stmt.image_src) > 0 {
+						validate_image(result, base_dir, stmt)
+					}
 					validate_dialogue(
 						result,
 						base_dir,
@@ -252,6 +255,9 @@ validate_dialogue :: proc(
 	has_dialogue_speaker: ^bool,
 ) {
 	if len(stmt.speaker.scene_ref) == 0 {
+		if len(stmt.image_src) > 0 {
+			return
+		}
 		if !has_dialogue_speaker^ {
 			append(
 				&result.errors,
@@ -592,7 +598,7 @@ semantic_reports_dialogue_speaker_that_is_not_character_test :: proc(t: ^testing
 @(test)
 semantic_reports_missing_root_relative_image_test :: proc(t: ^testing.T) {
 	build, lexed := build_result_from_source_for_test(
-		"# Main\n![Missing](/assets/images/does_not_exist.png)\n",
+		"# Main\n> ![Missing](/assets/images/does_not_exist.png)\n",
 	)
 	defer free_build_result(build)
 	defer delete(lexed.lines)

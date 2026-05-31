@@ -184,13 +184,14 @@ Built-in widget renderers are:
 
 ## Image
 
-Markdown image syntax renders an image from the story bundle:
+Markdown image syntax renders an image from the story bundle when it occupies the whole content line after `>` or `>>`:
 
 ```saga
-![Alt text](/assets/images/example.png)
+> ![Alt text](/assets/images/example.png)
+>> ![Alt text](/assets/images/example.png)
 ```
 
-In v0, image paths may be root-relative to the story bundle or relative to the generated HTML file. Root-relative image paths are validated at compile time. When previewing a generated HTML file locally, root-relative image paths are resolved against the source story bundle.
+Inline images inside text are not supported. Image paths may be root-relative to the story bundle or relative to the generated HTML file. Root-relative image paths are validated at compile time. When previewing a generated HTML file locally, root-relative image paths are resolved against the source story bundle.
 
 ## Choice
 
@@ -241,8 +242,6 @@ The special `end:` destination ends the story and displays the choice text as th
 ```saga
 - -> [You were eaten by a grue.](end:)
 ```
-
-`end(...)` effects are still accepted for older stories, but new stories should prefer `end:` choices.
 
 //****************************************/
 // Transfers and Targets
@@ -373,14 +372,13 @@ heading            = heading_marker space scene_label
 heading_marker     = "#" { "#" }
 
 statement          = passage
-                   | image
                    | dialogue
                    | choice
                    | effect
 
-passage            = ">" space show_condition? text
+passage            = ">" space show_condition? (text | image)
+dialogue           = ">>" space show_condition? (speaker_target? text | image)
 image              = "![" alt_text "](" image_path ")"
-dialogue           = ">>" space show_condition? speaker_target? text
 
 choice             = ("+" | "-") space show_condition? arrow space enable_condition? link_target
 

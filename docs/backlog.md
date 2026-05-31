@@ -1,8 +1,3 @@
-# Active Sprint
-1. Add whole-line image rendering in `>` and `>>`.
-2. Convert standalone image statements to `> ![...]`.
-3. Remove standalone image statement parsing once examples/docs/tests are migrated.
-
 # V0.1 Backlog
 2. Authorship metadata
 3. Title, author bio and links

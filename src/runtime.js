@@ -139,16 +139,6 @@ function runEffect(code) {
     }
     return;
   }
-  const endMatch = code.match(/^\s*end\((.*)\)\s*$/);
-  if (endMatch) {
-    const message = Function(
-      "state",
-      "rand",
-      "with (state) { return (" + endMatch[1] + "); }",
-    )(proxyState(), rand);
-    endStory(message, false);
-    return;
-  }
   Function(
     "state",
     "rand",
@@ -634,7 +624,11 @@ function renderDialogueBlock(statements, start, container, fromScene) {
     if (stmt.kind !== "Dialogue") break;
     if (i !== start && stmt.speaker.target.sceneRef) break;
     if (evalExpr(stmt.showIf)) {
-      if (stmt.text === "") {
+      if (stmt.imageSrc) {
+        hasVisibleText = true;
+        paragraph = null;
+        renderImage(body, stmt);
+      } else if (stmt.text === "") {
         paragraph = null;
       } else {
         hasVisibleText = true;
@@ -697,7 +691,7 @@ function renderWidgetScene(scene, container, surface) {
       p.className = "passage";
       p.textContent = interpolateText(stmt.text);
       container.appendChild(p);
-    } else if (stmt.kind === "Image") {
+    } else if (stmt.kind === "Image" && evalExpr(stmt.showIf)) {
       renderImage(container, stmt);
     }
     index += 1;
@@ -749,7 +743,7 @@ function render() {
       p.className = "passage";
       p.textContent = interpolateText(stmt.text);
       section.appendChild(p);
-    } else if (stmt.kind === "Image") {
+    } else if (stmt.kind === "Image" && evalExpr(stmt.showIf)) {
       renderImage(section, stmt);
     }
     index += 1;

@@ -70,7 +70,7 @@ A tiny story can look like this:
 
 ## Letter
   `visited := true`
-  ![Letter](/assets/images/letter.png)
+  > ![Letter](/assets/images/letter.png)
   > The letter says: Find the bell before moonrise.
   + -> [Continue](#Village)
 
@@ -84,7 +84,7 @@ A character profile and dialogue bubble:
 ```saga
 @widget std:character
 # BlueScarf
-  ![Blue scarf portrait](/assets/images/blue_scarf.png)
+  > ![Blue scarf portrait](/assets/images/blue_scarf.png)
   > The woman with the blue scarf.
 
 # Market

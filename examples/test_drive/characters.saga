@@ -1,6 +1,6 @@
 @widget std:character
 # BlueScarf
-  ![Blue scarf portrait](/assets/images/blue_scarf.png)
+  > ![Blue scarf portrait](/assets/images/blue_scarf.png)
   > The woman with the blue scarf.
   > She watches crowds through reflections and seems to know which questions you have not asked yet.
   > Her brass mirror is polished bright enough to hold more than faces. When she tilts it, you glimpse streets behind you that are not there when you turn.
@@ -8,7 +8,7 @@
 
 @widget std:character
 # CloakSeller
-  ![Cloak seller portrait](/assets/images/cloak_seller.png)
+  > ![Cloak seller portrait](/assets/images/cloak_seller.png)
   > A narrow market seller with rainwater in his cuffs and arithmetic behind his eyes.
   > He treats every errand like a bargain already half-won.
   > His stall is patched from three kinds of canvas, each allegedly waterproof and each disproving the claim in its own way.
@@ -16,7 +16,7 @@
 
 @widget std:character
 # Fishmonger
-  ![Fishmonger portrait](/assets/images/fishmonger.png)
+  > ![Fishmonger portrait](/assets/images/fishmonger.png)
   > A pipe-smoking fishmonger who knows every road out of Brindlewick by rumor, weather, and smell.
   > He points as if the village itself might change direction while no one is looking.
   > His fish are arranged with military precision. His advice is not, but it has the slippery shine of truth.
@@ -24,7 +24,7 @@
 
 @widget std:character
 # Locksmith
-  ![Locksmith portrait](/assets/images/locksmith.png)
+  > ![Locksmith portrait](/assets/images/locksmith.png)
   > A locksmith whose stall is barely wider than its door.
   > He listens to keys before he listens to people.
   > His fingers are stained with oil, soot, and the green-gray dust that gathers inside locks no one should still be opening.
@@ -32,7 +32,7 @@
 
 @widget std:character
 # Mira
-  ![Mira portrait](/assets/images/mira.png)
+  > ![Mira portrait](/assets/images/mira.png)
   > Mira works in the alley behind the market, counting deliveries under a crooked awning.
   > Her nods are small, exact, and more binding than signatures.
   > Bottles, debts, and secrets pass through her hands with the same brisk competence.
@@ -40,7 +40,7 @@
 
 @widget std:character
 # Watchman
-  ![Watchman portrait](/assets/images/watchman.png)
+  > ![Watchman portrait](/assets/images/watchman.png)
   > The gate watchman leans beneath the village arch with practiced patience.
   > He has the look of someone paid to notice everything and admit very little.
   > Rain has polished his spear shaft smooth where his hands rest. His silence has the same worn, familiar shape.

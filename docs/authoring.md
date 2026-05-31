@@ -21,7 +21,7 @@ Root-relative module paths are resolved from the story root:
 Root-relative image paths are also resolved from the story root:
 
 ```saga
-![Blue scarf portrait](/assets/images/blue_scarf.png)
+> ![Blue scarf portrait](/assets/images/blue_scarf.png)
 ```
 
 ## File organization
@@ -190,15 +190,16 @@ The generated runtime currently evaluates expressions in JavaScript.
 
 ## Images
 
-Images use Markdown-style syntax:
+Images use Markdown-style syntax after a content marker:
 
 ```saga
-![Alt text](/assets/images/letter.png)
+> ![Alt text](/assets/images/letter.png)
+>> ![Alt text](/assets/images/letter.png)
 ```
 
 Root-relative paths beginning with `/` are resolved against the story root and validated at compile time.
 
-Images are rendered inline in normal scenes and inside modals for item/character widgets.
+Images must occupy the whole content line. Inline images inside text are not supported.
 
 ## Widgets
 
@@ -212,7 +213,7 @@ Widgets are normal scenes decorated with `@widget`.
 
 @widget std:item
 ## OldKey
-  ![Blackened key](/assets/images/key.png)
+  > ![Blackened key](/assets/images/key.png)
   > A cold iron key with oil-dark teeth.
 ```
 
@@ -237,7 +238,7 @@ Character profiles are `std:character` widgets:
 ```saga
 @widget std:character
 # BlueScarf
-  ![Blue scarf portrait](/assets/images/blue_scarf.png)
+  > ![Blue scarf portrait](/assets/images/blue_scarf.png)
   > The woman with the blue scarf.
 ```
 

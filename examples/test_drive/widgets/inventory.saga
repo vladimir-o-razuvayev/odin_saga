@@ -12,7 +12,7 @@
 
 @widget std:item
 ## Letter
-  ![Letter with crescent seal](/assets/images/letter.png)
+  > ![Letter with crescent seal](/assets/images/letter.png)
   > The unsealed letter with the broken crescent seal is brief: find the bell beneath the old watchtower before moonrise.
 
 @widget std:item
