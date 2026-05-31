@@ -34,10 +34,10 @@
 ### Sleep
   > You close your eyes and let the rain count the seconds.
   > It reaches thirteen, pauses, and begins again at one.
-  `end("By morning, the rain has washed every road clean.")`
+  - -> [By morning, the rain has washed every road clean.](end:)
 
 # Epilogue
   > Brindlewick falls behind you. Somewhere under the road, something vast and hollow rings once.
   > The sound is gentle from this distance, almost kind, but every bird in the hedgerow rises at once.
   > `has_cloak` Your cloak snaps in the morning wind like a small, stubborn banner.
-  `end("The road carries you past Brindlewick, and the bell's final note follows you into the hills.")`
+  - -> [The road carries you past Brindlewick, and the bell's final note follows you into the hills.](end:)

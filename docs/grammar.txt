@@ -236,13 +236,13 @@ A backtick expression on its own line is an effect statement:
 
 Effects execute when the scene is entered and evaluation reaches the effect line.
 
-The built-in `end(message)` effect ends the story and displays the provided message:
+The special `end:` destination ends the story and displays the choice text as the ending message:
 
 ```saga
-`end("You were eaten by a grue")`
+- -> [You were eaten by a grue.](end:)
 ```
 
-When `end(...)` is reached, no later statements in the scene are evaluated.
+`end(...)` effects are still accepted for older stories, but new stories should prefer `end:` choices.
 
 //****************************************/
 // Transfers and Targets
@@ -268,9 +268,10 @@ Choice and dialogue speaker links use Markdown-style labels with Saga destinatio
 [Go to parent](#..)
 [Go to sibling](#..Sibling)
 [Go to another module](/module.saga#Scene)
+[End the story](end:)
 ```
 
-The square brackets contain user-facing text only. The destination after `#` is the scene target.
+The square brackets contain user-facing text. For scene destinations, the destination after `#` is the scene target. For `end:`, the square-bracket text is displayed as the final ending message.
 
 A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `#Main` resolves to `Main`, not `Patrons.WomanInRedDress.Main`.
 
@@ -352,9 +353,9 @@ Mutation operators apply to the nearest resolved binding. If a local binding exi
 Each scene should have at least one possible completion path:
 
 - one or more choices with transfers, or
-- a reachable `end(...)` effect.
+- a reachable choice targeting `end:`.
 
-Any statement after an unconditional `end(...)` effect is unreachable and should be reported as a semantic error.
+Any statement after an unconditional ending is unreachable and should be reported as a semantic error.
 
 //****************************************/
 // Grammar Summary
@@ -381,7 +382,7 @@ passage            = ">" space show_condition? text
 image              = "![" alt_text "](" image_path ")"
 dialogue           = ">>" space show_condition? speaker_target? text
 
-choice             = "+" space show_condition? arrow space enable_condition? link_target
+choice             = ("+" | "-") space show_condition? arrow space enable_condition? link_target
 
 comment            = "//" text
 
@@ -397,6 +398,7 @@ arrow              = "->" | "*->"
 link_target        = "[" label_text "]" "(" destination ")"
 destination        = "#" scene_ref
                    | module_path "#" scene_ref
+                   | "end:"
 module_path        = "/" path_text
 
 scene_ref          = scene_path

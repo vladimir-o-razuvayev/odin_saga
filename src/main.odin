@@ -198,7 +198,7 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 				}
 
 				target := stmt.transfer.target
-				if len(target.scene_ref) == 0 {
+				if len(target.scene_ref) == 0 || target.scene_ref == "end:" {
 					continue
 				}
 
@@ -517,6 +517,17 @@ semantic_accepts_sibling_target_test :: proc(t: ^testing.T) {
 	build, lexed := build_result_from_source_for_test(
 		"# Village\n## GateWatch\n### WatchtowerRumor\n+ *-> [Press him for more](#..OldKey)\n### OldKey\n> key\n",
 	)
+	defer free_build_result(build)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	validate_targets(&build, "")
+	testing.expect(t, len(build.errors) == 0)
+}
+
+@(test)
+semantic_accepts_end_destination_test :: proc(t: ^testing.T) {
+	build, lexed := build_result_from_source_for_test("# Main\n+ -> [Done](end:)\n")
 	defer free_build_result(build)
 	defer delete(lexed.lines)
 	defer delete(lexed.errors)

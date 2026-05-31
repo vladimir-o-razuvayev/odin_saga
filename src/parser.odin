@@ -378,7 +378,9 @@ parser :: struct {
 
 		module_path := ""
 		scene_ref := ""
-		if trimmed_destination[0] == '#' {
+		if trimmed_destination == "end:" {
+			scene_ref = "end:"
+		} else if trimmed_destination[0] == '#' {
 			scene_ref = trimmed_destination[1:]
 		} else if trimmed_destination[0] == '/' {
 			hash := lexer.index_of(trimmed_destination, "#")
@@ -399,7 +401,9 @@ parser :: struct {
 			parser.append_error(p, pos, "expected scene target after #")
 			return Target{}, false
 		}
-		parser.validate_scene_ref(p, scene_ref, pos, current_depth)
+		if scene_ref != "end:" {
+			parser.validate_scene_ref(p, scene_ref, pos, current_depth)
+		}
 		return Target{scene_ref = scene_ref, module_path = module_path, pos = pos}, true
 	},
 	parse_widget_decorator = proc(p: ^Parser, line: Source_Line) -> (string, bool) {
@@ -582,6 +586,21 @@ parser_new_choice_target_syntax_test :: proc(t: ^testing.T) {
 	testing.expect(t, second.choice_mode == .Fallback)
 	testing.expect(t, second.transfer.kind == .Once)
 	testing.expect(t, second.transfer.target.scene_ref == ".Door")
+}
+
+@(test)
+parser_end_destination_syntax_test :: proc(t: ^testing.T) {
+	result, lexed := parse_source_for_test("# Main\n- -> [The end.](end:)\n")
+	defer free_parse_result(result)
+	defer delete(lexed.lines)
+	defer delete(lexed.errors)
+
+	testing.expect(t, len(result.errors) == 0)
+	choice := result.module.scenes[0].statements[0]
+	testing.expect(t, choice.kind == .Choice)
+	testing.expect(t, choice.choice_mode == .Fallback)
+	testing.expect(t, choice.text == "The end.")
+	testing.expect(t, choice.transfer.target.scene_ref == "end:")
 }
 
 @(test)

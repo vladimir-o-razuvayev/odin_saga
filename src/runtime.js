@@ -141,16 +141,12 @@ function runEffect(code) {
   }
   const endMatch = code.match(/^\s*end\((.*)\)\s*$/);
   if (endMatch) {
-    ended = true;
     const message = Function(
       "state",
       "rand",
       "with (state) { return (" + endMatch[1] + "); }",
     )(proxyState(), rand);
-    const div = document.createElement("div");
-    div.className = "end";
-    div.textContent = message;
-    app.appendChild(div);
+    endStory(message, false);
     return;
   }
   Function(
@@ -158,6 +154,16 @@ function runEffect(code) {
     "rand",
     "with (state) { " + normalize(code) + "; }",
   )(proxyState(), rand);
+}
+
+function endStory(message, replace = true) {
+  ended = true;
+  if (replace) app.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "end";
+  div.textContent = message;
+  app.appendChild(div);
+  renderDock();
 }
 
 function targetFromDestination(destination) {
@@ -191,7 +197,12 @@ function resolveTargetRef(target, fromScene) {
   return scenes[module + "#" + path];
 }
 
+function isEndTransfer(transfer) {
+  return transfer?.target?.sceneRef === "end:";
+}
+
 function resolveTarget(transfer, fromScene) {
+  if (isEndTransfer(transfer)) return null;
   return resolveTargetRef(transfer.target, fromScene);
 }
 
@@ -211,14 +222,25 @@ function activate(destination) {
 }
 
 function transferKey(transfer, fromScene, target) {
-  return fromScene.key + "->" + target.key + ":" + transfer.target.sceneRef;
+  const targetKey = isEndTransfer(transfer)
+    ? "end:"
+    : target
+      ? target.key
+      : "?";
+  return fromScene.key + "->" + targetKey + ":" + transfer.target.sceneRef;
 }
 
 function isWidgetScene(scene) {
   return !!scene?.widget;
 }
 
-function go(transfer, fromScene) {
+function go(transfer, fromScene, label = "") {
+  if (isEndTransfer(transfer)) {
+    if (transfer.kind === "once")
+      consumed.add(transferKey(transfer, fromScene, null));
+    endStory(interpolateText(label));
+    return;
+  }
   const target = resolveTarget(transfer, fromScene);
   if (!target) {
     app.innerHTML =
@@ -641,7 +663,7 @@ function renderDialogueBlock(statements, start, container, fromScene) {
 function isChoiceVisible(choice, fromScene) {
   if (!evalExpr(choice.showIf)) return false;
   const target = resolveTarget(choice.transfer, fromScene);
-  const key = target ? transferKey(choice.transfer, fromScene, target) : "?";
+  const key = transferKey(choice.transfer, fromScene, target);
   return choice.transfer.kind !== "once" || !consumed.has(key);
 }
 
@@ -699,7 +721,7 @@ function renderWidgetScene(scene, container, surface) {
         button.style.color = "var(--muted)";
       }
       armButton(button, evalExpr(choice.enableIf), () =>
-        go(choice.transfer, scene),
+        go(choice.transfer, scene, choice.text),
       );
       div.appendChild(button);
     }
@@ -742,7 +764,7 @@ function render() {
       const button = document.createElement("button");
       button.textContent = interpolateText(choice.text);
       armButton(button, evalExpr(choice.enableIf), () =>
-        go(choice.transfer, current),
+        go(choice.transfer, current, choice.text),
       );
       div.appendChild(button);
     }

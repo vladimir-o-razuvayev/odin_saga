@@ -136,9 +136,10 @@ Modern choice and dialogue speaker targets use Markdown-style labels with Saga d
 [Button text](#..)                 // parent scene
 [Button text](#..Sibling)          // sibling under current parent
 [Button text](/other.saga#Scene)   // scene in another module
+[Ending text](end:)                // end the story
 ```
 
-The text inside `[]` is what the reader sees. The destination inside `()` tells Saga where it points.
+The text inside `[]` is what the reader sees. The destination inside `()` tells Saga where it points. For `end:`, the text inside `[]` becomes the ending message.
 
 When in doubt, prefer explicit module-root paths for cross-file links.
 
