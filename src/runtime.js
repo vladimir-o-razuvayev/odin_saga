@@ -119,6 +119,15 @@ function interpolateText(text) {
 
 function runEffect(code) {
   if (!code) return;
+  const activateMatch = code.match(/^\s*activate\((.*)\)\s*$/);
+  if (activateMatch) {
+    try {
+      activate(evalValue(activateMatch[1]));
+    } catch (err) {
+      console.warn("activate failed:", code, err);
+    }
+    return;
+  }
   const defaultMatch = code.match(/^\s*([A-Za-z_]\w*)\s*\?=\s*(.+)$/);
   if (defaultMatch) {
     if (!(defaultMatch[1] in state)) {
@@ -151,9 +160,26 @@ function runEffect(code) {
   )(proxyState(), rand);
 }
 
-function resolveTarget(transfer, fromScene) {
-  const ref = transfer.target.sceneRef;
-  const module = transfer.target.modulePath || fromScene.module.id;
+function targetFromDestination(destination) {
+  if (typeof destination !== "string") return null;
+  destination = destination.trim();
+  if (destination.startsWith("#")) {
+    return { sceneRef: destination.slice(1), modulePath: "" };
+  }
+  if (destination.startsWith("/")) {
+    const hash = destination.indexOf("#");
+    if (hash < 0) return null;
+    return {
+      modulePath: destination.slice(0, hash),
+      sceneRef: destination.slice(hash + 1),
+    };
+  }
+  return null;
+}
+
+function resolveTargetRef(target, fromScene) {
+  const ref = target.sceneRef;
+  const module = target.modulePath || fromScene.module.id;
   const parts = fromScene.path.split(".");
   let path = ref;
   if (ref === ".") path = fromScene.path;
@@ -163,6 +189,25 @@ function resolveTarget(transfer, fromScene) {
   else if (ref.startsWith("."))
     path = parts.concat(ref.slice(1).split(".")).join(".");
   return scenes[module + "#" + path];
+}
+
+function resolveTarget(transfer, fromScene) {
+  return resolveTargetRef(transfer.target, fromScene);
+}
+
+function activate(destination) {
+  const targetRef = targetFromDestination(destination);
+  const target =
+    targetRef && current ? resolveTargetRef(targetRef, current) : null;
+  if (!target) {
+    console.warn("activate target not found:", destination);
+    return;
+  }
+  if (!isWidgetScene(target)) {
+    console.warn("activate target is not a widget:", destination);
+    return;
+  }
+  runWidget(target);
 }
 
 function transferKey(transfer, fromScene, target) {

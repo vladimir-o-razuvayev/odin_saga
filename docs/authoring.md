@@ -110,7 +110,11 @@ Use `*->` when a choice or automatic transition should only be available once pe
 
 When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. For example, transferring to an inventory dock widget activates it, while transferring to an item or character widget opens it as a modal.
 
+Use `activate(destination)` in an effect when setup should activate a widget without showing a reader-facing button:
 
+```saga
+`activate("/widgets/contacts.saga#Contacts")`
+```
 
 ## Targets
 
@@ -171,6 +175,7 @@ Common operators:
 - `:=` assigns persistent story state.
 - `=` creates or assigns a scene-local value for the current visit.
 - `++` increments a value.
+- `--` decrements a value.
 
 The generated runtime currently evaluates expressions in JavaScript.
 
