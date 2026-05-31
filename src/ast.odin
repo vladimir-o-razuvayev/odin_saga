@@ -21,7 +21,6 @@ Diagnostic :: struct {
 Transfer_Kind :: enum {
 	Normal,
 	Once,
-	Widget,
 }
 
 Target :: struct {

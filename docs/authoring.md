@@ -87,7 +87,7 @@ Choices use `+`, a transfer arrow, and a labeled destination:
 
 The first condition controls visibility. The condition after the arrow controls whether the choice is enabled.
 
-The older `+ Choice text -> [Target]` form is still accepted during the v0.1 transition.
+
 
 ## Transfers
 
@@ -101,7 +101,7 @@ Saga has two primary transfer arrows:
 Examples:
 
 ```saga
--> [Village]
+-> [Continue](#Village)
 + *-> [Take the key](#.TakeKey)
 + -> [Inventory](/widgets/inventory.saga#Inventory)
 ```
@@ -110,7 +110,7 @@ Use `*->` when a choice or automatic transition should only be available once pe
 
 When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. For example, transferring to an inventory dock widget activates it, while transferring to an item or character widget opens it as a modal.
 
-The older `w->` widget arrow is still accepted during the v0.1 transition, but new stories should usually use `->` and let the target widget decide the behavior.
+
 
 ## Targets
 
@@ -127,14 +127,6 @@ Modern choice and dialogue speaker targets use Markdown-style labels with Saga d
 ```
 
 The text inside `[]` is what the reader sees. The destination inside `()` tells Saga where it points.
-
-Automatic transitions and older choices still accept legacy square-bracket targets:
-
-```saga
-[Scene]
-[.Child]
-[Scene](/other.saga)
-```
 
 When in doubt, prefer explicit module-root paths for cross-file links.
 
@@ -258,7 +250,6 @@ The compiler reports errors for common authoring mistakes:
 
 - unresolved target modules,
 - unresolved target scenes,
-- `w->` transfers to non-widget scenes,
 - unknown widget renderers,
 - dialogue speakers that are missing or not `std:character`,
 - dialogue continuation lines without a speaker,

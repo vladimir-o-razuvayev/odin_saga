@@ -240,18 +240,6 @@ validate_targets :: proc(result: ^Build_Result, base_dir: string) {
 					continue
 				}
 
-				if stmt.transfer.kind == .Widget && len(target_scene.widget) == 0 {
-					append(
-						&result.errors,
-						Diagnostic {
-							message = fmt.tprintf(
-								"widget transfer target %q is not a widget scene",
-								target_scene_path,
-							),
-							pos = target.pos,
-						},
-					)
-				}
 			}
 		}
 	}
@@ -512,7 +500,7 @@ build_result_from_source_for_test :: proc(source: string) -> (Build_Result, Lexe
 @(test)
 semantic_reports_unresolved_child_target_test :: proc(t: ^testing.T) {
 	build, lexed := build_result_from_source_for_test(
-		"# Village\n## GateWatch\n### WatchtowerRumor\n+ Press him for more *-> [.OldKey]\n### OldKey\n> key\n",
+		"# Village\n## GateWatch\n### WatchtowerRumor\n+ *-> [Press him for more](#.OldKey)\n### OldKey\n> key\n",
 	)
 	defer free_build_result(build)
 	defer delete(lexed.lines)
@@ -527,36 +515,9 @@ semantic_reports_unresolved_child_target_test :: proc(t: ^testing.T) {
 }
 
 @(test)
-semantic_reports_widget_transfer_to_non_widget_test :: proc(t: ^testing.T) {
-	build, lexed := build_result_from_source_for_test(
-		"# Main\nw-> [.Panel]\n## Panel\n> Not a widget\n",
-	)
-	defer free_build_result(build)
-	defer delete(lexed.lines)
-	defer delete(lexed.errors)
-
-	validate_targets(&build, "")
-	testing.expect(t, len(build.errors) == 1)
-	testing.expect(t, lexer.index_of(build.errors[0].message, "not a widget scene") >= 0)
-}
-
-@(test)
 semantic_accepts_sibling_target_test :: proc(t: ^testing.T) {
 	build, lexed := build_result_from_source_for_test(
-		"# Village\n## GateWatch\n### WatchtowerRumor\n+ Press him for more *-> [..OldKey]\n### OldKey\n> key\n",
-	)
-	defer free_build_result(build)
-	defer delete(lexed.lines)
-	defer delete(lexed.errors)
-
-	validate_targets(&build, "")
-	testing.expect(t, len(build.errors) == 0)
-}
-
-@(test)
-semantic_accepts_contacts_widget_transfer_test :: proc(t: ^testing.T) {
-	build, lexed := build_result_from_source_for_test(
-		"# Main\nw-> [.Contacts]\n@widget std:contacts\n## Contacts\n> People\n",
+		"# Village\n## GateWatch\n### WatchtowerRumor\n+ *-> [Press him for more](#..OldKey)\n### OldKey\n> key\n",
 	)
 	defer free_build_result(build)
 	defer delete(lexed.lines)
@@ -608,7 +569,7 @@ semantic_reports_dialogue_without_speaker_test :: proc(t: ^testing.T) {
 @(test)
 semantic_reports_dialogue_speaker_that_is_not_character_test :: proc(t: ^testing.T) {
 	build, lexed := build_result_from_source_for_test(
-		"# Main\n>> [Speaker] Hello.\n@widget std:item\n# Speaker\n> Not a character.\n",
+		"# Main\n>> [Speaker](#Speaker) Hello.\n@widget std:item\n# Speaker\n> Not a character.\n",
 	)
 	defer free_build_result(build)
 	defer delete(lexed.lines)

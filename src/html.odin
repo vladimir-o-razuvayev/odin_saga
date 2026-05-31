@@ -102,8 +102,6 @@ html :: struct {
 		kind := "normal"
 		if transfer.kind == .Once {
 			kind = "once"
-		} else if transfer.kind == .Widget {
-			kind = "widget"
 		}
 		strings.write_string(sb, "{kind:")
 		strings.write_string(sb, html.js_string(kind))
@@ -170,7 +168,7 @@ html :: struct {
 
 @(test)
 html_generates_document_test :: proc(t: ^testing.T) {
-	result, lexed := parse_source_for_test("# Start\n> Hello <world>\n+ Go -> [.]\n")
+	result, lexed := parse_source_for_test("# Start\n> Hello <world>\n+ -> [Go](#.)\n")
 	defer free_parse_result(result)
 	defer delete(lexed.lines)
 	defer delete(lexed.errors)

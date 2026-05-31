@@ -18,9 +18,9 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
   `ale_count++` // Assigns 1 if ale_count is nil.
   `x = rand(100)` // x is a scene-local binding for this visit to Patrons.
   // Automatic transitions are evaluated top-to-bottom. The first one to fire exits the scene.
-  *-> `x > 80 && !man_ran` [.Man]
-  -> `x <= 20 && !met_woman` [.WomanInRedDress]
-  -> [.NoOne]
+  *-> `x > 80 && !man_ran` [Continue](#.Man)
+  -> `x <= 20 && !met_woman` [Continue](#.WomanInRedDress)
+  -> [Continue](#.NoOne)
 
 ## Man
   `man_ran := true`
@@ -31,27 +31,27 @@ Each `.saga` file is a self-contained module. The language uses Markdown-style f
 
 ## WomanInRedDress
   > A woman in a red dress notices you, and walks over.
-  + `!met_woman` Introduce yourself -> [.InitialConvo]
-  + Tip your cap and carry on -> [Main]
+  + `!met_woman` -> [Introduce yourself](#.InitialConvo)
+  + -> [Tip your cap and carry on](#Main)
 
 ### InitialConvo
   `met_woman := true`
   > The woman introduces herself as Clair. She tells you to go to the bank, and tell Joe that she sent you.
   > The woman turns away, and walks upstairs.
-  -> [Main]
+  -> [Continue](#Main)
 
 ## NoOne
   > None of the bar patrons catch your interest.
-  -> [Main]
+  -> [Continue](#Main)
 
 # Innkeeper
   > The man looks at you gruffly.
-  + `man_ran` Mention the man *-> [.AskAboutMan]
-  + Gruff back -> [Main]
+  + `man_ran` *-> [Mention the man](#.AskAboutMan)
+  + -> [Gruff back](#Main)
 
 ## AskAboutMan
   > The innkeeper lowers his voice. "Best not chase trouble through town."
-  -> [Main]
+  -> [Continue](#Main)
 
 //****************************************/
 // Lexical Rules
@@ -71,11 +71,11 @@ Leading indentation before statements is ignored by the compiler. Authors may us
 
 Statements are single-line in v0. Multiline passages, choices, transitions, and effects are not supported.
 
-For readability and simpler parsing, choice arrows must be surrounded by whitespace, and automatic transition arrows must be followed by whitespace.
+For readability and simpler parsing, transfer arrows must be followed by whitespace.
 
 Passage and choice text are trimmed of leading and trailing whitespace.
 
-The modern choice form stores button text in `[label]` and the destination in `(destination)`. The older `+ text -> [Target]` form is still accepted during the v0.1 transition.
+Choice and transition targets store display text in `[label]` and the destination in `(destination)`.
 
 Comments start with `//` when `//` appears outside a backtick expression and is either:
 
@@ -162,9 +162,7 @@ A double greater-than sign `>>` adds character dialogue. The first line in a dia
 >> `trust_blue_scarf` You came back. Good.
 ```
 
-Legacy speaker targets may use unquoted module paths, such as `>> [BlueScarf](/characters.saga) ...`, during the v0.1 transition.
-
-Speaker targets must resolve to scenes decorated with `@widget std:character`.
+Speaker targets must use labeled destinations and must resolve to scenes decorated with `@widget std:character`.
 
 ## Widget Decorator
 
@@ -218,13 +216,6 @@ In a choice, an optional condition immediately after `+` controls whether the ch
 
 In a choice, an optional condition immediately after the arrow controls whether the choice is enabled.
 
-The older form is still accepted during the v0.1 transition:
-
-```saga
-+ Choice text -> [Target]
-+ `show_condition` Choice text -> `enable_condition` [Target]
-```
-
 If the choice is not visible, it is not shown to the player. If the choice is visible but not enabled, it is shown as disabled and cannot be selected.
 
 ## Automatic Transition
@@ -232,10 +223,10 @@ If the choice is not visible, it is not shown to the player. If the choice is vi
 An automatic transition starts with an arrow:
 
 ```saga
--> [Target]
--> `take_condition` [Target]
-*-> [Target]
-*-> `take_condition` [Target]
+-> [Continue](#Target)
+-> `take_condition` [Continue](#Target)
+*-> [Continue](#Target)
+*-> `take_condition` [Continue](#Target)
 ```
 
 When an automatic transition is reached and its optional condition is truthy, the scene transfers immediately and no later statements in the scene are evaluated.
@@ -272,13 +263,13 @@ When `end(...)` is reached, no later statements in the scene are evaluated.
 
 When a transfer target resolves to a widget scene, Saga automatically runs that widget action instead of replacing the current main scene. Dock widgets are activated, while modal widgets open in a modal.
 
-`w->` is the legacy widget arrow. It is still accepted during the v0.1 transition and still requires its target scene to have an `@widget` decorator.
+
 
 For automatic transitions, `*->` is consumed only when the transition is taken. On future visits, the consumed transition no-ops and evaluation continues to the next line.
 
 For choices, `*->` is consumed only when the player selects the choice and transfers. On future visits, the consumed choice is no longer visible.
 
-Choice and dialogue speaker links use Markdown-style labels with Saga destinations:
+Choice, transition, and dialogue speaker links use Markdown-style labels with Saga destinations:
 
 ```saga
 [Go to scene](#Scene)
@@ -288,39 +279,21 @@ Choice and dialogue speaker links use Markdown-style labels with Saga destinatio
 [Go to another module](/module.saga#Scene)
 ```
 
-The square brackets contain user-facing text. The destination after `#` is the scene target.
+The square brackets contain user-facing text only. The destination after `#` is the scene target.
 
-Automatic transitions and legacy choices still accept older square-bracket targets:
+A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `#Main` resolves to `Main`, not `Patrons.WomanInRedDress.Main`.
 
-```saga
-[Scene]
-[Parent.Child]
-[.]
-[.Child]
-[..]
-[..Sibling]
-[Scene](/module.saga)
-```
+In a scene target, `#.` resolves to the current scene.
 
-A target without `.` is resolved from the module root. For example, from `Patrons.WomanInRedDress`, `[Main]` and `#Main` resolve to `Main`, not `Patrons.WomanInRedDress.Main`.
+In a scene target, `.Child` expands to a child of the current scene. For example, from `Patrons.WomanInRedDress`, `#.InitialConvo` resolves to `Patrons.WomanInRedDress.InitialConvo`.
 
-In a scene target, `[.]` resolves to the current scene.
+In a scene target, `#..` resolves to the parent scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `#..` resolves to `Patrons.WomanInRedDress`. Using `#..` from a top-level scene is a compile error.
 
-In a scene target, `.Child` expands to a child of the current scene. For example, from `Patrons.WomanInRedDress`, `[.InitialConvo]` resolves to `Patrons.WomanInRedDress.InitialConvo`.
+In a scene target, `..Sibling` resolves to a sibling of the current scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `#..FollowUp` resolves to `Patrons.WomanInRedDress.FollowUp`. Using `#..Sibling` from a top-level scene is a compile error; use `#Sibling` instead.
 
-In a scene target, `[..]` resolves to the parent scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..]` resolves to `Patrons.WomanInRedDress`. Using `[..]` from a top-level scene is a compile error.
+If a destination omits a module path, the current module is used. If a destination includes a module path, the scene reference is resolved in that module.
 
-In a scene target, `..Sibling` resolves to a sibling of the current scene. For example, from `Patrons.WomanInRedDress.InitialConvo`, `[..FollowUp]` resolves to `Patrons.WomanInRedDress.FollowUp`. Using `[..Sibling]` from a top-level scene is a compile error; use `[Sibling]` instead.
-
-If a target omits a module path, the current module is used. If a target includes a module path, the scene reference is resolved in that module.
-
-A legacy target may include an unquoted module path after the scene reference:
-
-```saga
-[Scene](/path/to/module.saga)
-```
-
-A modern destination includes the root-relative module path before `#`:
+A destination includes the root-relative module path before `#`:
 
 ```saga
 [Button text](/path/to/module.saga#Scene)
@@ -421,9 +394,9 @@ passage            = ">" space show_condition? text
 image              = "![" alt_text "](" image_path ")"
 dialogue           = ">>" space show_condition? speaker_target? text
 
-choice             = "+" space show_condition? choice_text space arrow space enable_condition? target
+choice             = "+" space show_condition? arrow space enable_condition? link_target
 
-transition         = arrow space take_condition? target
+transition         = arrow space take_condition? link_target
 
 comment            = "//" text
 
@@ -435,10 +408,12 @@ take_condition     = expression space
 
 expression         = "`" expression_text "`"
 
-arrow              = "->" | "*->" | "w->"
+arrow              = "->" | "*->"
 
-target             = "[" scene_ref "]" module_ref?
-module_ref         = "(" string ")"
+link_target        = "[" label_text "]" "(" destination ")"
+destination        = "#" scene_ref
+                   | module_path "#" scene_ref
+module_path        = "/" path_text
 
 scene_ref          = scene_path
                    | self_scene_path
@@ -452,16 +427,6 @@ parent_scene_path  = ".."
 sibling_scene_path = ".." scene_path
 
 scene_label        = /[A-Za-z_][A-Za-z0-9_]*/
+label_text         = text
+path_text          = text
 ```
-
-//****************************************/
-// Tech Debt
-//****************************************/
-
-Potential issue: From `Patrons.WomanInRedDress.InitialConvo`, `[.Foo]` resolves to:
-
-```text
-Patrons.WomanInRedDress.InitialConvo.Foo
-```
-
-Authors can use `[.]` to target the current scene, `[..]` to target the parent scene, `[..Sibling]` to target a sibling scene, or an absolute scene path when they need to target another ancestor scene.

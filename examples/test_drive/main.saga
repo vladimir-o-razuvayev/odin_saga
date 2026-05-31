@@ -7,7 +7,7 @@
 
 # Start
   `player_name ?= prompt("What is your name?") || "traveler"`
-  -> [Contacts](/widgets/contacts.saga)
+  -> [Contacts](/widgets/contacts.saga#Contacts)
   > Rain taps against the shutters of the Hollow Bell inn, patient as fingers on a tabletop.
   > The room is registered to #{player_name}, though you do not remember signing the ledger.
   > The common room below has gone quiet in that late-afternoon way when everyone is listening to the weather and pretending not to.
@@ -18,7 +18,7 @@
 ## Letter
   `visited_start := true`
   `map_known := true`
-  -> [Inventory](/widgets/inventory.saga)
+  -> [Inventory](/widgets/inventory.saga#Inventory)
   ![Letter with crescent seal](/assets/images/letter.png)
   > The letter is brief: "#{player_name}, find the bell beneath the old watchtower before moonrise. Trust the woman with the blue scarf."
   > The ink looks fresh until you tilt the page, when it browns like something written years ago and only now remembered.

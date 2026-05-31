@@ -184,7 +184,7 @@ function go(transfer, fromScene) {
   }
   if (transfer.kind === "once")
     consumed.add(transferKey(transfer, fromScene, target));
-  if (transfer.kind === "widget" || isWidgetScene(target)) {
+  if (isWidgetScene(target)) {
     runWidget(target);
     return;
   }
@@ -672,7 +672,7 @@ function render() {
     } else if (stmt.kind === "Transition" && evalExpr(stmt.takeIf)) {
       const target = resolveTarget(stmt.transfer, current);
       const key = target ? transferKey(stmt.transfer, current, target) : "?";
-      if (stmt.transfer.kind === "widget" || isWidgetScene(target)) {
+      if (isWidgetScene(target)) {
         if (target && (stmt.transfer.kind !== "once" || !consumed.has(key))) {
           if (stmt.transfer.kind === "once") consumed.add(key);
           runWidget(target);
